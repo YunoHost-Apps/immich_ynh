@@ -134,7 +134,7 @@ ynh_script_progression --message="Making install..."
 # Install immich server
 pushd $final_path/build
         detect_arch
-	./docker-image-extract altran1502/immich-server:$PHOTOPRISM_SERVER_VERSION
+	./docker-image-extract altran1502/immich-server:$IMMICH_SERVER_VERSION
 popd
 mkdir -p "$final_path/server/dist/"
 mkdir -p "$final_path/server/node_modules/"
@@ -145,7 +145,7 @@ ynh_secure_remove --file="$final_path/build/output"
 # Install immich web
 pushd $final_path/build
         detect_arch
-	./docker-image-extract altran1502/immich-web:$PHOTOPRISM_WEB_VERSION
+	./docker-image-extract altran1502/immich-web:$IMMICH_WEB_VERSION
 popd
 mkdir -p "$final_path/web/"
 rsync -a "$final_path/build/output/usr/src/app/build/index.js" "$final_path/web/"
@@ -154,7 +154,7 @@ ynh_secure_remove --file="$final_path/build/output"
 # Install immich machine learning
 pushd $final_path/build
         detect_arch
-	./docker-image-extract altran1502/immich-web:$PHOTOPRISM_ML_VERSION
+	./docker-image-extract altran1502/immich-web:$IMMICH_ML_VERSION
 popd
 mkdir -p "$final_path/ml/dist/"
 mkdir -p "$final_path/ml/node_modules/"
