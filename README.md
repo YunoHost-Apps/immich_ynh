@@ -39,6 +39,7 @@ Some long and extensive description of what the app is and does, lorem ipsum dol
 
 **Shipped version:** 1.0~ynh1
 
+
 **Demo:** https://demo.example.com
 
 ## Screenshots
