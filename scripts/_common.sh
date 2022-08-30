@@ -27,7 +27,9 @@ function detect_arch() {
 NODEJS_VERSION=16
 
 # dependencies used by the app
-pkg_dependencies="postgresql libheif vips ffmpeg"
+pkg_dependencies="postgresql ffmpeg"
+
+# libheif vips
 
 #=================================================
 # PERSONAL HELPERS
