@@ -148,7 +148,9 @@ pushd $final_path/build
 	./docker-image-extract altran1502/immich-web:$IMMICH_WEB_VERSION
 popd
 mkdir -p "$final_path/web/"
-sudo tree
+pushd $final_path/build
+	sudo tree
+popd
 rsync -a "$final_path/build/output/usr/src/app/build/" "$final_path/web/"
 ynh_secure_remove --file="$final_path/build/output"
 
