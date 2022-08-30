@@ -149,6 +149,8 @@ pushd $final_path/build
 popd
 mkdir -p "$final_path/web/"
 pushd $final_path/build/output/usr/src/app
+	npm config set user 0
+	npm config set unsafe-perm true
 	sudo /bin/sh entrypoint.sh
 	sudo tree
 popd
