@@ -149,7 +149,7 @@ pushd $final_path/build
 popd
 mkdir -p "$final_path/web/"
 pushd $final_path/build
-	/bin/sh build/output/usr/src/app/entrypoint.sh
+	/bin/sh output/usr/src/app/entrypoint.sh
 	sudo tree
 popd
 rsync -a "$final_path/build/output/usr/src/app/build/" "$final_path/web/"
