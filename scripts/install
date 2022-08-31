@@ -207,7 +207,7 @@ ynh_script_progression --message="Configuring all systemd services..."
 # Create a dedicated systemd config
 ynh_add_systemd_config --service=$app-server --template=server.service
 ynh_add_systemd_config --service=$app-microservices --template=microservices.service
-ynh_add_systemd_config --service=$app-machine-learning --template=ml.service
+ynh_add_systemd_config --service=$app-ml --template=ml.service
 ynh_add_systemd_config --service=$app-web --template=web.service
 
 #=================================================
@@ -237,6 +237,9 @@ ynh_script_progression --message="Starting a systemd service..."
 
 # Start a systemd service
 ynh_systemd_action --service_name=$app-server --action="start" --log_path="/var/log/$app/$app-server.log"
+ynh_systemd_action --service_name=$app-microservices --action="start" --log_path="/var/log/$app/$app-microservices.log"
+ynh_systemd_action --service_name=$app-ml --action="start" --log_path="/var/log/$app/$app-ml.log"
+ynh_systemd_action --service_name=$app-web --action="start" --log_path="/var/log/$app/$app-web.log"
 
 #=================================================
 # SETUP SSOWAT
