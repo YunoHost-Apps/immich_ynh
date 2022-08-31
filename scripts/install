@@ -65,7 +65,7 @@ ynh_app_setting_set --app=$app --key=jwt --value=$jwt
 ynh_script_progression --message="Finding an available port..." --weight=1
 
 # Find an available port
-port=$(ynh_find_port --port=2283)
+port=$(ynh_find_port --port=3000)
 ynh_app_setting_set --app=$app --key=port --value=$port
 
 #=================================================
@@ -130,7 +130,7 @@ ynh_add_nginx_config
 #=================================================
 # MAKE INSTALL
 #=================================================
-ynh_script_progression --message="Making install..."
+ynh_script_progression --message="Making install..." --weight=5
 
 # Install immich server
 pushd $final_path/build
@@ -163,7 +163,7 @@ mkdir -p "$final_path/web/"
 chown -R $app:$app $final_path/build/output/usr/src/app
 pushd $final_path/build/output/usr/src/app
 	rm vite.config.js
-	ynh_add_config --template="../conf/vite.config.js" --destination="$final_path/build/output/usr/src/app/vite.config.js"
+	# ynh_add_config --template="../conf/vite.config.js" --destination="$final_path/build/output/usr/src/app/vite.config.js"
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm ci
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm run build
 popd
