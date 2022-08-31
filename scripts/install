@@ -135,7 +135,7 @@ ynh_script_progression --message="Making install..."
 # Install immich server
 pushd $final_path/build
         detect_arch
-	./docker-image-extract altran1502/immich-server:$IMMICH_SERVER_VERSION
+	./docker-image-extract altran1502/immich-server:$IMMICH_SERVER_VERSION 2>&1
 popd
 mkdir -p "$final_path/server/dist/"
 mkdir -p "$final_path/server/node_modules/"
