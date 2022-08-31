@@ -14,3 +14,5 @@ const config = {
     	port: __PORT__,
   	},
 };
+
+export default config()
