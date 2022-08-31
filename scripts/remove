@@ -42,7 +42,10 @@ fi
 ynh_script_progression --message="Stopping and removing the systemd service..." --weight=1
 
 # Remove the dedicated systemd config
-ynh_remove_systemd_config
+ynh_remove_systemd_config --service=immich-server
+ynh_remove_systemd_config --service=immich-microservicies
+ynh_remove_systemd_config --service=immich-ml
+ynh_remove_systemd_config --service=immich-web
 
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION
@@ -86,14 +89,6 @@ ynh_script_progression --message="Removing NGINX web server configuration..." --
 
 # Remove the dedicated NGINX config
 ynh_remove_nginx_config
-
-#=================================================
-# REMOVE PHP-FPM CONFIGURATION
-#=================================================
-ynh_script_progression --message="Removing PHP-FPM configuration..." --weight=1
-
-# Remove the dedicated PHP-FPM config
-ynh_remove_fpm_config
 
 #=================================================
 # REMOVE DEPENDENCIES
