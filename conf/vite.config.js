@@ -1,5 +1,6 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import path from 'path';
+import { defineConfig } from 'vite'
 
 /** @type {import('vite').UserConfig} */
 const config = {
@@ -15,4 +16,4 @@ const config = {
   	},
 };
 
-export default config()
+export default defineConfig(config)
