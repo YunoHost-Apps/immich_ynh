@@ -162,8 +162,8 @@ popd
 mkdir -p "$final_path/web/"
 chown -R $app:$app $final_path/build/output/usr/src/app
 pushd $final_path/build/output/usr/src/app
-	sed -i 's/3000/'$port'/' package.json
-	sed -i 's/vite build/vite build --port '$port'/' package.json
+	rm vite.config.js
+	ynh_add_config --template="../conf/vite.config.js" --destination="$final_path/build/output/usr/src/app/vite.config.js"
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm ci
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm run build
 popd
