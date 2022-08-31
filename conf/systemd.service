@@ -7,7 +7,7 @@ Type=simple
 User=__APP__
 Group=__APP__
 WorkingDirectory=__FINALPATH__/
-ExecStart=/usr/bin/sleep 1
+ExecStart=/usr/bin/sleep 10
 StandardOutput=append:/var/log/__APP__/__APP__.log
 StandardError=inherit
 
