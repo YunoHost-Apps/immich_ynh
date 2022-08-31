@@ -10,7 +10,7 @@ WorkingDirectory=__FINALPATH__/
 Environment="NODE_ENV=production"
 Environment="__YNH_NODE_LOAD_PATH__"
 EnvironmentFile=__FINALPATH__/.env
-ExecStart=__YNH_NODE__ server/dist/apps/immich/apps/immich/src/main
+ExecStart=__YNH_NODE__ server/dist/apps/microservices/apps/microservices/src/main
 StandardOutput=append:/var/log/__APP__/__APP__-microservices.log
 StandardError=inherit
 
