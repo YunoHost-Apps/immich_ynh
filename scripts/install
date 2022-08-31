@@ -144,19 +144,20 @@ rsync -a "$final_path/build/output/usr/src/app/node_modules/" "$final_path/serve
 ynh_secure_remove --file="$final_path/build/output"
 
 # Install immich web
-#pushd $final_path/build
-#        detect_arch
-#	./docker-image-extract altran1502/immich-web:$IMMICH_WEB_VERSION
-#popd
-#mkdir -p "$final_path/web/"
-#pushd $final_path/build/output/usr/src/app
+pushd $final_path/build
+        detect_arch
+	./docker-image-extract altran1502/immich-web:$IMMICH_WEB_VERSION
+popd
+mkdir -p "$final_path/web/"
+pushd $final_path/build/output/usr/src/app
+	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm ci
 #	npm config set user 0
 #	npm config set unsafe-perm true
 #	sudo /bin/sh entrypoint.sh
 #	sudo tree
-#popd
+popd
 #rsync -a "$final_path/build/output/usr/src/app/build/" "$final_path/web/"
-#ynh_secure_remove --file="$final_path/build/output"
+ynh_secure_remove --file="$final_path/build/output"
 
 # Install immich machine learning
 pushd $final_path/build
