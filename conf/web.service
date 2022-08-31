@@ -10,7 +10,7 @@ WorkingDirectory=__FINALPATH__/
 Environment="NODE_ENV=production"
 Environment="__YNH_NODE_LOAD_PATH__"
 EnvironmentFile=__FINALPATH__/.env
-ExecStart=__YNH_NODE__ web/usr/src/app/build/index.js
+ExecStart=__YNH_NODE__ web/build/index.js
 StandardOutput=append:/var/log/__APP__/__APP__-web.log
 StandardError=inherit
 
