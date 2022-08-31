@@ -161,7 +161,7 @@ ynh_secure_remove --file="$final_path/build/output"
 # Install immich machine learning
 pushd $final_path/build
         detect_arch
-	./docker-image-extract altran1502/immich-machine-learning:$IMMICH_ML_VERSION
+	./docker-image-extract altran1502/immich-machine-learning:$IMMICH_ML_VERSION 2>&1
 popd
 mkdir -p "$final_path/ml/dist/"
 mkdir -p "$final_path/ml/node_modules/"
