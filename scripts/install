@@ -77,7 +77,7 @@ ynh_script_progression --message="Installing dependencies..." --weight=1
 ynh_install_nodejs --nodejs_version=$NODEJS_VERSION 2>&1
 
 ynh_install_app_dependencies $pkg_dependencies
-sudo ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
+# sudo ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
 
 #=================================================
 # CREATE DEDICATED USER
