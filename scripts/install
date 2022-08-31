@@ -167,7 +167,7 @@ mkdir -p "$final_path/ml/node_modules/"
 rsync -a "$final_path/build/output/usr/src/app/dist/" "$final_path/ml/dist/"
 rsync -a "$final_path/build/output/usr/src/app/node_modules/" "$final_path/ml/node_modules/"
 
-ynh_secure_remove --file="$final_path/build"
+#ynh_secure_remove --file="$final_path/build"
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
