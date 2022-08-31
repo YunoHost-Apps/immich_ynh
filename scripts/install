@@ -149,6 +149,7 @@ pushd $final_path/build
 	./docker-image-extract altran1502/immich-web:$IMMICH_WEB_VERSION
 popd
 mkdir -p "$final_path/web/"
+chown -R $app:$app $final_path/build/output/usr/src/app
 pushd $final_path/build/output/usr/src/app
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm ci
 #	npm config set user 0
