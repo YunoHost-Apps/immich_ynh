@@ -27,13 +27,18 @@ function detect_arch() {
 NODEJS_VERSION=16
 
 # dependencies used by the app
-pkg_dependencies="npm postgresql ffmpeg"
+pkg_dependencies="npm musl-dev postgresql ffmpeg"
 
 # libheif vips
 
 #=================================================
 # PERSONAL HELPERS
 #=================================================
+
+# apt-get install musl-dev
+# ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
+
+
 
 #=================================================
 # EXPERIMENTAL HELPERS

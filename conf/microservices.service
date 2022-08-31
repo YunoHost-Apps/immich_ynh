@@ -7,8 +7,11 @@ Type=simple
 User=__APP__
 Group=__APP__
 WorkingDirectory=__FINALPATH__/
-ExecStart=/usr/bin/sleep 10
-StandardOutput=append:/var/log/__APP__/__APP__.log
+Environment="NODE_ENV=production"
+Environment="__YNH_NODE_LOAD_PATH__"
+EnvironmentFile=__FINALPATH__/.env
+ExecStart=__YNH_NODE__ server/dist/apps/immich/apps/immich/src/main
+StandardOutput=append:/var/log/__APP__/__APP__-microservices.log
 StandardError=inherit
 
 # Sandboxing options to harden security

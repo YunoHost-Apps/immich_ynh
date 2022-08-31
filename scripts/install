@@ -77,6 +77,7 @@ ynh_script_progression --message="Installing dependencies..." --weight=1
 ynh_install_nodejs --nodejs_version=$NODEJS_VERSION 2>&1
 
 ynh_install_app_dependencies $pkg_dependencies
+ynh_psql_execute_as_root ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
 
 #=================================================
 # CREATE DEDICATED USER
@@ -201,10 +202,13 @@ chown $app:$app "$final_path/.env"
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_script_progression --message="Configuring a systemd service..."
+ynh_script_progression --message="Configuring all systemd services..."
 
 # Create a dedicated systemd config
-ynh_add_systemd_config
+ynh_add_systemd_config --service=$app-server --template=server.service
+ynh_add_systemd_config --service=$app-microservices --template=microservices.service
+ynh_add_systemd_config --service=$app-machine-learning --template=ml.service
+ynh_add_systemd_config --service=$app-web --template=web.service
 
 #=================================================
 # GENERIC FINALIZATION
@@ -229,7 +233,7 @@ yunohost service add $app --description="A short description of the app" --log="
 ynh_script_progression --message="Starting a systemd service..."
 
 # Start a systemd service
-ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
+ynh_systemd_action --service_name=$app-server --action="start" --log_path="/var/log/$app/$app-server.log"
 
 #=================================================
 # SETUP SSOWAT
