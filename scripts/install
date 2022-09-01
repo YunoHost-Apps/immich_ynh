@@ -170,6 +170,11 @@ popd
 rsync -a "$final_path/build/output/usr/src/app/" "$final_path/web/"
 
 #ynh_secure_remove --file="$final_path/build"
+# To be put back when everything stabilized
+
+# Shouldn't be needed, but for some reasons the server doesn't use the .env 
+#/home/yunohost.app/__APP__/ value and expects a ./upload directory at the root
+mkdir -p "$final_path/upload"
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
