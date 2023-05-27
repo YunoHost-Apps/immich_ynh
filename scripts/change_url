@@ -69,7 +69,10 @@ fi
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..." --weight=1
 
-ynh_systemd_action --service_name=$app --action="stop" --log_path="/var/log/$app/$app.log"
+ynh_systemd_action --service_name=$app-server --action="stop" --log_path="/var/log/$app/$app-server.log"
+ynh_systemd_action --service_name=$app-microservices --action="stop" --log_path="/var/log/$app/$app-microservices.log"
+ynh_systemd_action --service_name=$app-ml --action="stop" --log_path="/var/log/$app/$app-ml.log"
+ynh_systemd_action --service_name=$app-web --action="stop" --log_path="/var/log/$app/$app-web.log"
 
 #=================================================
 # MODIFY URL IN NGINX CONF
@@ -101,19 +104,16 @@ then
 fi
 
 #=================================================
-# SPECIFIC MODIFICATIONS
-#=================================================
-# ...
-#=================================================
-
-#=================================================
 # GENERIC FINALISATION
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Starting a systemd service..." --weight=1
 
-ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
+ynh_systemd_action --service_name=$app-server --action="start" --log_path="/var/log/$app/$app-server.log"
+ynh_systemd_action --service_name=$app-microservices --action="start" --log_path="/var/log/$app/$app-microservices.log"
+ynh_systemd_action --service_name=$app-ml --action="start" --log_path="/var/log/$app/$app-ml.log"
+ynh_systemd_action --service_name=$app-web --action="start" --log_path="/var/log/$app/$app-web.log"
 
 #=================================================
 # RELOAD NGINX
