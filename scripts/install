@@ -25,7 +25,7 @@ ynh_script_progression --message="Installing dependencies..." --weight=1
 ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
 ynh_use_nodejs
 ln -fs /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
-
+libc.musl-x86_64.so.1
 #=================================================
 # CREATE A POSTGRESQL DATABASE
 #=================================================
@@ -92,6 +92,7 @@ chown -R $app:$app $install_dir/build/output/usr/src/app
 pushd $install_dir/build/output/usr/src/app
 	# rm vite.config.js
 	# ynh_add_config --template="../conf/vite.config.js" --destination="$install_dir/build/output/usr/src/app/vite.config.js"
+	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm install sharp
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm ci
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm run build
 popd
