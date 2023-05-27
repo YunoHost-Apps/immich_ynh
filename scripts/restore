@@ -63,14 +63,20 @@ ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
 
-yunohost service add $app --description="A short description of the app" --log="/var/log/$app/$app.log"
+yunohost service add $app-server --description="Immich Server" --log=/var/log/$app/$app-server.log
+yunohost service add $app-microservices --description="Immich Microservices" --log=/var/log/$app/$app-microservices.log
+yunohost service add $app-ml --description="Immich Machine Learning" --log=/var/log/$app/$app-ml.log
+yunohost service add $app-web --description="Immich Web" --log=/var/log/$app/$app-web.log
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Starting a systemd service..." --weight=1
 
-ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
+ynh_systemd_action --service_name=$app-server --action="start" --log_path="/var/log/$app/$app-server.log"
+ynh_systemd_action --service_name=$app-microservices --action="start" --log_path="/var/log/$app/$app-microservices.log"
+ynh_systemd_action --service_name=$app-ml --action="start" --log_path="/var/log/$app/$app-ml.log"
+ynh_systemd_action --service_name=$app-web --action="start" --log_path="/var/log/$app/$app-web.log"
 
 #=================================================
 # GENERIC FINALIZATION
