@@ -33,6 +33,7 @@ domain=$(ynh_app_setting_get --app=$app --key=domain)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 datadir=$(ynh_app_setting_get --app=$app --key=datadir)
+jwt=$(ynh_app_setting_get --app=$app --key=jwt)
 
 #=================================================
 # DECLARE DATA AND CONF FILES TO BACKUP
@@ -61,12 +62,6 @@ ynh_backup --src_path="$datadir" --is_big
 #=================================================
 
 ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-
-#=================================================
-# BACKUP THE PHP-FPM CONFIGURATION
-#=================================================
-
-ynh_backup --src_path="/etc/php/$phpversion/fpm/pool.d/$app.conf"
 
 #=================================================
 # BACKUP FAIL2BAN CONFIGURATION

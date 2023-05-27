@@ -22,6 +22,7 @@ db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_user=$db_name
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 datadir=$(ynh_app_setting_get --app=$app --key=datadir)
+jwt=$(ynh_app_setting_get --app=$app --key=jwt)
 
 #=================================================
 # STANDARD REMOVE
@@ -42,7 +43,10 @@ fi
 ynh_script_progression --message="Stopping and removing the systemd service..." --weight=1
 
 # Remove the dedicated systemd config
-ynh_remove_systemd_config
+ynh_remove_systemd_config --service=immich-server
+ynh_remove_systemd_config --service=immich-microservicies
+ynh_remove_systemd_config --service=immich-ml
+ynh_remove_systemd_config --service=immich-web
 
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION
@@ -53,12 +57,12 @@ ynh_script_progression --message="Removing logrotate configuration..." --weight=
 ynh_remove_logrotate
 
 #=================================================
-# REMOVE THE MYSQL DATABASE
+# REMOVE THE POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Removing the MySQL database..." --weight=1
+ynh_script_progression --message="Removing the PostgreSQL database..."
 
 # Remove a database if it exists, along with the associated user
-ynh_mysql_remove_db --db_user=$db_user --db_name=$db_name
+ynh_psql_remove_db --db_user=$db_name --db_name=$db_name
 
 #=================================================
 # REMOVE APP MAIN DIR
@@ -86,14 +90,6 @@ ynh_script_progression --message="Removing NGINX web server configuration..." --
 
 # Remove the dedicated NGINX config
 ynh_remove_nginx_config
-
-#=================================================
-# REMOVE PHP-FPM CONFIGURATION
-#=================================================
-ynh_script_progression --message="Removing PHP-FPM configuration..." --weight=1
-
-# Remove the dedicated PHP-FPM config
-ynh_remove_fpm_config
 
 #=================================================
 # REMOVE DEPENDENCIES
