@@ -13,48 +13,48 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
-ynh_clean_setup () {
+#REMOVEME? ynh_clean_setup () {
 	### Remove this function if there's nothing to clean before calling the remove script.
 	true
 }
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-domain=$YNH_APP_ARG_DOMAIN
-path_url=$YNH_APP_ARG_PATH
-is_public=$YNH_APP_ARG_IS_PUBLIC
-language=$YNH_APP_ARG_LANGUAGE
-admin=$YNH_APP_ARG_ADMIN
-password=$YNH_APP_ARG_PASSWORD
+#REMOVEME? domain=$YNH_APP_ARG_DOMAIN
+#REMOVEME? path=$YNH_APP_ARG_PATH
+#REMOVEME? is_public=$YNH_APP_ARG_IS_PUBLIC
+#REMOVEME? language=$YNH_APP_ARG_LANGUAGE
+#REMOVEME? admin=$YNH_APP_ARG_ADMIN
+#REMOVEME? password=$YNH_APP_ARG_PASSWORD
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
 jwt=$(ynh_string_random)
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_script_progression --message="Validating installation parameters..." --weight=1
+#REMOVEME? ynh_script_progression --message="Validating installation parameters..." --weight=1
 
-final_path=/var/www/$app
-test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
+#REMOVEME? install_dir=/var/www/$app
+#REMOVEME? test ! -e "$install_dir" || ynh_die --message="This path already contains a folder"
 
 # Register (book) web path
-ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
+#REMOVEME? ynh_webpath_register --app=$app --domain=$domain --path=$path
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Storing installation settings..." --weight=1
+#REMOVEME? ynh_script_progression --message="Storing installation settings..." --weight=1
 
-ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=path --value=$path_url
+#REMOVEME? ynh_app_setting_set --app=$app --key=domain --value=$domain
+#REMOVEME? ynh_app_setting_set --app=$app --key=path --value=$path
 ynh_app_setting_set --app=$app --key=language --value=$language
-ynh_app_setting_set --app=$app --key=admin --value=$admin
+#REMOVEME? ynh_app_setting_set --app=$app --key=admin --value=$admin
 ynh_app_setting_set --app=$app --key=jwt --value=$jwt
 
 #=================================================
@@ -62,40 +62,40 @@ ynh_app_setting_set --app=$app --key=jwt --value=$jwt
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_script_progression --message="Finding an available port..." --weight=1
+#REMOVEME? ynh_script_progression --message="Finding an available port..." --weight=1
 
 # Find an available port
-port=$(ynh_find_port --port=3000)
-ynh_app_setting_set --app=$app --key=port --value=$port
+#REMOVEME? port=$(ynh_find_port --port=3000)
+#REMOVEME? ynh_app_setting_set --app=$app --key=port --value=$port
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." --weight=1
+#REMOVEME? ynh_script_progression --message="Installing dependencies..." --weight=1
 
 # Install nodejs
 ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
 
-ynh_install_app_dependencies $pkg_dependencies
+#REMOVEME? ynh_install_app_dependencies $pkg_dependencies
 # sudo ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Configuring system user..." --weight=1
+#REMOVEME? ynh_script_progression --message="Configuring system user..." --weight=1
 
 # Create a system user
-ynh_system_user_create --username=$app --home_dir="$final_path"
+#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Creating a PostgreSQL database..." --weight=1
+#REMOVEME? ynh_script_progression --message="Creating a PostgreSQL database..." --weight=1
 
-db_name=$(ynh_sanitize_dbid --db_name=$app)
-ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-ynh_psql_test_if_first_run
-ynh_psql_setup_db --db_user=$db_name --db_name=$db_name
+#REMOVEME? db_name=$(ynh_sanitize_dbid --db_name=$app)
+#REMOVEME? ynh_app_setting_set --app=$app --key=db_name --value=$db_name
+#REMOVEME? ynh_psql_test_if_first_run
+#REMOVEME? ynh_psql_setup_db --db_user=$db_name --db_name=$db_name
 
 ynh_psql_execute_as_root --sql="CREATE EXTENSION IF NOT EXISTS unaccent;" --database=$db_name
 ynh_psql_execute_as_root --sql="CREATE EXTENSION IF NOT EXISTS pg_trgm;" --database=$db_name
@@ -105,13 +105,13 @@ ynh_psql_execute_as_root --sql="CREATE EXTENSION IF NOT EXISTS pg_trgm;" --datab
 #=================================================
 ynh_script_progression --message="Setting up source files..."
 
-ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+#REMOVEME? ynh_app_setting_set --app=$app --key=install_dir --value=$install_dir
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source --dest_dir="$final_path/build/" --source_id="docker-image-extract"
+ynh_setup_source --dest_dir="$install_dir/build/" --source_id="docker-image-extract"
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # NGINX CONFIGURATION
@@ -129,66 +129,66 @@ ynh_add_nginx_config
 ynh_script_progression --message="Making install..." --weight=5
 
 # Install immich server
-pushd $final_path/build
+pushd $install_dir/build
         detect_arch
 	./docker-image-extract altran1502/immich-server:$IMMICH_SERVER_VERSION 2>&1
 popd
-mkdir -p "$final_path/server/dist/"
-mkdir -p "$final_path/server/node_modules/"
-rsync -a "$final_path/build/output/usr/src/app/dist/" "$final_path/server/dist/"
-rsync -a "$final_path/build/output/usr/src/app/node_modules/" "$final_path/server/node_modules/"
-ynh_secure_remove --file="$final_path/build/output"
+mkdir -p "$install_dir/server/dist/"
+mkdir -p "$install_dir/server/node_modules/"
+rsync -a "$install_dir/build/output/usr/src/app/dist/" "$install_dir/server/dist/"
+rsync -a "$install_dir/build/output/usr/src/app/node_modules/" "$install_dir/server/node_modules/"
+#REMOVEME? ynh_secure_remove --file="$install_dir/build/output"
 
 # Install immich machine learning
-pushd $final_path/build
+pushd $install_dir/build
         detect_arch
 	./docker-image-extract altran1502/immich-machine-learning:$IMMICH_ML_VERSION 2>&1
 popd
-mkdir -p "$final_path/ml/dist/"
-mkdir -p "$final_path/ml/node_modules/"
-rsync -a "$final_path/build/output/usr/src/app/dist/" "$final_path/ml/dist/"
-rsync -a "$final_path/build/output/usr/src/app/node_modules/" "$final_path/ml/node_modules/"
-ynh_secure_remove --file="$final_path/build/output"
+mkdir -p "$install_dir/ml/dist/"
+mkdir -p "$install_dir/ml/node_modules/"
+rsync -a "$install_dir/build/output/usr/src/app/dist/" "$install_dir/ml/dist/"
+rsync -a "$install_dir/build/output/usr/src/app/node_modules/" "$install_dir/ml/node_modules/"
+#REMOVEME? ynh_secure_remove --file="$install_dir/build/output"
 
 # Install immich web
-pushd $final_path/build
+pushd $install_dir/build
         detect_arch
 	./docker-image-extract altran1502/immich-web:$IMMICH_WEB_VERSION
 popd
-mkdir -p "$final_path/web/"
-chown -R $app:$app $final_path/build/output/usr/src/app
-pushd $final_path/build/output/usr/src/app
+mkdir -p "$install_dir/web/"
+chown -R $app:$app $install_dir/build/output/usr/src/app
+pushd $install_dir/build/output/usr/src/app
 	# rm vite.config.js
-	# ynh_add_config --template="../conf/vite.config.js" --destination="$final_path/build/output/usr/src/app/vite.config.js"
+	# ynh_add_config --template="../conf/vite.config.js" --destination="$install_dir/build/output/usr/src/app/vite.config.js"
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm ci
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm run build
 popd
-rsync -a "$final_path/build/output/usr/src/app/" "$final_path/web/"
+rsync -a "$install_dir/build/output/usr/src/app/" "$install_dir/web/"
 
-#ynh_secure_remove --file="$final_path/build"
+#REMOVEME? #ynh_secure_remove --file="$install_dir/build"
 # To be put back when everything stabilized
 
 # Shouldn't be needed, but for some reasons the server doesn't use the .env 
 #/home/yunohost.app/__APP__/ value and expects a ./upload directory at the root
-mkdir -p "$final_path/upload"
+mkdir -p "$install_dir/upload"
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:$app "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:$app "$install_dir"
 
 #=================================================
 # CREATE DATA DIRECTORY
 #=================================================
 ynh_script_progression --message="Creating a data directory..." --weight=1
 
-datadir=/home/yunohost.app/$app
-ynh_app_setting_set --app=$app --key=datadir --value=$datadir
+#REMOVEME? data_dir=/home/yunohost.app/$app
+#REMOVEME? ynh_app_setting_set --app=$app --key=data_dir --value=$data_dir
 
-mkdir -p $datadir
+mkdir -p $data_dir
 
-chmod 750 "$datadir"
-chmod -R o-rwx "$datadir"
-chown -R $app:www-data "$datadir"
+chmod 750 "$data_dir"
+chmod -R o-rwx "$data_dir"
+chown -R $app:www-data "$data_dir"
 
 #=================================================
 # ADD A CONFIGURATION
@@ -196,10 +196,10 @@ chown -R $app:www-data "$datadir"
 
 ynh_script_progression --message="Adding a configuration file..."
 
-ynh_add_config --template="../conf/.env" --destination="$final_path/.env"
+ynh_add_config --template="../conf/.env" --destination="$install_dir/.env"
 
-chmod 600 "$final_path/.env"
-chown $app:$app "$final_path/.env"
+chmod 600 "$install_dir/.env"
+chown $app:$app "$install_dir/.env"
 
 #=================================================
 # SETUP SYSTEMD
@@ -246,33 +246,33 @@ ynh_systemd_action --service_name=$app-web --action="start" --log_path="/var/log
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring permissions..."
+#REMOVEME? ynh_script_progression --message="Configuring permissions..."
 
 # Make app public if necessary
-if [ $is_public -eq 1 ]
+#REMOVEME? if [ $is_public -eq 1 ]
 then
 	# Everyone can access the app.
 	# The "main" permission is automatically created before the install script.
-	ynh_permission_update --permission="main" --add="visitors"
+#REMOVEME? 	ynh_permission_update --permission="main" --add="visitors"
 fi
 
 ### N.B. : the following extra permissions only make sense if your app
 ### does have for example an admin interface or an API.
 
 # Only the admin can access the admin panel of the app (if the app has an admin panel)
-ynh_permission_create --permission="admin" --url="/admin" --allowed=$admin
+#REMOVEME? ynh_permission_create --permission="admin" --url="/admin" --allowed=$admin
 
 # Everyone can access the API part
 # We don't want to display the tile in the SSO so we put --show_tile="false"
 # And we don't want the YunoHost admin to be able to remove visitors group to this permission, so we put --protected="true"
-ynh_permission_create --permission="api" --url="/api" --allowed="visitors" --show_tile="false" --protected="true"
+#REMOVEME? ynh_permission_create --permission="api" --url="/api" --allowed="visitors" --show_tile="false" --protected="true"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..." --weight=1
+#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..." --weight=1
 
-ynh_systemd_action --service_name=nginx --action=reload
+#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT

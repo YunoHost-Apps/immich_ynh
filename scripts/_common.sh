@@ -27,7 +27,7 @@ function detect_arch() {
 NODEJS_VERSION=16
 
 # dependencies used by the app
-pkg_dependencies="npm musl-dev libvips postgresql ffmpeg"
+#REMOVEME? pkg_dependencies="npm musl-dev libvips postgresql ffmpeg"
 
 # libheif vips
 
