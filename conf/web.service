@@ -1,5 +1,5 @@
 [Unit]
-Description=Small description of the service
+Description=Immich:
 After=network.target
 
 [Service]
