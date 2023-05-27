@@ -93,6 +93,7 @@ pushd $install_dir/build/output/usr/src/app
 	# rm vite.config.js
 	# ynh_add_config --template="../conf/vite.config.js" --destination="$install_dir/build/output/usr/src/app/vite.config.js"
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm install sharp
+	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm rebuild bcrypt --build-from-source
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm ci
 	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm run build
 popd
