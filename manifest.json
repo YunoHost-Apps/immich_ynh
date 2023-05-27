@@ -3,19 +3,19 @@
     "id": "immich",
     "packaging_format": 1,
     "description": {
-        "en": "Self-hosted photo and video backup solution directly from your mobile phone.",
-        "fr": "Solution auto-hébergée pour la sauvegarde de photos et de vidéos directement depuis votre mobile."
+        "en": "Self-hosted photo and video backup solution directly from your mobile phone",
+        "fr": "Solution auto-hébergée pour la sauvegarde de photos et de vidéos directement depuis votre mobile"
     },
     "version": "1.26.0~ynh1",
     "url": "https://www.immich.app",
     "upstream": {
-        "license": "mit",
+        "license": "MIT",
         "website": "https://www.immich.app",
         "admindoc": "https://github.com/immich-app/immich#getting-started",
         "userdoc": "https://github.com/immich-app/immich#getting-started",
         "code": "https://github.com/immich-app/immich"
     },
-    "license": "mit",
+    "license": "MIT",
     "maintainer": {
         "name": "limezy"
     },
@@ -35,8 +35,8 @@
             {
                 "name": "path",
                 "type": "path",
-                "example": "/example",
-                "default": "/example"
+                "example": "/immich",
+                "default": "/immich"
             },
             {
                 "name": "is_public",

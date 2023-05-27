@@ -74,7 +74,7 @@ ynh_app_setting_set --app=$app --key=port --value=$port
 ynh_script_progression --message="Installing dependencies..." --weight=1
 
 # Install nodejs
-ynh_install_nodejs --nodejs_version=$NODEJS_VERSION 2>&1
+ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
 
 ynh_install_app_dependencies $pkg_dependencies
 # sudo ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
@@ -113,14 +113,10 @@ chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
-
-
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
 ynh_script_progression --message="Configuring NGINX web server..." --weight=1
-
-### `ynh_add_nginx_config` will use the file conf/nginx.conf
 
 # Create a dedicated NGINX config
 ynh_add_nginx_config

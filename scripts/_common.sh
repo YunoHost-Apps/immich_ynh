@@ -38,8 +38,6 @@ pkg_dependencies="npm musl-dev libvips postgresql ffmpeg"
 # apt-get install musl-dev
 # ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
 
-
-
 #=================================================
 # EXPERIMENTAL HELPERS
 #=================================================
