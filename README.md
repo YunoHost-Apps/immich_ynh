@@ -22,7 +22,7 @@ Photo and video backup solution directly from your mobile phone
 
 ## Screenshots
 
-![Screenshot of Immich](./doc/screenshots/example.jpg)
+![Screenshot of Immich](./doc/screenshots/immich-screenshots.png)
 
 ## Documentation and resources
 
