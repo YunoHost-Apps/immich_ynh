@@ -23,6 +23,7 @@ ynh_script_progression --message="Installing dependencies..." --weight=1
 
 # Install nodejs
 ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
+ynh_use_nodejs
 ln -fs /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
 
 #=================================================
