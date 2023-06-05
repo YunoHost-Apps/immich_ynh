@@ -76,11 +76,11 @@ ynh_backup --src_path="/etc/systemd/system/$app-ml.service"
 ynh_backup --src_path="/etc/systemd/system/$app-web.service"
 
 #=================================================
-# BACKUP THE MYSQL DATABASE
+# BACKUP THE POSTGRESQL DATABASE
 #=================================================
-ynh_print_info --message="Backing up the MySQL database..."
+ynh_print_info --message="Backing up a PostgreSQL database..."
 
-ynh_mysql_dump_db --database="$db_name" > db.sql
+ynh_psql_dump_db --database="$db_name" > db.sql
 
 #=================================================
 # END OF SCRIPT
