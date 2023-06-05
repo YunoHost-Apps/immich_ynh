@@ -24,7 +24,7 @@ function detect_arch() {
   esac
 }
 
-NODEJS_VERSION=16
+NODEJS_VERSION=18
 
 # dependencies used by the app
 pkg_dependencies="npm musl-dev libvips postgresql ffmpeg"
@@ -34,9 +34,6 @@ pkg_dependencies="npm musl-dev libvips postgresql ffmpeg"
 #=================================================
 # PERSONAL HELPERS
 #=================================================
-
-# apt-get install musl-dev
-# ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
 
 #=================================================
 # EXPERIMENTAL HELPERS
