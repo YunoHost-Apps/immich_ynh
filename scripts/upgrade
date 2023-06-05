@@ -22,7 +22,10 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..." --weight=1
 
-ynh_systemd_action --service_name=$app --action="stop" --log_path="/var/log/$app/$app.log"
+ynh_systemd_action --service_name=$app-server --action="stop" --log_path="/var/log/$app/$app-server.log"
+ynh_systemd_action --service_name=$app-microservices --action="stop" --log_path="/var/log/$app/$app-microservices.log"
+ynh_systemd_action --service_name=$app-ml --action="stop" --log_path="/var/log/$app/$app-ml.log"
+ynh_systemd_action --service_name=$app-web --action="stop" --log_path="/var/log/$app/$app-web.log"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -70,10 +73,10 @@ ynh_use_logrotate --non-append
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
 
-yunohost service add $app-server --description="Immich Server" --log=/var/log/$app/$app-server.log
-yunohost service add $app-microservices --description="Immich Microservices" --log=/var/log/$app/$app-microservices.log
-yunohost service add $app-ml --description="Immich Machine Learning" --log=/var/log/$app/$app-ml.log
-yunohost service add $app-web --description="Immich Web" --log=/var/log/$app/$app-web.log
+yunohost service add $app-server --description="Immich Server" --log="/var/log/$app/$app-server.log"
+yunohost service add $app-microservices --description="Immich Microservices" --log="/var/log/$app/$app-microservices.log"
+yunohost service add $app-ml --description="Immich Machine Learning" --log="/var/log/$app/$app-ml.log"
+yunohost service add $app-web --description="Immich Web" --log="/var/log/$app/$app-web.log"
 
 #=================================================
 # START SYSTEMD SERVICE

@@ -21,7 +21,6 @@ ynh_systemd_action --service_name=$app-microservices --action="stop" --log_path=
 ynh_systemd_action --service_name=$app-ml --action="stop" --log_path="/var/log/$app/$app-ml.log"
 ynh_systemd_action --service_name=$app-web --action="stop" --log_path="/var/log/$app/$app-web.log"
 
-
 #=================================================
 # MODIFY URL IN NGINX CONF
 #=================================================

@@ -51,9 +51,9 @@ ynh_backup --src_path="/etc/systemd/system/$app-ml.service"
 ynh_backup --src_path="/etc/systemd/system/$app-web.service"
 
 #=================================================
-# BACKUP THE DATABASE
+# BACKUP THE POSTGRESQL DATABASE
 #=================================================
-ynh_print_info --message="Backing up the database..."
+ynh_print_info --message="Backing up a PostgreSQL database..."
 
 ynh_psql_dump_db --database="$db_name" > db.sql
 

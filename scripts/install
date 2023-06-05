@@ -13,6 +13,7 @@ source /usr/share/yunohost/helpers
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
+
 jwt=$(ynh_string_random)
 ynh_app_setting_set --app=$app --key=jwt --value=$jwt
 
