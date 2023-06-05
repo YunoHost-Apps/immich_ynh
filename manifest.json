@@ -33,12 +33,6 @@
                 "type": "domain"
             },
             {
-                "name": "path",
-                "type": "path",
-                "example": "/immich",
-                "default": "/immich"
-            },
-            {
                 "name": "is_public",
                 "type": "boolean",
                 "default": true
