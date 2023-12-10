@@ -30,13 +30,6 @@ ynh_restore_file --origin_path="$data_dir" --not_mandatory
 chown -R $app:www-data "$data_dir"
 
 #=================================================
-# RESTORE THE NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring the NGINX web server configuration..." --weight=1
-
-ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-
-#=================================================
 # RESTORE THE DATABASE
 #=================================================
 ynh_script_progression --message="Restoring the database..." --weight=1
@@ -44,9 +37,11 @@ ynh_script_progression --message="Restoring the database..." --weight=1
 ynh_psql_connect_as --user=$db_user --password=$db_pwd --database=$db_name < ./db.sql
 
 #=================================================
-# RESTORE SYSTEMD
+# RESTORE THE NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Restoring the systemd configuration..." --weight=1
+ynh_script_progression --message="Restoring the NGINX web server configuration..." --weight=1
+
+ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 ynh_restore_file --origin_path="/etc/systemd/system/$app-server.service"
 ynh_restore_file --origin_path="/etc/systemd/system/$app-microservices.service"
@@ -58,17 +53,7 @@ systemctl enable $app-microservices.service --quiet
 systemctl enable $app-ml.service --quiet
 systemctl enable $app-web.service --quiet
 
-#=================================================
-# RESTORE THE LOGROTATE CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring the logrotate configuration..." --weight=1
-
 ynh_restore_file --origin_path="/etc/logrotate.d/$app"
-
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
 
 yunohost service add $app-server --description="Immich Server" --log=/var/log/$app/$app-server.log
 yunohost service add $app-microservices --description="Immich Microservices" --log=/var/log/$app/$app-microservices.log
@@ -84,13 +69,6 @@ ynh_systemd_action --service_name=$app-server --action="start" --log_path="/var/
 ynh_systemd_action --service_name=$app-microservices --action="start" --log_path="/var/log/$app/$app-microservices.log"
 ynh_systemd_action --service_name=$app-ml --action="start" --log_path="/var/log/$app/$app-ml.log"
 ynh_systemd_action --service_name=$app-web --action="start" --log_path="/var/log/$app/$app-web.log"
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# RELOAD NGINX AND PHP-FPM
-#=================================================
-ynh_script_progression --message="Reloading NGINX web server and PHP-FPM..." --weight=1
 
 ynh_systemd_action --service_name=nginx --action=reload
 

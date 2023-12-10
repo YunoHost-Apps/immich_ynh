@@ -5,7 +5,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.26.0~ynh1"
+version = "1.90.2~ynh1"
 
 maintainers = ["limezy"]
 
@@ -17,11 +17,14 @@ userdoc = "https://github.com/immich-app/immich#getting-started"
 code = "https://github.com/immich-app/immich"
 
 [integration]
-yunohost = ">= 11.1.19"
+yunohost = ">= 11.2"
 architectures = ["arm64", "amd64"]
 multi_instance = false
+
 ldap = false
+
 sso = false
+
 disk = "50M"
 ram.build = "50M"
 ram.runtime = "50M"
@@ -59,7 +62,7 @@ ram.runtime = "50M"
     api.protected = true
 
     [resources.apt]
-    packages = "postgresql musl-dev libvips ffmpeg"
+    packages = "postgresql, musl-dev, libvips, ffmpeg"
 
     [resources.database]
     type = "postgresql"

@@ -13,7 +13,6 @@ source /usr/share/yunohost/helpers
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-
 jwt=$(ynh_string_random)
 ynh_app_setting_set --app=$app --key=jwt --value=$jwt
 
@@ -114,7 +113,7 @@ chown -R $app:$app "$install_dir"
 #=================================================
 ynh_script_progression --message="Adding a configuration file..."
 
-ynh_add_config --template="../conf/.env" --destination="$install_dir/.env"
+ynh_add_config --template=".env" --destination="$install_dir/.env"
 
 chmod 600 "$install_dir/.env"
 chown $app:$app "$install_dir/.env"
