@@ -18,7 +18,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 Photo and video backup solution directly from your mobile phone
 
-**Shipped version:** 1.26.0~ynh1
+**Shipped version:** 1.90.2~ynh1
 
 ## Screenshots
 
