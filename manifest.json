@@ -6,7 +6,7 @@
         "en": "Photo and video backup solution directly from your mobile phone",
         "fr": "Sauvegarde de photos et de vidéos directement depuis votre mobile"
     },
-    "version": "1.26.0~ynh1",
+    "version": "1.90.2~ynh1",
     "url": "https://www.immich.app",
     "upstream": {
         "license": "MIT",
@@ -20,7 +20,7 @@
         "name": "limezy"
     },
     "requirements": {
-        "yunohost": ">= 11.0.0"
+        "yunohost": ">= 11.2"
     },
     "multi_instance": false,
     "services": [
