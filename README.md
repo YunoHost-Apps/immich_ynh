@@ -30,7 +30,7 @@ Photo and video backup solution directly from your mobile phone
 * Official user documentation: <https://github.com/immich-app/immich#getting-started>
 * Official admin documentation: <https://github.com/immich-app/immich#getting-started>
 * Upstream app code repository: <https://github.com/immich-app/immich>
-* YunoHost documentation for this app: <https://yunohost.org/app_immich>
+* YunoHost Store: <https://apps.yunohost.org/app/immich>
 * Report a bug: <https://github.com/YunoHost-Apps/immich_ynh/issues>
 
 ## Developer info
