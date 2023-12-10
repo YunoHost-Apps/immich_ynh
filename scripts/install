@@ -92,8 +92,8 @@ chown -R $app:$app $install_dir/build/output/usr/src/app
 pushd $install_dir/build/output/usr/src/app
 	# rm vite.config.js
 	# ynh_add_config --template="../conf/vite.config.js" --destination="$install_dir/build/output/usr/src/app/vite.config.js"
-	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm ci
-	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH npm run build
+	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH $ynh_npm ci
+	ynh_exec_warn_less sudo -u $app env $ynh_node_load_PATH $ynh_npm run build
 popd
 rsync -a "$install_dir/build/output/usr/src/app/" "$install_dir/web/"
 
@@ -129,20 +129,8 @@ ynh_add_systemd_config --service=$app-microservices --template=microservices.ser
 ynh_add_systemd_config --service=$app-ml --template=ml.service
 ynh_add_systemd_config --service=$app-web --template=web.service
 
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression --message="Configuring log rotation..."
-
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
-
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
 
 yunohost service add $app-server --description="Immich Server" --log="/var/log/$app/$app-server.log"
 yunohost service add $app-microservices --description="Immich Microservices" --log="/var/log/$app/$app-microservices.log"
