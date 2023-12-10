@@ -18,7 +18,7 @@ Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) po
 
 Photo and video backup solution directly from your mobile phone
 
-**Version incluse :** 1.26.0~ynh1
+**Version incluse :** 1.90.2~ynh1
 
 ## Captures d’écran
 
