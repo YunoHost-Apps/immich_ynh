@@ -27,26 +27,11 @@ Some long and extensive description of what the app is and does, lorem ipsum dol
 - Excepteur sint occaecat cupidatat non proident, sunt in culpa."
 
 
-**Version incluse :** 1.26.0~ynh1
+**Version incluse :** 1.90.2~ynh1
 
 ## Captures d’écran
 
 ![Capture d’écran de Immich](./doc/screenshots/example.jpg)
-
-## Avertissements / informations importantes
-
-* Any known limitations, constrains or stuff not working, such as (but not limited to):
-    * requiring a full dedicated domain ?
-    * architectures not supported ?
-    * not-working single-sign on or LDAP integration ?
-    * the app requires an important amount of RAM / disk / .. to install or to work properly
-    * etc...
-
-* Other infos that people should be aware of, such as:
-    * any specific step to perform after installing (such as manually finishing the install, specific admin credentials, ...)
-    * how to configure / administrate the application if it ain't obvious
-    * upgrade process / specificities / things to be aware of ?
-    * security considerations ?
 
 ## Documentations et ressources
 
@@ -54,7 +39,7 @@ Some long and extensive description of what the app is and does, lorem ipsum dol
 * Documentation officielle utilisateur : <https://github.com/immich-app/immich#getting-started>
 * Documentation officielle de l’admin : <https://github.com/immich-app/immich#getting-started>
 * Dépôt de code officiel de l’app : <https://github.com/immich-app/immich>
-* Documentation YunoHost pour cette app : <https://yunohost.org/app_immich>
+* YunoHost Store: <https://apps.yunohost.org/app/immich>
 * Signaler un bug : <https://github.com/YunoHost-Apps/immich_ynh/issues>
 
 ## Informations pour les développeurs
