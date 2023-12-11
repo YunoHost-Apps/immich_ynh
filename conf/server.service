@@ -1,5 +1,5 @@
 [Unit]
-Description=Small description of the service
+Description=Immich
 After=network.target
 
 [Service]
@@ -7,8 +7,11 @@ Type=simple
 User=__APP__
 Group=__APP__
 WorkingDirectory=__FINALPATH__/
-ExecStart=__FINALPATH__/script
-StandardOutput=append:/var/log/__APP__/__APP__.log
+Environment="NODE_ENV=production"
+Environment="__YNH_NODE_LOAD_PATH__"
+EnvironmentFile=__FINALPATH__/.env
+ExecStart=__YNH_NODE__ server/dist/apps/immich/apps/immich/src/main
+StandardOutput=append:/var/log/__APP__/__APP__-server.log
 StandardError=inherit
 
 # Sandboxing options to harden security
