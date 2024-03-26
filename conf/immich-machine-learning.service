@@ -1,15 +1,21 @@
 [Unit]
-Description=Small description of the service
+Description=Immich machine-learning
+Documentation=https://github.com/immich-app/immich
 After=network.target
+PartOf=immich-server.service
+Before=immich-server.service
 
 [Service]
 Type=simple
+Restart=on-failure
 User=__APP__
 Group=__APP__
-WorkingDirectory=__FINALPATH__/
-ExecStart=__FINALPATH__/script
-StandardOutput=append:/var/log/__APP__/__APP__.log
+WorkingDirectory=__INSTALL_DIR__/app
+EnvironmentFile=__INSTALL_DIR__/env
+ExecStart=__INSTALL_DIR__/app/machine-learning/start.sh
+StandardOutput=append:/var/log/__APP__/__APP__-machine-learning.log
 StandardError=inherit
+Restart=on-failure
 
 # Sandboxing options to harden security
 # Depending on specificities of your service/app, you may need to tweak these
@@ -42,4 +48,4 @@ CapabilityBoundingSet=~CAP_NET_ADMIN CAP_NET_BROADCAST CAP_NET_RAW
 CapabilityBoundingSet=~CAP_SYS_ADMIN CAP_SYS_PTRACE CAP_SYSLOG
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=immich-server.service
