@@ -101,8 +101,8 @@ myynh_install_python() {
 			local MY_DIR=$(pwd)
 
 			# Create a temp direcotry
-			tmpdir="$(mktemp --directory)"
-			cd "$tmpdir"
+			tmpdir_py="$(mktemp --directory)"
+			cd "$tmpdir_py"
 
 			# Download
 			wget --output-document="Python-$python.tar.xz" \
@@ -121,7 +121,7 @@ myynh_install_python() {
 			cd "$MY_DIR"
 
 			# Clean
-			ynh_secure_remove "$tmpdir"
+			ynh_secure_remove "$tmpdir_py"
 
 			# Set version
 			py_app_version="/usr/local/bin/python$python_major"
