@@ -178,10 +178,10 @@ myynh_install_immich() {
 			set -o nounset
 
 			# add poetry
-			"$install_dir/app/machine-learning/venv/bin/pip3" install --upgrade poetry
+			ynh_exec_warn_less "$install_dir/app/machine-learning/venv/bin/pip3" install --upgrade poetry
 
 			# poetry install
-			"$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
+			ynh_exec_warn_less "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
 		cp -a "$tmpdir/machine-learning/ann" "$install_dir/app/machine-learning/"
  		cp -a "$tmpdir/machine-learning/start.sh" "$install_dir/app/machine-learning/"
