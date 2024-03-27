@@ -134,21 +134,20 @@ myynh_install_python() {
 # Install immich
 myynh_install_immich() {
 	ynh_use_nodejs
-	ynh_npm="ynh_exec_warn_less $ynh_npm"
 
 	# Install immich-server
 		cd "$tmpdir/server"
-		"$ynh_npm" ci
-		"$ynh_npm" run build
-		"$ynh_npm" prune --omit=dev --omit=optional
+		ynh_exec_warn_less "$ynh_npm" ci
+		ynh_exec_warn_less "$ynh_npm" run build
+		ynh_exec_warn_less "$ynh_npm" prune --omit=dev --omit=optional
 
 		cd "$tmpdir/open-api/typescript-sdk"
-		"$ynh_npm" ci
-		"$ynh_npm" run build
+		ynh_exec_warn_less "$ynh_npm" ci
+		ynh_exec_warn_less "$ynh_npm" run build
 
 		cd "$tmpdir/web"
-		"$ynh_npm" ci
-		"$ynh_npm" run build
+		ynh_exec_warn_less "$ynh_npm" ci
+		ynh_exec_warn_less "$ynh_npm" run build
 
 		mkdir -p "$install_dir/app/"
 		cp -a "$tmpdir/server/node_modules" "$install_dir/app/"
@@ -198,7 +197,7 @@ myynh_install_immich() {
 
 	# Install sharp
 		cd "$install_dir/app"
-		"$ynh_npm" install sharp
+		ynh_exec_warn_less "$ynh_npm" install sharp
 
 	# Use 127.0.0.1 for microservices
 		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/microservices/main.js"
