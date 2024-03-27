@@ -134,6 +134,7 @@ myynh_install_python() {
 # Install immich
 myynh_install_immich() {
 	ynh_use_nodejs
+	ynh_npm="ynh_exec_warn_less $ynh_npm"
 
 	# Install immich-server
 		cd "$tmpdir/server"
@@ -157,7 +158,6 @@ myynh_install_immich() {
 		cp -a "$tmpdir/server/resources" "$install_dir/app/"
 		cp -a "$tmpdir/server/package.json" "$install_dir/app/"
 		cp -a "$tmpdir/server/package-lock.json" "$install_dir/app/"
-		cp -a "$tmpdir/server/start.sh" "$install_dir/app/"
 		cp -a "$tmpdir/server/start-microservices.sh" "$install_dir/app/"
 		cp -a "$tmpdir/server/start-server.sh" "$install_dir/app/"
 		cp -a "$tmpdir/LICENSE" "$install_dir/app/"
@@ -184,8 +184,7 @@ myynh_install_immich() {
 			ynh_exec_warn_less "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
 		cp -a "$tmpdir/machine-learning/ann" "$install_dir/app/machine-learning/"
- 		cp -a "$tmpdir/machine-learning/start.sh" "$install_dir/app/machine-learning/"
-		cp -a "$tmpdir/machine-learning/app" "$install_dir/app/machine-learning/"
+ 		cp -a "$tmpdir/machine-learning/app" "$install_dir/app/machine-learning/"
 		# Install custom start.sh script
 			ynh_add_config --template="immich-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
 			chmod +x "$install_dir/app/machine-learning/start.sh"
@@ -262,7 +261,7 @@ myynh_dump_psql_db() {
 
 # Restore the database
 myynh_restore_psql_db() {
-    sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
+	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
 		psql --cluster="$postgresql_version/main" --dbname="$app" < ./db.sql
 }
 
