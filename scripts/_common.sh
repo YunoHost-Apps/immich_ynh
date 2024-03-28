@@ -133,6 +133,8 @@ myynh_install_python() {
 
 # Install immich
 myynh_install_immich() {
+	# Thanks to https://github.com/arter97/immich-native
+
 	ynh_use_nodejs
 
 	# Install immich-server
@@ -262,7 +264,7 @@ myynh_dump_psql_db() {
 myynh_restore_psql_db() {
 	# https://github.com/immich-app/immich/issues/5630#issuecomment-1866581570
 	ynh_replace_string --match_string="SELECT pg_catalog.set_config('search_path', '', false);" \
-		--replace_string="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --target_file=target_file
+		--replace_string="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --target_file="db.sql"
 
 	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
 		psql --cluster="$postgresql_version/main" --dbname="$app" < ./db.sql
