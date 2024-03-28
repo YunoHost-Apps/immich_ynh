@@ -66,7 +66,7 @@ ram.runtime = "500M"
     api.protected = true
 
     [resources.apt]
-    packages = ["python3-venv", "python3-dev", "ffmpeg", "postgresql", "wget", "build-essential", "libreadline-dev", "libncursesw5-dev", "libssl-dev", "libsqlite3-dev", "tk-dev", "libgdbm-dev", "libc6-dev", "libbz2-dev", "libffi-dev", "zlib1g-dev"]
+    packages = ["python3-venv", "python3-dev", "ffmpeg", "postgresql", "wget", "build-essential", "libreadline-dev", "libncursesw5-dev", "libssl-dev", "libsqlite3-dev", "tk-dev", "libgdbm-dev", "libc6-dev", "libbz2-dev", "libffi-dev", "zlib1g-dev", "unzip"]
 
     extras.postgresql.repo = "deb https://apt.postgresql.org/pub/repos/apt bullseye-pgdg main 16"
     extras.postgresql.key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"

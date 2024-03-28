@@ -207,6 +207,17 @@ myynh_install_immich() {
 	# Cleanup
 		ynh_secure_remove --file="$tmpdir"
 
+	# Install geonames
+		wget --output-document="$install_dir/resources/cities500.zip" \
+			"https://download.geonames.org/export/dump/cities500.zip" 2>&1
+		unzip "$install_dir/resources/cities500.zip" -d "$install_dir/resources/"
+		ynh_secure_remove --file="$install_dir/resources/cities500.zip"
+		wget --output-document="$install_dir/resources/admin1CodesASCII.txt" \
+			"https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
+		wget --output-document="$install_dir/resources/admin2Codes.txt" \
+			"https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
+		date --iso-8601=seconds | tr -d "\n" > "$install_dir/resources/geodata-date.txt"
+
 	# Fix permissisons
 		chmod 750 "$install_dir"
 		chmod -R o-rwx "$install_dir"
