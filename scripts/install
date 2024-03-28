@@ -6,9 +6,6 @@
 source _common.sh
 source /usr/share/yunohost/helpers
 
-# read -p "Continue [Y] ? " reponse
-# [[ $reponse == "Y" ]] || ynh_die
-
 #=================================================
 # APP "BUILD" (DEPLOYING SOURCES, VENV, COMPILING ETC)
 #=================================================

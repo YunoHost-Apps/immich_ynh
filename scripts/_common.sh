@@ -164,7 +164,7 @@ myynh_install_immich() {
 			ynh_add_config --template="immich-server-start.sh" --destination="$install_dir/app/start.sh"
 			chmod +x "$install_dir/app/start.sh"
 		cd "$install_dir/app/"
-		"$ynh_npm" cache clean --force
+		ynh_exec_warn_less "$ynh_npm" cache clean --force
 
 	# Install immich-machine-learning
 		cd  "$tmpdir/machine-learning"
