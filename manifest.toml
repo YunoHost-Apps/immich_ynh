@@ -1,0 +1,76 @@
+packaging_format = 2
+
+id = "immich"
+name = "Immich"
+description.en = "Photo and video backup solution directly from your mobile phone"
+description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
+
+version = "1.98.2~ynh1"
+
+maintainers = ["ewilly"]
+
+[upstream]
+license = "MIT"
+website = "https://www.immich.app"
+admindoc = "https://github.com/immich-app/immich#getting-started"
+userdoc = "https://github.com/immich-app/immich#getting-started"
+code = "https://github.com/immich-app/immich"
+
+[integration]
+yunohost = ">= 11.2"
+architectures = ["arm64", "amd64"]
+multi_instance = false
+
+ldap = false
+sso = false
+
+disk = "2G"
+ram.build = "800M"
+ram.runtime = "500M"
+
+[install]
+    [install.domain]
+    type = "domain"
+
+    [install.init_main_permission]
+    type = "group"
+    default = "visitors"
+
+[resources]
+    [resources.sources]
+
+        [resources.sources.main]
+        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.98.2.tar.gz"
+        sha256 = "3fd79057b41a235518dde50ce62a2314758329c20360f462f77bba949f35d306"
+
+        autoupdate.strategy = "latest_github_release"
+
+    [resources.ports]
+    main.default = 3001
+    microservices.default = 3002
+    machinelearning.default = 3003
+
+    [resources.system_user]
+
+    [resources.install_dir]
+
+    [resources.data_dir]
+
+    [resources.permissions]
+    main.url = "/"
+    admin.url = "/admin"
+    admin.allowed= "admins"
+    api.url = "/api"
+    api.allowed = "visitors"
+    api.show_tile = false
+    api.protected = true
+
+    [resources.apt]
+    packages = ["python3-venv", "python3-dev", "ffmpeg", "postgresql", "wget", "build-essential", "libreadline-dev", "libncursesw5-dev", "libssl-dev", "libsqlite3-dev", "tk-dev", "libgdbm-dev", "libc6-dev", "libbz2-dev", "libffi-dev", "zlib1g-dev", "unzip"]
+
+    extras.postgresql.repo = "deb https://apt.postgresql.org/pub/repos/apt bullseye-pgdg main 16"
+    extras.postgresql.key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+    extras.postgresql.packages = ["libllvm13", "libpq5", "libpq-dev" , "postgresql-16", "postgresql-16-pgvector", "postgresql-client-16", "postgresql-common", "postgresql-client-common"]
+
+    [resources.database]
+    type = "postgresql"
