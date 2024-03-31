@@ -41,7 +41,7 @@ db_pwd=$(ynh_string_random)
 myynh_create_psql_db
 db_port=$(myynh_execute_psql_as_root --sql="\conninfo" | cut -d'"' -f8)
 ynh_app_setting_set --app="$app" --key=psql_pwd --value="$db_pwd"
-ynh_app_setting_set --app="$app" --key=psql_version --value="$postgresql_version"
+ynh_app_setting_set --app="$app" --key=psql_version --value="$(postgresql_version)"
 ynh_app_setting_set --app="$app" --key=psql_port --value="$db_port"
 
 #=================================================

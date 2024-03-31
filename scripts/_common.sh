@@ -7,18 +7,18 @@
 # NodeJS required version
 nodejs_version=20
 
-# PostgreSQL required version
-postgresql_version=$(
-	ynh_read_manifest --manifest_key="resources.apt.extras.postgresql.packages" \
-	| grep -o 'postgresql-[0-9][0-9]-pgvector' | head -n1 | cut -d'-' -f2
-)
-
 # Fail2ban
 failregex="immich-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
 #=================================================
 # PERSONAL HELPERS
 #=================================================
+
+# PostgreSQL required version
+postgresql_version() {
+	ynh_read_manifest --manifest_key="resources.apt.extras.postgresql.packages" \
+	| grep -o 'postgresql-[0-9][0-9]-pgvector' | head -n1 | cut -d'-' -f2
+}
 
 # Retrieve full latest python version from major version
 # usage: py_latest_from_major --python="3.8"
@@ -230,7 +230,7 @@ myynh_execute_psql_as_root() {
 	fi
 
 	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$postgresql_version/main" "$database" --command="$sql"
+		psql --cluster="$(postgresql_version)/main" "$database" --command="$sql"
 }
 
 # Install the database
@@ -264,7 +264,7 @@ myynh_restore_psql_db() {
 		--replace_string="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --target_file="db.sql"
 
 	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$postgresql_version/main" --dbname="$app" < ./db.sql
+		psql --cluster="$(postgresql_version)/main" --dbname="$app" < ./db.sql
 }
 
 #=================================================
