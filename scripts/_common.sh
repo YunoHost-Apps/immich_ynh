@@ -4,8 +4,6 @@
 # COMMON VARIABLES
 #=================================================
 
-app_version="v$(ynh_app_upstream_version)" # v1.98.2
-
 # NodeJS required version
 nodejs_version=20
 
