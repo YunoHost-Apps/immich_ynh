@@ -1,3 +1,5 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
 packaging_format = 2
 
 id = "immich"
@@ -11,7 +13,7 @@ maintainers = ["ewilly"]
 
 [upstream]
 license = "AGPL-3.0-or-later"
-website = "https://www.immich.app"
+website = "https://immich.app"
 admindoc = "https://github.com/immich-app/immich#getting-started"
 userdoc = "https://github.com/immich-app/immich#getting-started"
 code = "https://github.com/immich-app/immich"
@@ -66,11 +68,32 @@ ram.runtime = "500M"
     api.protected = true
 
     [resources.apt]
-    packages = ["python3-venv", "python3-dev", "ffmpeg", "postgresql", "wget", "build-essential", "libreadline-dev", "libncursesw5-dev", "libssl-dev", "libsqlite3-dev", "tk-dev", "libgdbm-dev", "libc6-dev", "libbz2-dev", "libffi-dev", "zlib1g-dev", "unzip"]
+    packages = [
+        "python3-venv",
+        "python3-dev",
+        "ffmpeg",
+        "postgresql",
+        "wget",
+        "build-essential",
+        "libreadline-dev",
+        "libncursesw5-dev",
+        "libssl-dev",
+        "libsqlite3-dev",
+        "tk-dev",
+        "libgdbm-dev",
+        "libc6-dev",
+        "libbz2-dev",
+        "libffi-dev",
+        "zlib1g-dev",
+        "unzip"
+    ]
 
-    extras.postgresql.repo = "deb https://apt.postgresql.org/pub/repos/apt bullseye-pgdg main 16"
-    extras.postgresql.key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
-    extras.postgresql.packages = ["libllvm13", "libpq5", "libpq-dev" , "postgresql-16", "postgresql-16-pgvector", "postgresql-client-16", "postgresql-common", "postgresql-client-common"]
+    [resources.apt.extras.postgresql]
+    repo = "deb https://apt.postgresql.org/pub/repos/apt bullseye-pgdg main 16"
+    key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+    packages = [
+        "libllvm13", "libpq5", "libpq-dev" , "postgresql-16", "postgresql-16-pgvector", "postgresql-client-16", "postgresql-common", "postgresql-client-common"
+    ]
 
     [resources.database]
     type = "postgresql"
