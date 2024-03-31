@@ -24,8 +24,9 @@ ynh_systemd_action --service_name="$app-machine-learning" --action="stop"
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression --message="Upgrading source files..." --weight=1
-tmpdir="$(mktemp --directory)"
-ynh_setup_source --source_id="main" --dest_dir="$tmpdir"
+
+source_dir="$install_dir/source"
+ynh_setup_source --source_id="main" --dest_dir="$source_dir"
 
 #=================================================
 # CHECK PYTHON VERSION AND COMPILE IF NEEDED

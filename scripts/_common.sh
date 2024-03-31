@@ -124,30 +124,30 @@ myynh_install_immich() {
 	ynh_use_nodejs
 
 	# Install immich-server
-		cd "$tmpdir/server"
+		cd "$source_dir/server"
 		ynh_exec_warn_less "$ynh_npm" ci
 		ynh_exec_warn_less "$ynh_npm" run build
 		ynh_exec_warn_less "$ynh_npm" prune --omit=dev --omit=optional
 
-		cd "$tmpdir/open-api/typescript-sdk"
+		cd "$source_dir/open-api/typescript-sdk"
 		ynh_exec_warn_less "$ynh_npm" ci
 		ynh_exec_warn_less "$ynh_npm" run build
 
-		cd "$tmpdir/web"
+		cd "$source_dir/web"
 		ynh_exec_warn_less "$ynh_npm" ci
 		ynh_exec_warn_less "$ynh_npm" run build
 
 		mkdir -p "$install_dir/app/"
-		cp -a "$tmpdir/server/node_modules" "$install_dir/app/"
-		cp -a "$tmpdir/server/dist" "$install_dir/app/"
-		cp -a "$tmpdir/server/bin" "$install_dir/app/"
-		cp -a "$tmpdir/web/build" "$install_dir/app/www"
-		cp -a "$tmpdir/server/resources" "$install_dir/app/"
-		cp -a "$tmpdir/server/package.json" "$install_dir/app/"
-		cp -a "$tmpdir/server/package-lock.json" "$install_dir/app/"
-		cp -a "$tmpdir/server/start-microservices.sh" "$install_dir/app/"
-		cp -a "$tmpdir/server/start-server.sh" "$install_dir/app/"
-		cp -a "$tmpdir/LICENSE" "$install_dir/app/"
+		cp -a "$source_dir/server/node_modules" "$install_dir/app/"
+		cp -a "$source_dir/server/dist" "$install_dir/app/"
+		cp -a "$source_dir/server/bin" "$install_dir/app/"
+		cp -a "$source_dir/web/build" "$install_dir/app/www"
+		cp -a "$source_dir/server/resources" "$install_dir/app/"
+		cp -a "$source_dir/server/package.json" "$install_dir/app/"
+		cp -a "$source_dir/server/package-lock.json" "$install_dir/app/"
+		cp -a "$source_dir/server/start-microservices.sh" "$install_dir/app/"
+		cp -a "$source_dir/server/start-server.sh" "$install_dir/app/"
+		cp -a "$source_dir/LICENSE" "$install_dir/app/"
 		# Install custom start.sh script
 			ynh_add_config --template="immich-server-start.sh" --destination="$install_dir/app/start.sh"
 			chmod +x "$install_dir/app/start.sh"
@@ -155,7 +155,7 @@ myynh_install_immich() {
 		ynh_exec_warn_less "$ynh_npm" cache clean --force
 
 	# Install immich-machine-learning
-		cd  "$tmpdir/machine-learning"
+		cd  "$source_dir/machine-learning"
 		mkdir -p "$install_dir/app/machine-learning"
 		$py_app_version -m venv "$install_dir/app/machine-learning/venv"
 		(
@@ -170,8 +170,8 @@ myynh_install_immich() {
 			# poetry install
 			ynh_exec_warn_less "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
-		cp -a "$tmpdir/machine-learning/ann" "$install_dir/app/machine-learning/"
- 		cp -a "$tmpdir/machine-learning/app" "$install_dir/app/machine-learning/"
+		cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
+ 		cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
 		# Install custom start.sh script
 			ynh_add_config --template="immich-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
 			chmod +x "$install_dir/app/machine-learning/start.sh"
@@ -191,7 +191,7 @@ myynh_install_immich() {
 		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/microservices/main.js"
 
 	# Cleanup
-		ynh_secure_remove --file="$tmpdir"
+		ynh_secure_remove --file="$source_dir"
 
 	# Install geonames
 		wget --output-document="$install_dir/resources/cities500.zip" \
