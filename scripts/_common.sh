@@ -4,28 +4,16 @@
 # COMMON VARIABLES
 #=================================================
 
-if [[ ${BASH_SOURCE[0]} == "../settings/"* ]]
-then
-	manifest_path="../settings/manifest.toml"
-else
-	manifest_path="../manifest.toml"
-fi
-
-# App version
-## yq is not a dependencie of yunohost package so tomlq command is not available
-## (see https://github.com/YunoHost/yunohost/blob/dev/debian/control)
-app_version=$(cat "$manifest_path" 2>/dev/null \
-				| grep 'version = ' | cut -d '=' -f 2 \
-				| cut -d '~' -f 1 | tr -d ' "') #2024.2.5
-app_version="v$app_version"
+app_version="v$(ynh_app_upstream_version)" # v1.98.2
 
 # NodeJS required version
 nodejs_version=20
 
 # PostgreSQL required version
-postgresql_version=$(cat "$manifest_path" 2>/dev/null \
-						| grep -o 'postgresql-[0-9][0-9]-pgvector' \
-						| head -n1 | cut -d'-' -f2) #16
+postgresql_version=$(
+	ynh_read_manifest --manifest_key="resources.apt.extras.postgresql.packages" \
+	| grep -o 'postgresql-[0-9][0-9]-pgvector' | head -n1 | cut -d'-' -f2
+)
 
 # Fail2ban
 failregex="immich-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
