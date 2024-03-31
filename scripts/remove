@@ -12,32 +12,26 @@ source /usr/share/yunohost/helpers
 ynh_script_progression --message="Removing system configurations related to $app..." --weight=1
 
 # Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status "$app-server" >/dev/null
-then
-	ynh_script_progression --message="Removing $app-server service integration..." --weight=1
+if ynh_exec_warn_less yunohost service status "$app-server" >/dev/null; then
 	yunohost service remove "$app-server"
 fi
-if ynh_exec_warn_less yunohost service status "$app-microservices" >/dev/null
-then
-	ynh_script_progression --message="Removing $app-microservices service integration..." --weight=1
+if ynh_exec_warn_less yunohost service status "$app-microservices" >/dev/null; then
 	yunohost service remove "$app-microservices"
 fi
-if ynh_exec_warn_less yunohost service status "$app-machine-learning" >/dev/null
-then
-	ynh_script_progression --message="Removing $app-machine-learning service integration..." --weight=1
+if ynh_exec_warn_less yunohost service status "$app-machine-learning" >/dev/null; then
 	yunohost service remove "$app-machine-learning"
 fi
+
+# Remove the dedicated systemd config
+ynh_remove_systemd_config --service="immich-server"
+ynh_remove_systemd_config --service="immich-microservices"
+ynh_remove_systemd_config --service="immich-machine-learning"
 
 # Remove the app-specific fail2ban config
 ynh_remove_fail2ban_config
 
 # Remove the app-specific logrotate config
 ynh_remove_logrotate
-
-# Remove the dedicated systemd config
-ynh_remove_systemd_config --service="immich-server"
-ynh_remove_systemd_config --service="immich-microservices"
-ynh_remove_systemd_config --service="immich-machine-learning"
 
 # Remove the dedicated NGINX config
 ynh_remove_nginx_config
