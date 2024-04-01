@@ -24,7 +24,7 @@ Solution d'autohébergement pour a gestion de vos photos et vidéos.
 - Interface conviviale et egronomique ;
 
 
-**Version incluse :** 1.98.2~ynh1
+**Version incluse :** 1.100.0~ynh1
 
 ## Captures d’écran
 
@@ -32,7 +32,7 @@ Solution d'autohébergement pour a gestion de vos photos et vidéos.
 
 ## Documentations et ressources
 
-- Site officiel de l’app : <https://www.immich.app>
+- Site officiel de l’app : <https://immich.app>
 - Documentation officielle utilisateur : <https://github.com/immich-app/immich#getting-started>
 - Documentation officielle de l’admin : <https://github.com/immich-app/immich#getting-started>
 - Dépôt de code officiel de l’app : <https://github.com/immich-app/immich>
