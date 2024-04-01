@@ -32,7 +32,7 @@ ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace=1
 # CHECK PYTHON VERSION AND COMPILE IF NEEDED
 #=================================================
 ynh_script_progression --message="Check Python version & compile the required one if needed..." --weight=1
-py_required_major=$(cat "$tmpdir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
+py_required_major=$(cat "$source_dir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
 myynh_py_latest_from_major --python="$py_required_major"
 myynh_install_python --python="$py_required_version"
 
