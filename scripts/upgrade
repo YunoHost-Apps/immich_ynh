@@ -32,6 +32,7 @@ ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace=1
 # CHECK PYTHON VERSION AND COMPILE IF NEEDED
 #=================================================
 ynh_script_progression --message="Check Python version & compile the required one if needed..." --weight=1
+
 py_required_major=$(cat "$source_dir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
 myynh_py_latest_from_major --python="$py_required_major"
 myynh_install_python --python="$py_required_version"
@@ -40,13 +41,14 @@ myynh_install_python --python="$py_required_version"
 # INSTALL NODEJS
 #=================================================
 ynh_script_progression --message="Installing nodejs..." --weight=1
+
 ynh_exec_warn_less ynh_install_nodejs --nodejs_version="$nodejs_version"
 
 #=================================================
 # MAKE INSTALL
 #=================================================
 ynh_script_progression --message="Making install..." --weight=5
-ynh_secure_remove --file="$install_dir"
+
 myynh_install_immich
 
 #=================================================
