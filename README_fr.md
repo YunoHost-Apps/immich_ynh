@@ -32,7 +32,7 @@ Solution d'autohébergement pour a gestion de vos photos et vidéos.
 
 ## Documentations et ressources
 
-- Site officiel de l’app : <https://www.immich.app>
+- Site officiel de l’app : <https://immich.app>
 - Documentation officielle utilisateur : <https://github.com/immich-app/immich#getting-started>
 - Documentation officielle de l’admin : <https://github.com/immich-app/immich#getting-started>
 - Dépôt de code officiel de l’app : <https://github.com/immich-app/immich>
