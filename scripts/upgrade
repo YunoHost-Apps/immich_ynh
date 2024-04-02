@@ -27,9 +27,9 @@ ynh_script_progression --message="Upgrading source files..." --weight=1
 
 source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace=1
-ynh_setup_source --source_id="geonames_cities" --dest_dir="$source_dir/resources/" --full_replace=1
-ynh_setup_source --source_id="geonames_divisions" --dest_dir="$source_dir/resources/" --full_replace=1
-ynh_setup_source --source_id="geonames_subdivisions" --dest_dir="$source_dir/resources/" --full_replace=1
+ynh_setup_source --source_id="geonames_cities" --dest_dir="$source_dir/geonames_cities/" --full_replace=1
+ynh_setup_source --source_id="geonames_divisions" --dest_dir="$source_dir/geonames_divisions/" --full_replace=1
+ynh_setup_source --source_id="geonames_subdivisions" --dest_dir="$source_dir/geonames_subdivisions/" --full_replace=1
 
 #=================================================
 # CHECK PYTHON VERSION AND COMPILE IF NEEDED

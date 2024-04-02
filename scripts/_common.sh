@@ -188,10 +188,12 @@ myynh_install_immich() {
 		ynh_exec_warn_less "$ynh_npm" install sharp
 
 	# Use 127.0.0.1 for microservices
-		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/microservices/main.js"
+		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/main.js"
 
 	# Install geonames
-		cp -a "$source_dir/resources/*.txt" "$install_dir/resources/"
+		cp -a "$source_dir/geonames_cities/cities500.txt" "$install_dir/resources/"
+		cp -a "$source_dir/geonames_divisions/admin1CodesASCII.txt" "$install_dir/resources/"
+		cp -a "$source_dir/geonames_subdivisions/admin2Codes.txt" "$install_dir/resources/"
 		date --iso-8601=seconds | tr -d "\n" > "$install_dir/resources/geodata-date.txt"
 
 	# Cleanup

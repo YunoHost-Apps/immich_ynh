@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.98.2~ynh1"
+version = "1.100.0~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -42,8 +42,8 @@ ram.runtime = "500M"
     [resources.sources]
 
         [resources.sources.main]
-        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.98.2.tar.gz"
-        sha256 = "3fd79057b41a235518dde50ce62a2314758329c20360f462f77bba949f35d306"
+        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.100.0.tar.gz"
+        sha256 = "13f00122d97f75293d4b1ac3385d40ebf07278f3b14ac2c7898138d9cf446fbb"
 
         autoupdate.strategy = "latest_github_release"
 
@@ -55,10 +55,12 @@ ram.runtime = "500M"
         [resources.sources.geonames_divisions]
         url = "https://download.geonames.org/export/dump/admin1CodesASCII.txt"
         sha256 = "6eace8b269cd4c9635d8f8631857c0be2cb3fb6362495f77f17f266ef7328f11"
+        rename = "admin1CodesASCII.txt"
 
         [resources.sources.geonames_subdivisions]
         url = "https://download.geonames.org/export/dump/admin2Codes.txt"
         sha256 = "defbd99329530fa6b06e154662fb16a51a0c12caf41636be17597c58c5374f1c"
+        rename = "admin2Codes.txt"
 
     [resources.ports]
     main.default = 3001
