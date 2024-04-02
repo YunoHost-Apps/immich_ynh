@@ -160,6 +160,7 @@ myynh_install_immich() {
 		chmod 750 "$install_dir/app/machine-learning"
 		chmod -R o-rwx "$install_dir/app/machine-learning"
 		chown -R $app:$app "$install_dir/app/machine-learning"
+
 		ynh_exec_as $app $py_app_version -m venv "$install_dir/app/machine-learning/venv"
 		(
 			# activate the virtual environment
@@ -168,7 +169,7 @@ myynh_install_immich() {
 			set -o nounset
 
 			# add pip
-			ynh_exec_as $app "$install_dir/bin/python3" -m ensurepip
+			ynh_exec_as $app "$install_dir/app/machine-learning/venv/bin/python3" -m ensurepip
 
 			# add poetry
 			ynh_exec_warn_less ynh_exec_as $app "$install_dir/app/machine-learning/venv/bin/pip3" install --upgrade poetry
