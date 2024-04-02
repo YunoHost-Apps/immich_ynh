@@ -32,7 +32,7 @@ Self-hosted photo and video management solution.
 
 ## Documentación e recursos
 
-- Web oficial da app: <https://www.immich.app>
+- Web oficial da app: <https://immich.app>
 - Documentación oficial para usuarias: <https://github.com/immich-app/immich#getting-started>
 - Documentación oficial para admin: <https://github.com/immich-app/immich#getting-started>
 - Repositorio de orixe do código: <https://github.com/immich-app/immich>
