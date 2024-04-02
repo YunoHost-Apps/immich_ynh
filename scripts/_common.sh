@@ -157,18 +157,24 @@ myynh_install_immich() {
 	# Install immich-machine-learning
 		cd  "$source_dir/machine-learning"
 		mkdir -p "$install_dir/app/machine-learning"
-		$py_app_version -m venv "$install_dir/app/machine-learning/venv"
+		chmod 750 "$install_dir/app/machine-learning"
+		chmod -R o-rwx "$install_dir/app/machine-learning"
+		chown -R $app:$app "$install_dir/app/machine-learning"
+		ynh_exec_as $app $py_app_version -m venv "$install_dir/app/machine-learning/venv"
 		(
 			# activate the virtual environment
 			set +o nounset
 			source "$install_dir/app/machine-learning/venv/bin/activate"
 			set -o nounset
 
+			# add pip
+			ynh_exec_as $app "$install_dir/bin/python3" -m ensurepip
+
 			# add poetry
-			ynh_exec_warn_less "$install_dir/app/machine-learning/venv/bin/pip3" install --upgrade poetry
+			ynh_exec_warn_less ynh_exec_as $app "$install_dir/app/machine-learning/venv/bin/pip3" install --upgrade poetry
 
 			# poetry install
-			ynh_exec_warn_less "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
+			ynh_exec_warn_less ynh_exec_as $app "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
 		cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
  		cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
