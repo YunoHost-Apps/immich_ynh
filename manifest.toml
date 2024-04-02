@@ -50,6 +50,7 @@ ram.runtime = "500M"
         [resources.sources.geonames_cities]
         url = "https://download.geonames.org/export/dump/cities500.zip"
         sha256 = "6f11390524953d068439b0a55dab36f5bf86f4e5615da4ac00d724c1d167f847"
+        in_subdir = false
 
         [resources.sources.geonames_divisions]
         url = "https://download.geonames.org/export/dump/admin1CodesASCII.txt"
