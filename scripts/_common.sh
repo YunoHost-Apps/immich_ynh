@@ -240,9 +240,6 @@ myynh_create_psql_db() {
 	myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 	myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
-
-	myynh_execute_psql_as_root --sql="INSERT INTO system_config (key, value) VALUES ('newVersionCheck.enabled', false);" --database="$app"
-	myynh_execute_psql_as_root --sql="INSERT INTO system_config (key, value) VALUES ('machineLearning.url', '127.0.0.1:$port_machinelearning');" --database="$app"
 }
 
 # Remove the database
