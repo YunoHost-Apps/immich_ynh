@@ -47,6 +47,18 @@ ram.runtime = "500M"
 
         autoupdate.strategy = "latest_github_release"
 
+        [resources.sources.geonames_cities]
+        url = "https://download.geonames.org/export/dump/cities500.zip"
+        sha256 = "6f11390524953d068439b0a55dab36f5bf86f4e5615da4ac00d724c1d167f847"
+
+        [resources.sources.geonames_divisions]
+        url = "https://download.geonames.org/export/dump/admin1CodesASCII.txt"
+        sha256 = "6eace8b269cd4c9635d8f8631857c0be2cb3fb6362495f77f17f266ef7328f11"
+
+        [resources.sources.geonames_subdivisions]
+        url = "https://download.geonames.org/export/dump/admin2Codes.txt"
+        sha256 = "defbd99329530fa6b06e154662fb16a51a0c12caf41636be17597c58c5374f1c"
+
     [resources.ports]
     main.default = 3001
     microservices.default = 3002

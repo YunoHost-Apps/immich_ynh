@@ -190,19 +190,12 @@ myynh_install_immich() {
 	# Use 127.0.0.1 for microservices
 		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/microservices/main.js"
 
+	# Install geonames
+		cp -a "$source_dir/resources/*.txt" "$install_dir/resources/"
+		date --iso-8601=seconds | tr -d "\n" > "$install_dir/resources/geodata-date.txt"
+
 	# Cleanup
 		ynh_secure_remove --file="$source_dir"
-
-	# Install geonames
-		wget --output-document="$install_dir/resources/cities500.zip" \
-			"https://download.geonames.org/export/dump/cities500.zip" 2>&1
-		unzip "$install_dir/resources/cities500.zip" -d "$install_dir/resources/"
-		ynh_secure_remove --file="$install_dir/resources/cities500.zip"
-		wget --output-document="$install_dir/resources/admin1CodesASCII.txt" \
-			"https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
-		wget --output-document="$install_dir/resources/admin2Codes.txt" \
-			"https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
-		date --iso-8601=seconds | tr -d "\n" > "$install_dir/resources/geodata-date.txt"
 
 	# Fix permissisons
 		chmod 750 "$install_dir"
