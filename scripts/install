@@ -15,9 +15,6 @@ ynh_script_progression --message="Setting up source files..." --weight=1
 
 source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir"
-ynh_setup_source --source_id="geonames_cities" --dest_dir="$source_dir/geonames_cities/"
-ynh_setup_source --source_id="geonames_divisions" --dest_dir="$source_dir/geonames_divisions/"
-ynh_setup_source --source_id="geonames_subdivisions" --dest_dir="$source_dir/geonames_subdivisions/"
 
 #=================================================
 # CHECK PYTHON VERSION AND COMPILE IF NEEDED
