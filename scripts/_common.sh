@@ -155,7 +155,7 @@ myynh_install_immich() {
 		ynh_exec_warn_less "$ynh_npm" cache clean --force
 
 	# Install immich-machine-learning
-		cd  "$source_dir/machine-learning"
+		cd "$source_dir/machine-learning"
 		mkdir -p "$install_dir/app/machine-learning"
 		$py_app_version -m venv "$install_dir/app/machine-learning/venv"
 		(
@@ -191,9 +191,15 @@ myynh_install_immich() {
 		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/main.js"
 
 	# Install geonames
-		cp -a "$source_dir/geonames_cities/cities500.txt" "$install_dir/resources/"
-		cp -a "$source_dir/geonames_divisions/admin1CodesASCII.txt" "$install_dir/resources/"
-		cp -a "$source_dir/geonames_subdivisions/admin2Codes.txt" "$install_dir/resources/"
+		mkdir -p "$source_dir/geonames"
+		cd "$source_dir/geonames"
+		curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
+		curl -LO "https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
+		curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
+		unzip "cities500.zip"
+		cp -a "$source_dir/geonames/cities500.txt" "$install_dir/resources/"
+		cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$install_dir/resources/"
+		cp -a "$source_dir/geonames/admin2Codes.txt" "$install_dir/resources/"
 		date --iso-8601=seconds | tr -d "\n" > "$install_dir/resources/geodata-date.txt"
 
 	# Cleanup

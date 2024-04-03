@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.100.0~ynh1"
+version = "1.100.0~ynh2"
 
 maintainers = ["ewilly"]
 
@@ -46,21 +46,6 @@ ram.runtime = "500M"
         sha256 = "13f00122d97f75293d4b1ac3385d40ebf07278f3b14ac2c7898138d9cf446fbb"
 
         autoupdate.strategy = "latest_github_release"
-
-        [resources.sources.geonames_cities]
-        url = "https://download.geonames.org/export/dump/cities500.zip"
-        sha256 = "afec3356a980771f20c5e96f4a877d33c97fcc331dfc6b02d6bf8a492ec43828"
-        in_subdir = false
-
-        [resources.sources.geonames_divisions]
-        url = "https://download.geonames.org/export/dump/admin1CodesASCII.txt"
-        sha256 = "6eace8b269cd4c9635d8f8631857c0be2cb3fb6362495f77f17f266ef7328f11"
-        rename = "admin1CodesASCII.txt"
-
-        [resources.sources.geonames_subdivisions]
-        url = "https://download.geonames.org/export/dump/admin2Codes.txt"
-        sha256 = "defbd99329530fa6b06e154662fb16a51a0c12caf41636be17597c58c5374f1c"
-        rename = "admin2Codes.txt"
 
     [resources.ports]
     main.default = 3001
