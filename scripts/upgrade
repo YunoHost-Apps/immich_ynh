@@ -7,11 +7,6 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# CHECK VERSION
-#=================================================
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..." --weight=1
@@ -26,38 +21,38 @@ ynh_systemd_action --service_name="$app-machine-learning" --action="stop"
 #ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 #=================================================
-# APP "BUILD" (DEPLOYING SOURCES, VENV, COMPILING ETC)
+# DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-if [ "$upgrade_type" == "UPGRADE_APP" ]
-then
-	#=================================================
-	# DOWNLOAD, CHECK AND UNPACK SOURCE
-	#=================================================
-	ynh_script_progression --message="Upgrading source files..." --weight=1
-		tmpdir="$(mktemp --directory)"
-		ynh_setup_source --source_id="main" --dest_dir="$tmpdir"
+ynh_script_progression --message="Upgrading source files..." --weight=1
 
-	#=================================================
-	# CHECK PYTHON VERSION AND COMPILE IF NEEDED
-	#=================================================
-	ynh_script_progression --message="Check Python version & compile the required one if needed..." --weight=1
-		py_required_major=$(cat "$tmpdir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
-		myynh_py_latest_from_major --python="$py_required_major"
-		myynh_install_python --python="$py_required_version"
+source_dir="$install_dir/source"
+ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace=1
+ynh_setup_source --source_id="geonames_cities" --dest_dir="$source_dir/geonames_cities/" --full_replace=1
+ynh_setup_source --source_id="geonames_divisions" --dest_dir="$source_dir/geonames_divisions/" --full_replace=1
+ynh_setup_source --source_id="geonames_subdivisions" --dest_dir="$source_dir/geonames_subdivisions/" --full_replace=1
 
-	#=================================================
-	# INSTALL NODEJS
-	#=================================================
-	ynh_script_progression --message="Installing nodejs..." --weight=1
-		ynh_exec_warn_less ynh_install_nodejs --nodejs_version="$nodejs_version"
+#=================================================
+# CHECK PYTHON VERSION AND COMPILE IF NEEDED
+#=================================================
+ynh_script_progression --message="Check Python version & compile the required one if needed..." --weight=1
 
-	#=================================================
-	# MAKE INSTALL
-	#=================================================
-	ynh_script_progression --message="Making install..." --weight=5
-		ynh_secure_remove --file="$install_dir"
-		myynh_install_immich
-fi
+py_required_major=$(cat "$source_dir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
+myynh_py_latest_from_major --python="$py_required_major"
+myynh_install_python --python="$py_required_version"
+
+#=================================================
+# INSTALL NODEJS
+#=================================================
+ynh_script_progression --message="Installing nodejs..." --weight=1
+
+ynh_exec_warn_less ynh_install_nodejs --nodejs_version="$nodejs_version"
+
+#=================================================
+# MAKE INSTALL
+#=================================================
+ynh_script_progression --message="Making install..." --weight=5
+
+myynh_install_immich
 
 #=================================================
 # UPDATE A CONFIG FILE

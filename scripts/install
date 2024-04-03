@@ -13,15 +13,18 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression --message="Setting up source files..." --weight=1
 
-tmpdir="$(mktemp --directory)"
-ynh_setup_source --source_id="main" --dest_dir="$tmpdir"
+source_dir="$install_dir/source"
+ynh_setup_source --source_id="main" --dest_dir="$source_dir"
+ynh_setup_source --source_id="geonames_cities" --dest_dir="$source_dir/geonames_cities/"
+ynh_setup_source --source_id="geonames_divisions" --dest_dir="$source_dir/geonames_divisions/"
+ynh_setup_source --source_id="geonames_subdivisions" --dest_dir="$source_dir/geonames_subdivisions/"
 
 #=================================================
 # CHECK PYTHON VERSION AND COMPILE IF NEEDED
 #=================================================
 ynh_script_progression --message="Check Python version & compile the required one if needed..." --weight=1
 
-py_required_major=$(cat "$tmpdir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
+py_required_major=$(cat "$source_dir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
 myynh_py_latest_from_major --python="$py_required_major"
 myynh_install_python --python="$py_required_version"
 
@@ -41,7 +44,7 @@ db_pwd=$(ynh_string_random)
 myynh_create_psql_db
 db_port=$(myynh_execute_psql_as_root --sql="\conninfo" | cut -d'"' -f8)
 ynh_app_setting_set --app="$app" --key=psql_pwd --value="$db_pwd"
-ynh_app_setting_set --app="$app" --key=psql_version --value="$postgresql_version"
+ynh_app_setting_set --app="$app" --key=psql_version --value="$(postgresql_version)"
 ynh_app_setting_set --app="$app" --key=psql_port --value="$db_port"
 
 #=================================================

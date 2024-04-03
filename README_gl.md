@@ -24,7 +24,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Versión proporcionada:** 1.98.2~ynh1
+**Versión proporcionada:** 1.100.0~ynh1
 
 ## Capturas de pantalla
 
@@ -32,7 +32,7 @@ Self-hosted photo and video management solution.
 
 ## Documentación e recursos
 
-- Web oficial da app: <https://www.immich.app>
+- Web oficial da app: <https://immich.app>
 - Documentación oficial para usuarias: <https://github.com/immich-app/immich#getting-started>
 - Documentación oficial para admin: <https://github.com/immich-app/immich#getting-started>
 - Repositorio de orixe do código: <https://github.com/immich-app/immich>

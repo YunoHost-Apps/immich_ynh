@@ -4,28 +4,8 @@
 # COMMON VARIABLES
 #=================================================
 
-if [[ ${BASH_SOURCE[0]} == "../settings/"* ]]
-then
-	manifest_path="../settings/manifest.toml"
-else
-	manifest_path="../manifest.toml"
-fi
-
-# App version
-## yq is not a dependencie of yunohost package so tomlq command is not available
-## (see https://github.com/YunoHost/yunohost/blob/dev/debian/control)
-app_version=$(cat "$manifest_path" 2>/dev/null \
-				| grep 'version = ' | cut -d '=' -f 2 \
-				| cut -d '~' -f 1 | tr -d ' "') #2024.2.5
-app_version="v$app_version"
-
 # NodeJS required version
 nodejs_version=20
-
-# PostgreSQL required version
-postgresql_version=$(cat "$manifest_path" 2>/dev/null \
-						| grep -o 'postgresql-[0-9][0-9]-pgvector' \
-						| head -n1 | cut -d'-' -f2) #16
 
 # Fail2ban
 failregex="immich-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
@@ -33,6 +13,12 @@ failregex="immich-server.*Failed login attempt for user.+from ip address\s?<ADDR
 #=================================================
 # PERSONAL HELPERS
 #=================================================
+
+# PostgreSQL required version
+postgresql_version() {
+	ynh_read_manifest --manifest_key="resources.apt.extras.postgresql.packages" \
+	| grep -o 'postgresql-[0-9][0-9]-pgvector' | head -n1 | cut -d'-' -f2
+}
 
 # Retrieve full latest python version from major version
 # usage: py_latest_from_major --python="3.8"
@@ -138,30 +124,30 @@ myynh_install_immich() {
 	ynh_use_nodejs
 
 	# Install immich-server
-		cd "$tmpdir/server"
+		cd "$source_dir/server"
 		ynh_exec_warn_less "$ynh_npm" ci
 		ynh_exec_warn_less "$ynh_npm" run build
 		ynh_exec_warn_less "$ynh_npm" prune --omit=dev --omit=optional
 
-		cd "$tmpdir/open-api/typescript-sdk"
+		cd "$source_dir/open-api/typescript-sdk"
 		ynh_exec_warn_less "$ynh_npm" ci
 		ynh_exec_warn_less "$ynh_npm" run build
 
-		cd "$tmpdir/web"
+		cd "$source_dir/web"
 		ynh_exec_warn_less "$ynh_npm" ci
 		ynh_exec_warn_less "$ynh_npm" run build
 
 		mkdir -p "$install_dir/app/"
-		cp -a "$tmpdir/server/node_modules" "$install_dir/app/"
-		cp -a "$tmpdir/server/dist" "$install_dir/app/"
-		cp -a "$tmpdir/server/bin" "$install_dir/app/"
-		cp -a "$tmpdir/web/build" "$install_dir/app/www"
-		cp -a "$tmpdir/server/resources" "$install_dir/app/"
-		cp -a "$tmpdir/server/package.json" "$install_dir/app/"
-		cp -a "$tmpdir/server/package-lock.json" "$install_dir/app/"
-		cp -a "$tmpdir/server/start-microservices.sh" "$install_dir/app/"
-		cp -a "$tmpdir/server/start-server.sh" "$install_dir/app/"
-		cp -a "$tmpdir/LICENSE" "$install_dir/app/"
+		cp -a "$source_dir/server/node_modules" "$install_dir/app/"
+		cp -a "$source_dir/server/dist" "$install_dir/app/"
+		cp -a "$source_dir/server/bin" "$install_dir/app/"
+		cp -a "$source_dir/web/build" "$install_dir/app/www"
+		cp -a "$source_dir/server/resources" "$install_dir/app/"
+		cp -a "$source_dir/server/package.json" "$install_dir/app/"
+		cp -a "$source_dir/server/package-lock.json" "$install_dir/app/"
+		cp -a "$source_dir/server/start-microservices.sh" "$install_dir/app/"
+		cp -a "$source_dir/server/start-server.sh" "$install_dir/app/"
+		cp -a "$source_dir/LICENSE" "$install_dir/app/"
 		# Install custom start.sh script
 			ynh_add_config --template="immich-server-start.sh" --destination="$install_dir/app/start.sh"
 			chmod +x "$install_dir/app/start.sh"
@@ -169,7 +155,7 @@ myynh_install_immich() {
 		ynh_exec_warn_less "$ynh_npm" cache clean --force
 
 	# Install immich-machine-learning
-		cd  "$tmpdir/machine-learning"
+		cd  "$source_dir/machine-learning"
 		mkdir -p "$install_dir/app/machine-learning"
 		$py_app_version -m venv "$install_dir/app/machine-learning/venv"
 		(
@@ -184,8 +170,8 @@ myynh_install_immich() {
 			# poetry install
 			ynh_exec_warn_less "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
-		cp -a "$tmpdir/machine-learning/ann" "$install_dir/app/machine-learning/"
- 		cp -a "$tmpdir/machine-learning/app" "$install_dir/app/machine-learning/"
+		cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
+ 		cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
 		# Install custom start.sh script
 			ynh_add_config --template="immich-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
 			chmod +x "$install_dir/app/machine-learning/start.sh"
@@ -202,21 +188,16 @@ myynh_install_immich() {
 		ynh_exec_warn_less "$ynh_npm" install sharp
 
 	# Use 127.0.0.1 for microservices
-		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/microservices/main.js"
-
-	# Cleanup
-		ynh_secure_remove --file="$tmpdir"
+		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/main.js"
 
 	# Install geonames
-		wget --output-document="$install_dir/resources/cities500.zip" \
-			"https://download.geonames.org/export/dump/cities500.zip" 2>&1
-		unzip "$install_dir/resources/cities500.zip" -d "$install_dir/resources/"
-		ynh_secure_remove --file="$install_dir/resources/cities500.zip"
-		wget --output-document="$install_dir/resources/admin1CodesASCII.txt" \
-			"https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
-		wget --output-document="$install_dir/resources/admin2Codes.txt" \
-			"https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
+		cp -a "$source_dir/geonames_cities/cities500.txt" "$install_dir/resources/"
+		cp -a "$source_dir/geonames_divisions/admin1CodesASCII.txt" "$install_dir/resources/"
+		cp -a "$source_dir/geonames_subdivisions/admin2Codes.txt" "$install_dir/resources/"
 		date --iso-8601=seconds | tr -d "\n" > "$install_dir/resources/geodata-date.txt"
+
+	# Cleanup
+		ynh_secure_remove --file="$source_dir"
 
 	# Fix permissisons
 		chmod 750 "$install_dir"
@@ -244,7 +225,7 @@ myynh_execute_psql_as_root() {
 	fi
 
 	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$postgresql_version/main" "$database" --command="$sql"
+		psql --cluster="$(postgresql_version)/main" "$database" --command="$sql"
 }
 
 # Install the database
@@ -278,7 +259,7 @@ myynh_restore_psql_db() {
 		--replace_string="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --target_file="db.sql"
 
 	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$postgresql_version/main" --dbname="$app" < ./db.sql
+		psql --cluster="$(postgresql_version)/main" --dbname="$app" < ./db.sql
 }
 
 #=================================================

@@ -1,3 +1,5 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
 packaging_format = 2
 
 id = "immich"
@@ -5,13 +7,13 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.98.2~ynh1"
+version = "1.100.0~ynh1"
 
 maintainers = ["ewilly"]
 
 [upstream]
 license = "AGPL-3.0-or-later"
-website = "https://www.immich.app"
+website = "https://immich.app"
 admindoc = "https://github.com/immich-app/immich#getting-started"
 userdoc = "https://github.com/immich-app/immich#getting-started"
 code = "https://github.com/immich-app/immich"
@@ -40,10 +42,25 @@ ram.runtime = "500M"
     [resources.sources]
 
         [resources.sources.main]
-        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.98.2.tar.gz"
-        sha256 = "3fd79057b41a235518dde50ce62a2314758329c20360f462f77bba949f35d306"
+        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.100.0.tar.gz"
+        sha256 = "13f00122d97f75293d4b1ac3385d40ebf07278f3b14ac2c7898138d9cf446fbb"
 
         autoupdate.strategy = "latest_github_release"
+
+        [resources.sources.geonames_cities]
+        url = "https://download.geonames.org/export/dump/cities500.zip"
+        sha256 = "6f11390524953d068439b0a55dab36f5bf86f4e5615da4ac00d724c1d167f847"
+        in_subdir = false
+
+        [resources.sources.geonames_divisions]
+        url = "https://download.geonames.org/export/dump/admin1CodesASCII.txt"
+        sha256 = "6eace8b269cd4c9635d8f8631857c0be2cb3fb6362495f77f17f266ef7328f11"
+        rename = "admin1CodesASCII.txt"
+
+        [resources.sources.geonames_subdivisions]
+        url = "https://download.geonames.org/export/dump/admin2Codes.txt"
+        sha256 = "defbd99329530fa6b06e154662fb16a51a0c12caf41636be17597c58c5374f1c"
+        rename = "admin2Codes.txt"
 
     [resources.ports]
     main.default = 3001
@@ -66,11 +83,32 @@ ram.runtime = "500M"
     api.protected = true
 
     [resources.apt]
-    packages = ["python3-venv", "python3-dev", "ffmpeg", "postgresql", "wget", "build-essential", "libreadline-dev", "libncursesw5-dev", "libssl-dev", "libsqlite3-dev", "tk-dev", "libgdbm-dev", "libc6-dev", "libbz2-dev", "libffi-dev", "zlib1g-dev", "unzip"]
+    packages = [
+        "python3-venv",
+        "python3-dev",
+        "ffmpeg",
+        "postgresql",
+        "wget",
+        "build-essential",
+        "libreadline-dev",
+        "libncursesw5-dev",
+        "libssl-dev",
+        "libsqlite3-dev",
+        "tk-dev",
+        "libgdbm-dev",
+        "libc6-dev",
+        "libbz2-dev",
+        "libffi-dev",
+        "zlib1g-dev",
+        "unzip"
+    ]
 
-    extras.postgresql.repo = "deb https://apt.postgresql.org/pub/repos/apt bullseye-pgdg main 16"
-    extras.postgresql.key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
-    extras.postgresql.packages = ["libllvm13", "libpq5", "libpq-dev" , "postgresql-16", "postgresql-16-pgvector", "postgresql-client-16", "postgresql-common", "postgresql-client-common"]
+    [resources.apt.extras.postgresql]
+    repo = "deb https://apt.postgresql.org/pub/repos/apt bullseye-pgdg main 16"
+    key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+    packages = [
+        "libllvm13", "libpq5", "libpq-dev" , "postgresql-16", "postgresql-16-pgvector", "postgresql-client-16", "postgresql-common", "postgresql-client-common"
+    ]
 
     [resources.database]
     type = "postgresql"
