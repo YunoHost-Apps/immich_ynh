@@ -25,6 +25,7 @@ ynh_systemd_action --service_name="$app-machine-learning" --action="stop"
 #=================================================
 ynh_script_progression --message="Upgrading source files..." --weight=1
 
+ynh_secure_remove --file="$install_dir"
 source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace=1
 
