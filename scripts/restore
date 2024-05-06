@@ -70,6 +70,9 @@ yunohost service add "$app-server" --description="Immich Server" --log="/var/log
 yunohost service add "$app-microservices" --description="Immich Microservices" --log="/var/log/$app/$app-microservices.log"
 yunohost service add "$app-machine-learning" --description="Immich Machine Learning" --log="/var/log/$app/$app-machine-learning.log"
 
+ynh_multimedia_build_main_dir
+ynh_multimedia_addaccess --user_name=$app
+
 ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 
 ynh_restore_file --origin_path="/etc/fail2ban/jail.d/$app.conf"

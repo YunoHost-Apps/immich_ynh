@@ -78,6 +78,9 @@ yunohost service add "$app-microservices" --description="Immich Microservices" -
 yunohost service add "$app-machine-learning" --description="Immich Machine Learning" --log="/var/log/$app/$app-machine-learning.log"
 yunohost service add "$app-server" --description="Immich Server" --log="/var/log/$app/$app-server.log"
 
+ynh_multimedia_build_main_dir
+ynh_multimedia_addaccess --user_name=$app
+
 ynh_use_logrotate --non-append
 
 ynh_add_fail2ban_config --logpath="/var/log/$app/$app-server.log" --failregex="$failregex"
