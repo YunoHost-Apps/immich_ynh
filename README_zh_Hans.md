@@ -3,7 +3,7 @@
 请勿手动编辑。
 -->
 
-# YunoHost 的 Immich
+# YunoHost 上的 Immich
 
 [![集成程度](https://dash.yunohost.org/integration/immich.svg)](https://dash.yunohost.org/appci/app/immich) ![工作状态](https://ci-apps.yunohost.org/ci/badges/immich.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/immich.maintain.svg)
 
@@ -29,6 +29,13 @@ Self-hosted photo and video management solution.
 ## 截图
 
 ![Immich 的截图](./doc/screenshots/immich-screenshots.png)
+
+## 免责声明 / 重要信息
+
+## Disclaimer
+
+This package provides support for the JPEG, PNG, WebP, AVIF (limited to 8-bit depth), TIFF, GIF and SVG (input) image formats.
+HEIC/HEIF file format is not supported (see cf. https://github.com/YunoHost-Apps/immich_ynh/issues/40#issuecomment-2096788600).
 
 ## 文档与资源
 
