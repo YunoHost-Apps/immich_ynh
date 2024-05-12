@@ -24,16 +24,11 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Shipped version:** 1.103.1~ynh2
+**Shipped version:** 1.103.1~ynh3
 
 ## Screenshots
 
 ![Screenshot of Immich](./doc/screenshots/immich-screenshots.png)
-
-## Disclaimers / important information
-
-This package provides support for the JPEG, PNG, WebP, AVIF (limited to 8-bit depth), TIFF, GIF and SVG (input) image formats.
-HEIC/HEIF file format is not supported (see cf. https://github.com/YunoHost-Apps/immich_ynh/issues/40#issuecomment-2096788600).
 
 ## Documentation and resources
 
