@@ -24,11 +24,15 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Paketatutako bertsioa:** 1.105.1~ynh1
+**Paketatutako bertsioa:** 1.106.4~ynh1
 
 ## Pantaila-argazkiak
 
 ![Immich(r)en pantaila-argazkia](./doc/screenshots/immich-screenshots.png)
+
+## :red_circle: Ezaugarri zalantzagarriak
+
+- **Alfa softwarea**: Garapenaren hasierako fasean dago. Ezaugarri aldakor edo ezegonkorrak, erroreak eta segurtasun-arazoak izan ditzazke.
 
 ## Dokumentazioa eta baliabideak
 

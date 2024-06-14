@@ -24,11 +24,15 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Versión proporcionada:** 1.105.1~ynh1
+**Versión proporcionada:** 1.106.4~ynh1
 
 ## Capturas de pantalla
 
 ![Captura de pantalla de Immich](./doc/screenshots/immich-screenshots.png)
+
+## :red_circle: Debes considerar
+
+- **Alpha software**: Early development stage. May contain changing or unstable features, bugs, and security vulnerability.
 
 ## Documentación e recursos
 

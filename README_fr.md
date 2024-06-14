@@ -24,11 +24,15 @@ Solution d'autohébergement pour a gestion de vos photos et vidéos.
 - Interface conviviale et egronomique ;
 
 
-**Version incluse :** 1.105.1~ynh1
+**Version incluse :** 1.106.4~ynh1
 
 ## Captures d’écran
 
 ![Capture d’écran de Immich](./doc/screenshots/immich-screenshots.png)
+
+## :red_circle: Anti-fonctionnalités
+
+- **Logiciel en version alpha **: Le logiciel est au tout début de son développement. Il pourrait contenir des fonctionnalités changeantes ou instables, des bugs, et des failles de sécurité.
 
 ## Documentations et ressources
 
