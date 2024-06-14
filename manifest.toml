@@ -49,7 +49,6 @@ ram.runtime = "500M"
 
     [resources.ports]
     main.default = 3001
-    microservices.default = 3002
     machinelearning.default = 3003
 
     [resources.system_user]
