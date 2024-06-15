@@ -1,11 +1,11 @@
 [Unit]
-Description=Immich server
+Description=Immich microservices
 Documentation=https://github.com/immich-app/immich
 Requires=redis-server.service
 Requires=postgresql.service
-Requires=immich-machine-learning.service
-Requires=immich-microservices.service
 After=network.target
+PartOf=immich-server.service
+Before=immich-server.service
 
 [Service]
 Type=simple
@@ -15,8 +15,8 @@ Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/app
 Environment="__YNH_NODE_LOAD_PATH__"
 EnvironmentFile=__INSTALL_DIR__/env-server
-ExecStart=__YNH_NODE__ __INSTALL_DIR__/app/dist/main __APP__
-StandardOutput=append:/var/log/__APP__/__APP__-server.log
+ExecStart=__YNH_NODE__ __INSTALL_DIR__/app/dist/main microservices
+StandardOutput=append:/var/log/__APP__/__APP__-microservices.log
 StandardError=inherit
 Restart=on-failure
 
@@ -51,4 +51,4 @@ CapabilityBoundingSet=~CAP_NET_ADMIN CAP_NET_BROADCAST CAP_NET_RAW
 CapabilityBoundingSet=~CAP_SYS_ADMIN CAP_SYS_PTRACE CAP_SYSLOG
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=immich-server.service

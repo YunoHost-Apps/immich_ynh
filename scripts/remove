@@ -15,12 +15,16 @@ ynh_script_progression --message="Removing system configurations related to $app
 if ynh_exec_warn_less yunohost service status "$app-server" >/dev/null; then
 	yunohost service remove "$app-server"
 fi
+if ynh_exec_warn_less yunohost service status "$app-microservices" >/dev/null; then
+	yunohost service remove "$app-microservices"
+fi
 if ynh_exec_warn_less yunohost service status "$app-machine-learning" >/dev/null; then
 	yunohost service remove "$app-machine-learning"
 fi
 
 # Remove the dedicated systemd config
 ynh_remove_systemd_config --service="immich-server"
+ynh_remove_systemd_config --service="immich-microservices"
 ynh_remove_systemd_config --service="immich-machine-learning"
 
 # Remove the app-specific fail2ban config

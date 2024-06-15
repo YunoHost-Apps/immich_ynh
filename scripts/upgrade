@@ -12,22 +12,13 @@ source /usr/share/yunohost/helpers
 ynh_script_progression --message="Stopping a systemd service..." --weight=1
 
 ynh_systemd_action --service_name="$app-server" --action="stop"
+ynh_systemd_action --service_name="$app-microservices" --action="stop"
 ynh_systemd_action --service_name="$app-machine-learning" --action="stop"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
-
-if ynh_compare_current_package_version --comparison lt --version 1.106.4~ynh1
-then
-	ynh_systemd_action --service_name="$app-microservices" --action="stop"
-	if ynh_exec_warn_less yunohost service status "$app-microservices" >/dev/null; then
-		yunohost service remove "$app-microservices"
-	fi
-	ynh_remove_systemd_config --service="immich-microservices"
-	ynh_secure_remove --file="/var/log/$app/$app-microservices.log"
-fi
+#ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -85,8 +76,10 @@ ynh_script_progression --message="Upgrading system configurations related to $ap
 ynh_add_nginx_config
 
 ynh_add_systemd_config --service="$app-server" --template="immich-server.service"
+ynh_add_systemd_config --service="$app-microservices" --template="immich-microservices.service"
 ynh_add_systemd_config --service="$app-machine-learning" --template="immich-machine-learning.service"
 
+yunohost service add "$app-microservices" --description="Immich Microservices" --log="/var/log/$app/$app-microservices.log"
 yunohost service add "$app-machine-learning" --description="Immich Machine Learning" --log="/var/log/$app/$app-machine-learning.log"
 yunohost service add "$app-server" --description="Immich Server" --log="/var/log/$app/$app-server.log"
 
@@ -101,6 +94,7 @@ ynh_add_fail2ban_config --logpath="/var/log/$app/$app-server.log" --failregex="$
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Starting a systemd service..." --weight=1
+ynh_systemd_action --service_name="$app-microservices" --action="start" --line_match="Immich Microservices is listening" --log_path="/var/log/$app/$app-microservices.log"
 ynh_systemd_action --service_name="$app-machine-learning" --action="start" --line_match="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
 ynh_systemd_action --service_name="$app-server" --action="start" --line_match="Immich Server is listening" --log_path="/var/log/$app/$app-server.log"
 

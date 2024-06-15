@@ -28,6 +28,7 @@ ynh_backup --src_path="$data_dir" --is_big
 ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 ynh_backup --src_path="/etc/systemd/system/$app-server.service"
+ynh_backup --src_path="/etc/systemd/system/$app-microservices.service"
 ynh_backup --src_path="/etc/systemd/system/$app-machine-learning.service"
 
 ynh_backup --src_path="/etc/logrotate.d/$app"
