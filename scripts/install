@@ -56,9 +56,13 @@ myynh_install_immich
 #=================================================
 ynh_script_progression --message="Adding a configuration file..."
 
-ynh_add_config --template="env" --destination="$install_dir/env"
-chmod 600 "$install_dir/env"
-chown $app:$app "$install_dir/env"
+ynh_add_config --template="env-server" --destination="$install_dir/env-server"
+chmod 600 "$install_dir/env-server"
+chown $app:$app "$install_dir/env-server"
+
+ynh_add_config --template="env-machine-learning" --destination="$install_dir/env-machine-learning"
+chmod 600 "$install_dir/env-machine-learning"
+chown $app:$app "$install_dir/env-machine-learning"
 
 #=================================================
 # SYSTEM CONFIGURATION
@@ -87,7 +91,7 @@ ynh_add_fail2ban_config --logpath="/var/log/$app/$app-server.log" --failregex="$
 #=================================================
 ynh_script_progression --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name="$app-microservices" --action="start" --line_match="Immich Microservices is listening" --log_path="/var/log/$app/$app-microservices.log"
+ynh_systemd_action --service_name="$app-microservices" --action="start" --line_match="Immich Microservices is running" --log_path="/var/log/$app/$app-microservices.log"
 ynh_systemd_action --service_name="$app-machine-learning" --action="start" --line_match="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
 ynh_systemd_action --service_name="$app-server" --action="start" --line_match="Immich Server is listening" --log_path="/var/log/$app/$app-server.log"
 

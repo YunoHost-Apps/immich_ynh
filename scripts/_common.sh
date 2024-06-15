@@ -145,8 +145,6 @@ myynh_install_immich() {
 		cp -a "$source_dir/server/resources" "$install_dir/app/"
 		cp -a "$source_dir/server/package.json" "$install_dir/app/"
 		cp -a "$source_dir/server/package-lock.json" "$install_dir/app/"
-		cp -a "$source_dir/server/start-microservices.sh" "$install_dir/app/"
-		cp -a "$source_dir/server/start-server.sh" "$install_dir/app/"
 		cp -a "$source_dir/LICENSE" "$install_dir/app/"
 		# Install custom start.sh script
 			ynh_add_config --template="immich-server-start.sh" --destination="$install_dir/app/start.sh"
@@ -187,7 +185,7 @@ myynh_install_immich() {
 		cd "$install_dir/app"
 		ynh_exec_warn_less "$ynh_npm" install sharp
 
-	# Use 127.0.0.1 for microservices
+	# Use 127.0.0.1
 		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/main.js"
 
 	# Install geonames

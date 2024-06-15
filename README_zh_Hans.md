@@ -24,11 +24,15 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**分发版本：** 1.105.1~ynh1
+**分发版本：** 1.106.4~ynh1
 
 ## 截图
 
 ![Immich 的截图](./doc/screenshots/immich-screenshots.png)
+
+## :red_circle: 负面特征
+
+- **Alpha software**: Early development stage. May contain changing or unstable features, bugs, and security vulnerability.
 
 ## 文档与资源
 
