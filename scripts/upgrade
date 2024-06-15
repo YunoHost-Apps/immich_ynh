@@ -94,7 +94,7 @@ ynh_add_fail2ban_config --logpath="/var/log/$app/$app-server.log" --failregex="$
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Starting a systemd service..." --weight=1
-ynh_systemd_action --service_name="$app-microservices" --action="start" --line_match="Immich Microservices is listening" --log_path="/var/log/$app/$app-microservices.log"
+ynh_systemd_action --service_name="$app-microservices" --action="start" --line_match="Immich Microservices is running" --log_path="/var/log/$app/$app-microservices.log"
 ynh_systemd_action --service_name="$app-machine-learning" --action="start" --line_match="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
 ynh_systemd_action --service_name="$app-server" --action="start" --line_match="Immich Server is listening" --log_path="/var/log/$app/$app-server.log"
 
