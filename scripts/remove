@@ -37,7 +37,6 @@ ynh_remove_logrotate
 ynh_remove_nginx_config
 
 # Remove the log files
-ynh_secure_remove --file="/var/log/$app"
 
 # Remove database
 myynh_drop_psql_db
