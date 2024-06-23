@@ -30,7 +30,7 @@ Self-hosted photo and video management solution.
 
 ![Captura de Immich](./doc/screenshots/immich-screenshots.png)
 
-## :red_circle: funcionalidades no deseadas
+## :red_circle: Características no deseables
 
 - **Alpha software**: Early development stage. May contain changing or unstable features, bugs, and security vulnerability.
 
