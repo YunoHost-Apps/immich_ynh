@@ -5,7 +5,7 @@ EZ editatu eskuz.
 
 # Immich YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/immich.svg)](https://dash.yunohost.org/appci/app/immich) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/immich.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/immich.maintain.svg)
+[![Integrazio maila](https://dash.yunohost.org/integration/immich.svg)](https://ci-apps.yunohost.org/ci/apps/immich/) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/immich.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/immich.maintain.svg)
 
 [![Instalatu Immich YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=immich)
 
@@ -24,7 +24,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Paketatutako bertsioa:** 1.106.4~ynh1
+**Paketatutako bertsioa:** 1.107.1~ynh1
 
 ## Pantaila-argazkiak
 
