@@ -5,7 +5,7 @@ It shall NOT be edited by hand.
 
 # Immich for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/immich.svg)](https://dash.yunohost.org/appci/app/immich) ![Working status](https://ci-apps.yunohost.org/ci/badges/immich.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/immich.maintain.svg)
+[![Integration level](https://dash.yunohost.org/integration/immich.svg)](https://ci-apps.yunohost.org/ci/apps/immich/) ![Working status](https://ci-apps.yunohost.org/ci/badges/immich.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/immich.maintain.svg)
 
 [![Install Immich with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=immich)
 
@@ -24,7 +24,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Shipped version:** 1.106.4~ynh1
+**Shipped version:** 1.107.2~ynh1
 
 ## Screenshots
 
