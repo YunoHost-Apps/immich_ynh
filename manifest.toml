@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.107.2~ynh1"
+version = "1.108.0~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -42,8 +42,8 @@ ram.runtime = "500M"
     [resources.sources]
 
         [resources.sources.main]
-        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.107.2.tar.gz"
-        sha256 = "99be31d0ec09d4c29b28449fa8e008c6861ff4a6d3a04488dc480a210e2e870a"
+        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.108.0.tar.gz"
+        sha256 = "102e2c91a30e64471ff565bf232cd5ddeedd15e609e7ad05436a86fb550657c0"
 
         autoupdate.strategy = "latest_github_release"
 
@@ -84,7 +84,30 @@ ram.runtime = "500M"
         "libbz2-dev",
         "libffi-dev",
         "zlib1g-dev",
-        "unzip"
+        "unzip",
+        "uuid-runtime",
+        "autoconf",
+        "jq",
+        "perl",
+        "libnet-ssleay-perl",
+        "libio-socket-ssl-perl",
+        "libcapture-tiny-perl",
+        "libfile-which-perl",
+        "libfile-chdir-perl",
+        "libpkgconfig-perl",
+        "libffi-checklib-perl",
+        "libtest-warnings-perl",
+        "libtest-fatal-perl",
+        "libtest-needs-perl",
+        "libtest2-suite-perl",
+        "libsort-versions-perl",
+        "libpath-tiny-perl",
+        "libtry-tiny-perl",
+        "libterm-table-perl",
+        "libany-uri-escape-perl",
+        "libmojolicious-perl",
+        "libfile-slurper-perl",
+        "liblcms2-2"
     ]
 
     [resources.apt.extras.postgresql]
