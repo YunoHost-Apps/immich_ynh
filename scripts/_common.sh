@@ -208,7 +208,6 @@ myynh_install_immich() {
 		curl -LO "https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
 		curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
 		unzip "cities500.zip"
-		cd "$install_dir/resources"
 		mkdir -p "$install_dir/app/geodata/"
 		cp -a "$source_dir/geonames/cities500.txt" "$install_dir/app/geodata/"
 		cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$install_dir/app/geodata/"
