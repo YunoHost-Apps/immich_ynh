@@ -10,6 +10,8 @@ nodejs_version=20
 # Fail2ban
 failregex="immich-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
+export NODE_OPTIONS=--max_old_space_size=3072
+
 #=================================================
 # PERSONAL HELPERS
 #=================================================
@@ -153,16 +155,16 @@ myynh_install_immich() {
 	# Install immich-server
 		cd "$source_dir/server"
 		ynh_exec_warn_less "$ynh_npm" ci
-		ynh_exec_warn_less "$ynh_npm" run build
-		ynh_exec_warn_less "$ynh_npm" prune --omit=dev --omit=optional
+		ynh_exec_warn_less env "$ynh_npm" run build
+		ynh_exec_warn_less env "$ynh_npm" prune --omit=dev --omit=optional
 
 		cd "$source_dir/open-api/typescript-sdk"
-		ynh_exec_warn_less "$ynh_npm" ci
-		ynh_exec_warn_less "$ynh_npm" run build
+		ynh_exec_warn_less env "$ynh_npm" ci
+		ynh_exec_warn_less env "$ynh_npm" run build
 
 		cd "$source_dir/web"
-		ynh_exec_warn_less "$ynh_npm" ci
-		ynh_exec_warn_less "$ynh_npm" run build
+		ynh_exec_warn_less env "$ynh_npm" ci
+		ynh_exec_warn_less env "$ynh_npm" run build
 
 		mkdir -p "$install_dir/app/"
 		cp -a "$source_dir/server/node_modules" "$install_dir/app/"
@@ -216,7 +218,7 @@ myynh_install_immich() {
 
 	# Install sharp
 		cd "$install_dir/app"
-		ynh_exec_warn_less "$ynh_npm" install sharp
+		ynh_exec_warn_less env "$ynh_npm" install sharp
 
 	# Cleanup
 		ynh_secure_remove --file="$source_dir"
