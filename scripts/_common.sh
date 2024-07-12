@@ -123,6 +123,33 @@ myynh_install_immich() {
 
 	ynh_use_nodejs
 
+	# Use 127.0.0.1
+		cd "$source_dir"
+		find . -type f \( -name '*.ts' -o -name '*.js' \) \
+			-exec grep app.listen {} + \
+			| sed 's/.*app.listen//' | grep -v '()' \
+			| grep '^(' \
+			| tr -d "[:blank:]" | awk -F"[(),]" '{print $2}' \
+			| sort \
+			| uniq \
+			| while read port; do
+				find . -type f \( -name '*.ts' -o -name '*.js' \) \
+					-exec sed -i -e "s@app.listen(${port})@app.listen(${port}, '127.0.0.1')@g" {} +
+			done
+		find . -type f \( -name '*.ts' -o -name '*.js' \) \
+			-exec sed -i -e "s@PrometheusExporter({ port })@PrometheusExporter({ host: '127.0.0.1', port: port })@g" {} +
+		grep -RlE "\"0\.0\.0\.0\"|'0\.0\.0\.0'" \
+			| xargs -n1 sed -i -e "s@'0\.0\.0\.0'@'127.0.0.1'@g" -e 's@"0\.0\.0\.0"@"127.0.0.1"@g'
+
+	# Replace /usr/src
+		cd "$source_dir"
+		grep -Rl "/usr/src" | xargs -n1 sed -i -e "s@/usr/src@$install_dir@g"
+		mkdir -p "$install_dir/cache"
+		grep -RlE "\"/cache\"|'/cache'" \
+			| xargs -n1 sed -i -e "s@\"/cache\"@\"$install_dir/cache\"@g" -e "s@'/cache'@'$install_dir/cache'@g"
+		grep -RlE "\"/build\"|'/build'" \
+			| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
+
 	# Install immich-server
 		cd "$source_dir/server"
 		ynh_exec_warn_less "$ynh_npm" ci
@@ -174,20 +201,6 @@ myynh_install_immich() {
 			ynh_add_config --template="immich-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
 			chmod +x "$install_dir/app/machine-learning/start.sh"
 
-	# Replace /usr/src
-		cd "$install_dir/app"
-		grep -Rl "/usr/src" | xargs -n1 sed -i -e "s@/usr/src@$install_dir@g"
-		ln -sf "$install_dir/app/resources" "$install_dir/"
-		mkdir -p "$install_dir/cache"
-		sed -i -e "s@\"/cache\"@\"$install_dir/cache\"@g" "$install_dir/app/machine-learning/app/config.py"
-
-	# Install sharp
-		cd "$install_dir/app"
-		ynh_exec_warn_less "$ynh_npm" install sharp
-
-	# Use 127.0.0.1
-		sed -i -e "s@app.listen(port)@app.listen(port, '127.0.0.1')@g" "$install_dir/app/dist/main.js"
-
 	# Install geonames
 		mkdir -p "$source_dir/geonames"
 		cd "$source_dir/geonames"
@@ -196,10 +209,15 @@ myynh_install_immich() {
 		curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
 		unzip "cities500.zip"
 		cd "$install_dir/resources"
-		cp -a "$source_dir/geonames/cities500.txt" "$install_dir/resources/"
-		cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$install_dir/resources/"
-		cp -a "$source_dir/geonames/admin2Codes.txt" "$install_dir/resources/"
-		date --iso-8601=seconds | tr -d "\n" > "$install_dir/resources/geodata-date.txt"
+		mkdir -p "$install_dir/app/geodata/"
+		cp -a "$source_dir/geonames/cities500.txt" "$install_dir/app/geodata/"
+		cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$install_dir/app/geodata/"
+		cp -a "$source_dir/geonames/admin2Codes.txt" "$install_dir/app/geodata/"
+		date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
+
+	# Install sharp
+		cd "$install_dir/app"
+		ynh_exec_warn_less "$ynh_npm" install sharp
 
 	# Cleanup
 		ynh_secure_remove --file="$source_dir"

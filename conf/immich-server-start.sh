@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -a
-. "__INSTALL_DIR__/env-server"
+source "__INSTALL_DIR__/env-server"
 set +a
 
 cd "__INSTALL_DIR__/app"
