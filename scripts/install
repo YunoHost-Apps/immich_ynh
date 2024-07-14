@@ -39,7 +39,7 @@ ynh_script_progression --message="Creating a PostgreSQL database..." --weight=1
 
 db_pwd=$(ynh_string_random)
 myynh_create_psql_db
-db_port=$(myynh_execute_psql_as_root --sql="\conninfo" | cut -d'"' -f8)
+db_port=$(myynh_execute_psql_as_root --sql="\conninfo" | awk -F '"' '{ print $(NF-1) }')
 ynh_app_setting_set --app="$app" --key=psql_pwd --value="$db_pwd"
 ynh_app_setting_set --app="$app" --key=psql_version --value="$(postgresql_version)"
 ynh_app_setting_set --app="$app" --key=psql_port --value="$db_port"
