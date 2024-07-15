@@ -246,7 +246,7 @@ myynh_execute_psql_as_root() {
 		database="--dbname=$database"
 	fi
 
-	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
+	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
 		psql --cluster="$(postgresql_version)/main" "$database" --command="$sql"
 }
 
