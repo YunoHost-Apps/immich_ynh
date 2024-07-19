@@ -1,0 +1,26 @@
+{
+  "sources": [
+    {
+      "name": "imagemagick",
+      "version": "?"
+    },
+    {
+      "name": "libheif",
+      "version": "?"
+    },
+    {
+      "name": "libraw",
+      "version": "?"
+    },
+    {
+      "name": "libvips",
+      "version": "?"
+    }
+  ],
+  "packages": [
+    {
+      "name": "ffmpeg",
+      "version": "?"
+    }
+  ]
+}
