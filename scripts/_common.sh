@@ -120,6 +120,7 @@ myynh_install_python() {
 # Install immich
 myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native
+	# Check https://github.com/immich-app/base-images/blob/main/server/Dockerfile for changes
 
 	ynh_use_nodejs
 
@@ -207,11 +208,13 @@ myynh_install_immich() {
 		curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
 		curl -LO "https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
 		curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
+		curl -LO "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_countries.geojson" 2>&1
 		unzip "cities500.zip"
 		mkdir -p "$install_dir/app/geodata/"
 		cp -a "$source_dir/geonames/cities500.txt" "$install_dir/app/geodata/"
 		cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$install_dir/app/geodata/"
 		cp -a "$source_dir/geonames/admin2Codes.txt" "$install_dir/app/geodata/"
+		cp -a "$source_dir/geonames/ne_10m_admin_0_countries.geojson" "$install_dir/app/geodata/"
 		date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
 
 	# Install sharp
