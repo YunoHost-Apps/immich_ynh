@@ -39,7 +39,7 @@ Self-hosted photo and video management solution.
 - Website aplikasi resmi: <https://immich.app>
 - Dokumentasi pengguna resmi: <https://github.com/immich-app/immich#getting-started>
 - Dokumentasi admin resmi: <https://github.com/immich-app/immich#getting-started>
-- Repositori kode aplikasi hulu: <https://github.com/immich-app/immich>
+- Depot kode aplikasi hulu: <https://github.com/immich-app/immich>
 - Gudang YunoHost: <https://apps.yunohost.org/app/immich>
 - Laporkan bug: <https://github.com/YunoHost-Apps/immich_ynh/issues>
 
