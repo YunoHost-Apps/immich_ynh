@@ -107,7 +107,8 @@ ram.runtime = "500M"
         "libany-uri-escape-perl",
         "libmojolicious-perl",
         "libfile-slurper-perl",
-        "liblcms2-2"
+        "liblcms2-2",
+        "redis-server"
     ]
 
     [resources.apt.extras.postgresql]
