@@ -108,6 +108,8 @@ ram.runtime = "500M"
         "libmojolicious-perl",
         "libfile-slurper-perl",
         "liblcms2-2",
+        "libllvm16",
+        "libllvm13",
         "redis-server"
     ]
 
@@ -115,7 +117,20 @@ ram.runtime = "500M"
     repo = "deb https://apt.postgresql.org/pub/repos/apt __YNH_DEBIAN_VERSION__-pgdg main 16"
     key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
     packages = [
-        "libllvm13", "libpq5", "libpq-dev" , "postgresql-16", "postgresql-16-pgvector", "postgresql-client-16", "postgresql-common", "postgresql-client-common"
+        "libpq5",
+        "libpq-dev",
+        "postgresql-16",
+        "postgresql-16-pgvector",
+        "postgresql-client-16",
+        "postgresql-common",
+        "postgresql-client-common"
+    ]
+
+    [resources.apt.extras.jellyfin-ffmpeg]
+    repo = "deb [arch=__YNH_ARCH__] https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"
+    key = "https://repo.jellyfin.org/jellyfin_team.gpg.key"
+    packages = [
+        "jellyfin-ffmpeg6"
     ]
 
     [resources.database]
