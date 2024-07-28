@@ -130,7 +130,7 @@ ram.runtime = "500M"
     repo = "deb [arch=__YNH_ARCH__] https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"
     key = "https://repo.jellyfin.org/jellyfin_team.gpg.key"
     packages = [
-        jellyfin-ffmpeg6
+        "jellyfin-ffmpeg6"
     ]
 
     [resources.database]
