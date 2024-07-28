@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.109.2~ynh2"
+version = "1.110.0~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -42,8 +42,8 @@ ram.runtime = "500M"
     [resources.sources]
 
         [resources.sources.main]
-        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.109.2.tar.gz"
-        sha256 = "c45bed3fa510d51df6e31e7bbf06bda3413aa4ef751d9c6d7596ffc49b921459"
+        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.110.0.tar.gz"
+        sha256 = "aceddfef934fcbea8c4e8c8069595bd2806bd758498f94be15c99ffbc2721ad3"
 
         autoupdate.strategy = "latest_github_release"
 
@@ -107,14 +107,30 @@ ram.runtime = "500M"
         "libany-uri-escape-perl",
         "libmojolicious-perl",
         "libfile-slurper-perl",
-        "liblcms2-2"
+        "liblcms2-2",
+        "libllvm16",
+        "libllvm13",
+        "redis-server"
     ]
 
     [resources.apt.extras.postgresql]
     repo = "deb https://apt.postgresql.org/pub/repos/apt __YNH_DEBIAN_VERSION__-pgdg main 16"
     key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
     packages = [
-        "libllvm13", "libpq5", "libpq-dev" , "postgresql-16", "postgresql-16-pgvector", "postgresql-client-16", "postgresql-common", "postgresql-client-common"
+        "libpq5",
+        "libpq-dev",
+        "postgresql-16",
+        "postgresql-16-pgvector",
+        "postgresql-client-16",
+        "postgresql-common",
+        "postgresql-client-common"
+    ]
+
+    [resources.apt.extras.jellyfin-ffmpeg]
+    repo = "deb [arch=__YNH_ARCH__] https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"
+    key = "https://repo.jellyfin.org/jellyfin_team.gpg.key"
+    packages = [
+        "jellyfin-ffmpeg6"
     ]
 
     [resources.database]
