@@ -109,7 +109,7 @@ ram.runtime = "500M"
         "libfile-slurper-perl",
         "liblcms2-2",
         "libllvm16",
-        "libllvm13",,
+        "libllvm13",
         "redis-server"
     ]
 
