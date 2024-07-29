@@ -16,6 +16,9 @@ ynh_script_progression --message="Setting up source files..." --weight=1
 source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir"
 
+ffmpeg_static_dir="$install_dir/ffmpeg-static"
+ynh_setup_source --source_id="ffmpeg-static" --dest_dir="$ffmpeg_static_dir"
+
 #=================================================
 # CHECK PYTHON VERSION AND COMPILE IF NEEDED
 #=================================================

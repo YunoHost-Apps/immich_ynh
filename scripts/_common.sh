@@ -122,8 +122,8 @@ myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native
 	# Check https://github.com/immich-app/base-images/blob/main/server/Dockerfile for changes
 
-	# Add jellyfin-ffmpeg to $PATH
-		PATH="/usr/lib/jellyfin-ffmpeg:$PATH"
+	# Add ffmpeg-static direcotry to $PATH
+		PATH="$ffmpeg_static_dir:$PATH"
 
 	# Use ynh nodejs helper
 		ynh_use_nodejs
