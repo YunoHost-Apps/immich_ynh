@@ -49,7 +49,7 @@ ram.runtime = "500M"
 
         [resources.sources.ffmpeg-static]
         amd64.url = "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
-        amd64.sha256 = "5341ac10c505b9217740790d56d8e63e590d74ca81e3e56796e4c98f7be80b61"
+        amd64.sha256 = "abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67"
         arm64.url = "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-arm64-static.tar.xz"
         arm64.sha256 = "7387f7aae3ae88cbaad5c66155fdf23ce0c0dbeaf4b1e573d704817938cd1b8e"
 
