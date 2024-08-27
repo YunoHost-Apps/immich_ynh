@@ -28,7 +28,7 @@ echo "REPO=$repo" >> $GITHUB_ENV
 echo "PROCEED=false" >> $GITHUB_ENV
 
 # Proceed only if the retrieved version is greater than the current one
-if [ "$amd64_sha_current" == "$amd64_sha_last" ] And [ "$arm64_sha_current" == "$amd64_sha_last" ]
+if [ "$amd64_sha_current" == "$amd64_sha_last" ] && [ "$arm64_sha_current" == "$amd64_sha_last" ]
 then
     echo "::warning ::No new version available"
     exit 0
