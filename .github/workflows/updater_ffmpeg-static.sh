@@ -28,6 +28,7 @@ then
     exit 0
 # Proceed only if a PR for this new version does not already exist
 elif git ls-remote -q --exit-code --heads https://github.com/$GITHUB_REPOSITORY.git ci-auto-update-v${version_next/~/-}
+then
     echo "::warning ::A branch already exists for this update"
     exit 0
 fi
