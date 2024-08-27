@@ -18,12 +18,6 @@ amd64_sha_last=$(curl --silent "$amd64_url" | sha256sum)
 arm64_url=$(cat manifest.toml | tomlq -j '.resources.sources."ffmpeg-static".arm64.url')
 arm64_sha_current=$(cat manifest.toml | tomlq -j '.resources.sources."ffmpeg-static".arm64.sha256')
 arm64_sha_last=$(curl --silent "$arm64_url" | sha256sum)
-
-# Setting up the environment variables
-echo "Current version: $version_current"
-echo "Latest version: $version_next"
-echo "VERSION=$version_next" >> $GITHUB_ENV
-echo "REPO=$repo" >> $GITHUB_ENV
 # For the time being, let's assume the script will fail
 echo "PROCEED=false" >> $GITHUB_ENV
 
@@ -33,10 +27,16 @@ then
     echo "::warning ::No new version available"
     exit 0
 # Proceed only if a PR for this new version does not already exist
-elif git ls-remote -q --exit-code --heads https://github.com/$GITHUB_REPOSITORY.git ci-auto-update-v$version_next ; then
+elif git ls-remote -q --exit-code --heads https://github.com/$GITHUB_REPOSITORY.git ci-auto-update-v${version_next/~/-}
     echo "::warning ::A branch already exists for this update"
     exit 0
 fi
+
+# Setting up the environment variables
+echo "Current version: $version_current"
+echo "Latest version: $version_next"
+echo "VERSION=${version_next/~/-}" >> $GITHUB_ENV
+echo "REPO=$repo" >> $GITHUB_ENV
 
 #=================================================
 # GENERIC FINALIZATION
