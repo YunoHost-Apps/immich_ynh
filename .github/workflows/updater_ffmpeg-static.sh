@@ -9,7 +9,7 @@ version_current=$(cat manifest.toml | tomlq -j '.version')
 version_app=$(cat manifest.toml | tomlq -j '.version|split("~ynh")[0]')
 version_ynh=$(cat manifest.toml | tomlq -j '.version|split("~ynh")[1]')
 version_next="$version_app~ynh$(($version_ynh+1))"
-version=$("$version_next" | tr '~' '-')
+version=$(echo "$version_next" | tr '~' '-')
 repo=$(cat manifest.toml | tomlq -j '.upstream.code|split("https://github.com/")[1]')
 
 amd64_url=$(cat manifest.toml | tomlq -j '.resources.sources."ffmpeg-static".amd64.url')
