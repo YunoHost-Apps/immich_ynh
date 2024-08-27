@@ -9,6 +9,7 @@ version_current=$(cat manifest.toml | tomlq -j '.version')
 version_app=$(cat manifest.toml | tomlq -j '.version|split("~ynh")[0]')
 version_ynh=$(cat manifest.toml | tomlq -j '.version|split("~ynh")[1]')
 version_next="$version_app~ynh$(($version_ynh+1))"
+version=$("$version_next" | tr '~' '-')
 repo=$(cat manifest.toml | tomlq -j '.upstream.code|split("https://github.com/")[1]')
 
 amd64_url=$(cat manifest.toml | tomlq -j '.resources.sources."ffmpeg-static".amd64.url')
@@ -22,12 +23,13 @@ arm64_sha_last=$(curl --silent "$arm64_url" | sha256sum)
 echo "PROCEED=false" >> $GITHUB_ENV
 
 # Proceed only if the retrieved version is greater than the current one
-if [ "$amd64_sha_current" == "$amd64_sha_last" ] && [ "$arm64_sha_current" == "$amd64_sha_last" ]
+#if [ "$amd64_sha_current" == "$amd64_sha_last" ] && [ "$arm64_sha_current" == "$arm64_sha_last" ]
+if true
 then
     echo "::warning ::No new version available"
     exit 0
 # Proceed only if a PR for this new version does not already exist
-elif git ls-remote -q --exit-code --heads https://github.com/$GITHUB_REPOSITORY.git ci-auto-update-v${version_next/~/-}
+elif git ls-remote -q --exit-code --heads https://github.com/$GITHUB_REPOSITORY.git ci-auto-update-v$version
 then
     echo "::warning ::A branch already exists for this update"
     exit 0
@@ -36,7 +38,7 @@ fi
 # Setting up the environment variables
 echo "Current version: $version_current"
 echo "Latest version: $version_next"
-echo "VERSION=${version_next/~/-}" >> $GITHUB_ENV
+echo "VERSION=$version" >> $GITHUB_ENV
 echo "REPO=$repo" >> $GITHUB_ENV
 
 #=================================================
