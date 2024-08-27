@@ -36,21 +36,21 @@ jobs:
         id: commit
         if: ${{ env.PROCEED == 'true' }}
         run: |
-          git commit -am "Upgrade to v$VERSION"
+          git commit -am "Update ffmpeg-static sha for $VERSION"
       - name: Create Pull Request to testing
         id: cpr-testing
         if: ${{ env.PROCEED == 'true' }}
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Update to version ${{ env.VERSION }}
+          commit-message: Update ffmpeg-static sha for ${{ env.VERSION }}
           committer: 'yunohost-bot <yunohost-bot@users.noreply.github.com>'
           author: 'yunohost-bot <yunohost-bot@users.noreply.github.com>'
           signoff: false
           base: testing
-          branch: ci-auto-update-v${{ env.VERSION }}
+          branch: ci-auto-update-ffmpeg-static-sha-${{ env.VERSION }}
           delete-branch: true
-          title: 'Upgrade to version ${{ env.VERSION }}'
+          title: 'Update ffmpeg-static sha for ${{ env.VERSION }}'
           body: |
-            Upgrade to v${{ env.VERSION }}
+            Update ffmpeg-static sha for ${{ env.VERSION }}
           draft: false
