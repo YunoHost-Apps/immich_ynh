@@ -50,6 +50,13 @@ ynh_script_progression --message="Installing nodejs..." --weight=1
 ynh_exec_warn_less ynh_install_nodejs --nodejs_version="$nodejs_version"
 
 #=================================================
+# UPDATE A POSTGRESQL DATABASE
+#=================================================
+ynh_script_progression --message="Udpating a PostgreSQL database..." --weight=1
+
+myynh_update_psql_db
+
+#=================================================
 # MAKE INSTALL
 #=================================================
 ynh_script_progression --message="Making install..." --weight=5

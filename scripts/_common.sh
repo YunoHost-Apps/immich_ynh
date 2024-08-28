@@ -249,7 +249,8 @@ myynh_execute_psql_as_root() {
 	ynh_handle_getopts_args "$@"
 	database="${database:-}"
 
-	if [ -n "$database" ]; then
+	if [ -n "$database" ]
+	then
 		database="--dbname=$database"
 	fi
 
@@ -263,6 +264,19 @@ myynh_create_psql_db() {
 	myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 	myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
+}
+
+# Update the database
+myynh_update_psql_db() {
+	for db in postgres "$app"
+	do
+		test_collation_mismatch=$(ynh_exec_warn_less myynh_execute_psql_as_root --sql=";" --database="$db" | grep "collation version mismatch")
+		if [ -n "$test_collation_mismatch" ]
+		then
+			ynh_exec_warn_less myynh_execute_psql_as_root --sql="REINDEX DATABASE $db;" --database="$db"
+			myynh_execute_psql_as_root --sql="ALTER DATABASE $db REFRESH COLLATION VERSION;" --database="$db"
+		fi
+	done
 }
 
 # Remove the database
