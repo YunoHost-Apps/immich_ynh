@@ -274,8 +274,8 @@ myynh_create_psql_db() {
 myynh_update_psql_db() {
 	for db in postgres "$app"
 	do
-		test_collation_mismatch=$(ynh_exec_warn_less myynh_execute_psql_as_root --sql=";" --database="$db" | grep "collation version mismatch")
-		if [ -n "$test_collation_mismatch" ]
+		if ynh_exec_warn_less myynh_execute_psql_as_root --sql=";" --database="$db" \
+		   | grep -q "collation version mismatch"
 		then
 			ynh_exec_warn_less myynh_execute_psql_as_root --sql="REINDEX DATABASE $db;" --database="$db"
 			myynh_execute_psql_as_root --sql="ALTER DATABASE $db REFRESH COLLATION VERSION;" --database="$db"
