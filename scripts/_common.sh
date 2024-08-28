@@ -75,9 +75,9 @@ myynh_install_python() {
 		if $(dpkg --compare-versions $py_built_version ge $python)
 		then
 			# Built >= Required
-			ynh_print_info --message="Using already python3 built version: $py_app_version"
-
 			py_app_version="/usr/local/bin/python${py_built_version%.*}"
+
+			ynh_print_info --message="Using already python3 built version: $py_app_version"
 
 		else
 			# APT < Minimal & Actual < Minimal => Build & install Python into /usr/local/bin
