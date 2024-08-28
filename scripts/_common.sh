@@ -66,7 +66,7 @@ myynh_install_python() {
 	if $(dpkg --compare-versions $py_apt_version ge $python)
 	then
 		# APT >= Required
-		ynh_print_info --message="Using provided python3..."
+		ynh_print_info --message="Using OS provided python3..."
 
 		py_app_version="python3"
 
@@ -75,13 +75,13 @@ myynh_install_python() {
 		if $(dpkg --compare-versions $py_built_version ge $python)
 		then
 			# Built >= Required
-			ynh_print_info --message="Using already used python3 built version..."
+			ynh_print_info --message="Using already python3 built version: $py_app_version"
 
 			py_app_version="/usr/local/bin/python${py_built_version%.*}"
 
 		else
 			# APT < Minimal & Actual < Minimal => Build & install Python into /usr/local/bin
-			ynh_print_info --message="Building python (may take a while)..."
+			ynh_print_info --message="Building python3 : $python (may take a while)..."
 
 			# Store current direcotry
 			local MY_DIR=$(pwd)
@@ -115,6 +115,10 @@ myynh_install_python() {
 	fi
 	# Save python version in settings
 	ynh_app_setting_set --app=$app --key=python --value="$python"
+
+	# Print some version information
+	ynh_print_info --message="Python version: $($py_app_version -VV)"
+	ynh_print_info --message="Pip version: $($py_app_version -m pip -V)"
 }
 
 # Install immich
