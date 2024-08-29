@@ -35,9 +35,15 @@ then
     exit 0
 fi
 
-# Setting up the environment variables
+# Print some infos
 echo "Current version: $version_current"
+echo "Current ffmpeg-static amd64 sha : $amd64_sha_current"
+echo "LAst ffmpeg-static amd64 sha : $amd64_sha_last"
+echo "Current ffmpeg-static arm64 sha : $arm64_sha_current"
+echo "LAst ffmpeg-static arm64 sha : $arm64_sha_last"
 # echo "Latest version: $version_next"
+
+# Setting up the environment variables
 echo "VERSION=$version" >> $GITHUB_ENV
 echo "REPO=$repo" >> $GITHUB_ENV
 
