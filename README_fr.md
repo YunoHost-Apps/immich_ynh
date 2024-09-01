@@ -24,7 +24,7 @@ Solution d'autohébergement pour a gestion de vos photos et vidéos.
 - Interface conviviale et egronomique ;
 
 
-**Version incluse :** 1.112.1~ynh2
+**Version incluse :** 1.113.0~ynh1
 
 ## Captures d’écran
 
