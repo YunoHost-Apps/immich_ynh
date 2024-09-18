@@ -9,34 +9,34 @@ source /usr/share/yunohost/helpers
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Stopping a systemd service..." --weight=1
+ynh_script_progression "Stopping $app's systemd service..."
 
-ynh_systemd_action --service_name="$app-server" --action="stop"
-ynh_systemd_action --service_name="$app-microservices" --action="stop"
-ynh_systemd_action --service_name="$app-machine-learning" --action="stop"
+ynh_systemctl --service="$app-server" --action="stop"
+ynh_systemctl --service="$app-microservices" --action="stop"
+ynh_systemctl --service="$app-machine-learning" --action="stop"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-#ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
+#ynh_script_progression "Ensuring downward compatibility..."
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Upgrading source files..." --weight=1
+ynh_script_progression "Upgrading source files..."
 
-ynh_secure_remove --file="$install_dir"
+ynh_safe_rm "$install_dir"
 
 source_dir="$install_dir/source"
-ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace=1
+ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace
 
 ffmpeg_static_dir="$install_dir/ffmpeg-static"
-ynh_setup_source --source_id="ffmpeg-static" --dest_dir="$ffmpeg_static_dir" --full_replace=1
+ynh_setup_source --source_id="ffmpeg-static" --dest_dir="$ffmpeg_static_dir" --full_replace
 
 #=================================================
 # CHECK PYTHON VERSION AND COMPILE IF NEEDED
 #=================================================
-ynh_script_progression --message="Check Python version & compile the required one if needed..." --weight=1
+ynh_script_progression "Check Python version & compile the required one if needed..."
 
 py_required_major=$(cat "$source_dir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
 myynh_py_latest_from_major --python="$py_required_major"
@@ -45,54 +45,54 @@ myynh_install_python --python="$py_required_version"
 #=================================================
 # INSTALL NODEJS
 #=================================================
-ynh_script_progression --message="Installing nodejs..." --weight=1
+ynh_script_progression "Installing nodejs..."
 
-ynh_exec_warn_less ynh_install_nodejs --nodejs_version="$nodejs_version"
+ynh_nodejs_install
 
 #=================================================
 # UPDATE A POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Udpating a PostgreSQL database..." --weight=1
+ynh_script_progression "Udpating a PostgreSQL database..."
 
 myynh_update_psql_db
 
 #=================================================
 # MAKE INSTALL
 #=================================================
-ynh_script_progression --message="Making install..." --weight=5
+ynh_script_progression "Making install..."
 
 myynh_install_immich
 
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
-ynh_script_progression --message="Updating $app's configuration files..." --weight=1
+ynh_script_progression "Updating $app's configuration files..."
 
-db_pwd=$(ynh_app_setting_get --app="$app" --key=psql_pwd)
-db_port=$(ynh_app_setting_get --app="$app" --key=psql_port)
+db_pwd=$(ynh_app_setting_get --key=psql_pwd)
+db_port=$(ynh_app_setting_get --key=psql_port)
 
-ynh_add_config --template="env-server" --destination="$install_dir/env-server"
-chmod 600 "$install_dir/env-server"
-chown $app:$app "$install_dir/env-server"
+ynh_config_add --template="env-server" --destination="$install_dir/env-server"
+chmod u=rw,g=,o= "$install_dir/env-server"
+chown $app: "$install_dir/env-server"
 
-ynh_add_config --template="env-machine-learning" --destination="$install_dir/env-machine-learning"
-chmod 600 "$install_dir/env-machine-learning"
-chown $app:$app "$install_dir/env-machine-learning"
+ynh_config_add --template="env-machine-learning" --destination="$install_dir/env-machine-learning"
+chmod u=rw,g=,o= "$install_dir/env-machine-learning"
+chown $app: "$install_dir/env-machine-learning"
 
-ynh_add_config --template="build-lock.json" --destination="$install_dir/app/build-lock.json"
-chmod 600 "$install_dir/app/build-lock.json"
-chown $app:$app "$install_dir/app/build-lock.json"
+ynh_config_add --template="build-lock.json" --destination="$install_dir/app/build-lock.json"
+chmod u=rw,g=,o= "$install_dir/app/build-lock.json"
+chown $app: "$install_dir/app/build-lock.json"
 
 #=================================================
 # REAPPLY SYSTEM CONFIGURATIONS
 #=================================================
-ynh_script_progression --message="Upgrading system configurations related to $app..." --weight=1
+ynh_script_progression "Upgrading system configurations related to $app..."
 
-ynh_add_nginx_config
+ynh_config_add_nginx
 
-ynh_add_systemd_config --service="$app-server" --template="immich-server.service"
-ynh_add_systemd_config --service="$app-microservices" --template="immich-microservices.service"
-ynh_add_systemd_config --service="$app-machine-learning" --template="immich-machine-learning.service"
+ynh_config_add_systemd --service="$app-server" --template="immich-server.service"
+ynh_config_add_systemd --service="$app-microservices" --template="immich-microservices.service"
+ynh_config_add_systemd --service="$app-machine-learning" --template="immich-machine-learning.service"
 
 yunohost service add "$app-microservices" --description="Immich Microservices" --log="/var/log/$app/$app-microservices.log"
 yunohost service add "$app-machine-learning" --description="Immich Machine Learning" --log="/var/log/$app/$app-machine-learning.log"
@@ -101,19 +101,19 @@ yunohost service add "$app-server" --description="Immich Server" --log="/var/log
 ynh_multimedia_build_main_dir
 ynh_multimedia_addaccess --user_name=$app
 
-ynh_use_logrotate --non-append
+ynh_config_add_logrotate
 
-ynh_add_fail2ban_config --logpath="/var/log/$app/$app-server.log" --failregex="$failregex"
+ynh_config_add_fail2ban --logpath="/var/log/$app/$app-server.log" --failregex="$failregex"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..." --weight=1
-ynh_systemd_action --service_name="$app-microservices" --action="start" --line_match="Immich Microservices is running" --log_path="/var/log/$app/$app-microservices.log"
-ynh_systemd_action --service_name="$app-machine-learning" --action="start" --line_match="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
-ynh_systemd_action --service_name="$app-server" --action="start" --line_match="Immich Server is listening" --log_path="/var/log/$app/$app-server.log"
+ynh_script_progression "Starting $app's systemd service..."
+ynh_systemctl --service="$app-microservices" --action="start" --wait_until="Immich Microservices is running" --log_path="/var/log/$app/$app-microservices.log"
+ynh_systemctl --service="$app-machine-learning" --action="start" --wait_until="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
+ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
-ynh_script_progression --message="Upgrade of $app completed" --last
+ynh_script_progression "Upgrade of $app completed"
