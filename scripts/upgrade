@@ -99,7 +99,7 @@ yunohost service add "$app-machine-learning" --description="Immich Machine Learn
 yunohost service add "$app-server" --description="Immich Server" --log="/var/log/$app/$app-server.log"
 
 ynh_multimedia_build_main_dir
-ynh_multimedia_addaccess --user_name=$app
+ynh_multimedia_addaccess "$app"
 
 ynh_config_add_logrotate
 
