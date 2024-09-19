@@ -60,16 +60,10 @@ myynh_install_immich
 ynh_script_progression "Adding $app's configuration..."
 
 ynh_config_add --template="env-server" --destination="$install_dir/env-server"
-chmod u=rw,g=,o= "$install_dir/env-server"
-chown $app: "$install_dir/env-server"
 
 ynh_config_add --template="env-machine-learning" --destination="$install_dir/env-machine-learning"
-chmod u=rw,g=,o= "$install_dir/env-machine-learning"
-chown $app: "$install_dir/env-machine-learning"
 
 ynh_config_add --template="build-lock.json" --destination="$install_dir/app/build-lock.json"
-chmod u=rw,g=,o= "$install_dir/app/build-lock.json"
-chown $app: "$install_dir/app/build-lock.json"
 
 #=================================================
 # SYSTEM CONFIGURATION
@@ -92,6 +86,12 @@ ynh_multimedia_addaccess "$app"
 ynh_config_add_logrotate
 
 ynh_config_add_fail2ban --logpath="/var/log/$app/$app-server.log" --failregex="$failregex"
+
+#=================================================
+# SET FILE OWNERSHIP / PERMISSIONS
+#=================================================
+
+myynh_set_permissions
 
 #=================================================
 # START SYSTEMD SERVICE

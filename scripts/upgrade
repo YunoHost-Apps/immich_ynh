@@ -72,16 +72,10 @@ db_pwd=$(ynh_app_setting_get --key=psql_pwd)
 db_port=$(ynh_app_setting_get --key=psql_port)
 
 ynh_config_add --template="env-server" --destination="$install_dir/env-server"
-chmod u=rw,g=,o= "$install_dir/env-server"
-chown $app: "$install_dir/env-server"
 
 ynh_config_add --template="env-machine-learning" --destination="$install_dir/env-machine-learning"
-chmod u=rw,g=,o= "$install_dir/env-machine-learning"
-chown $app: "$install_dir/env-machine-learning"
 
 ynh_config_add --template="build-lock.json" --destination="$install_dir/app/build-lock.json"
-chmod u=rw,g=,o= "$install_dir/app/build-lock.json"
-chown $app: "$install_dir/app/build-lock.json"
 
 #=================================================
 # REAPPLY SYSTEM CONFIGURATIONS
@@ -104,6 +98,12 @@ ynh_multimedia_addaccess "$app"
 ynh_config_add_logrotate
 
 ynh_config_add_fail2ban --logpath="/var/log/$app/$app-server.log" --failregex="$failregex"
+
+#=================================================
+# SET FILE OWNERSHIP / PERMISSIONS
+#=================================================
+
+myynh_set_permissions
 
 #=================================================
 # START SYSTEMD SERVICE

@@ -179,7 +179,6 @@ myynh_install_immich() {
 		cp -a "$source_dir/LICENSE" "$install_dir/app/"
 		# Install custom start.sh script
 			ynh_config_add --template="immich-server-start.sh" --destination="$install_dir/app/start.sh"
-			chmod +x "$install_dir/app/start.sh"
 		cd "$install_dir/app/"
 		ynh_hide_warnings npm cache clean --force
 
@@ -203,7 +202,6 @@ myynh_install_immich() {
  		cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
 		# Install custom start.sh script
 			ynh_config_add --template="immich-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
-			chmod +x "$install_dir/app/machine-learning/start.sh"
 
 	# Install geonames
 		mkdir -p "$source_dir/geonames"
@@ -226,11 +224,6 @@ myynh_install_immich() {
 
 	# Cleanup
 		ynh_safe_rm "$source_dir"
-
-	# Fix permissisons
-		chown -R $app:$app "$install_dir"
-		chmod u=rwX,g=rX,o= "$install_dir"
-		chmod -R o-rwx "$install_dir"
 }
 
 # Execute a psql command as root user
@@ -301,4 +294,19 @@ myynh_restore_psql_db() {
 
 	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
 		psql --cluster="$(postgresql_version)/main" --dbname="$app" < ./db.sql
+}
+
+
+# Set permissions
+myynh_set_permissions () {
+	chown -R $app: "$install_dir"
+	chmod u=rwX,g=rX,o= "$install_dir"
+	chmod -R o-rwx "$install_dir"
+
+	chown -R $app: "$data_dir"
+	chmod u=rwX,g=rX,o= "$data_dir"
+	chmod -R o-rwx "$data_dir"
+
+	chown -R $app: "/var/log/$app"
+	chmod u=rw,g=r,o= "/var/log/$app"
 }
