@@ -85,6 +85,11 @@ ynh_systemctl --service="fail2ban" --action="restart"
 ynh_restore "/var/log/$app/"
 
 #=================================================
+# SET FILE OWNERSHIP / PERMISSIONS
+#=================================================
+myynh_set_permissions
+
+#=================================================
 # RELOAD NGINX AND PHP-FPM OR THE APP SERVICE
 #=================================================
 ynh_script_progression "Reloading NGINX web server and $app's service..."

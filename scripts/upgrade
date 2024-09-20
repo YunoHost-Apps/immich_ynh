@@ -102,7 +102,6 @@ ynh_config_add_fail2ban --logpath="/var/log/$app/$app-server.log" --failregex="$
 #=================================================
 # SET FILE OWNERSHIP / PERMISSIONS
 #=================================================
-
 myynh_set_permissions
 
 #=================================================
