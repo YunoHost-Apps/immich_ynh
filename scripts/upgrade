@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -14,11 +11,6 @@ ynh_script_progression "Stopping $app's systemd service..."
 ynh_systemctl --service="$app-server" --action="stop"
 ynh_systemctl --service="$app-microservices" --action="stop"
 ynh_systemctl --service="$app-machine-learning" --action="stop"
-
-#=================================================
-# ENSURE DOWNWARD COMPATIBILITY
-#=================================================
-#ynh_script_progression "Ensuring downward compatibility..."
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -102,12 +94,14 @@ ynh_config_add_fail2ban --logpath="/var/log/$app/$app-server.log" --failregex="$
 #=================================================
 # SET FILE OWNERSHIP / PERMISSIONS
 #=================================================
+
 myynh_set_permissions
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
+
 ynh_systemctl --service="$app-microservices" --action="start" --wait_until="Immich Microservices is running" --log_path="/var/log/$app/$app-microservices.log" --timeout=300
 ynh_systemctl --service="$app-machine-learning" --action="start" --wait_until="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
 ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log"
@@ -115,4 +109,5 @@ ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Serv
 #=================================================
 # END OF SCRIPT
 #=================================================
+
 ynh_script_progression "Upgrade of $app completed"

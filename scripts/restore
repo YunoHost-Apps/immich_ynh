@@ -1,9 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
@@ -76,11 +72,13 @@ ynh_systemctl --service="fail2ban" --action="restart"
 #=================================================
 # RESTORE VARIOUS FILES
 #=================================================
+
 ynh_restore "/var/log/$app/"
 
 #=================================================
 # SET FILE OWNERSHIP / PERMISSIONS
 #=================================================
+
 myynh_set_permissions
 
 #=================================================
@@ -97,4 +95,5 @@ ynh_systemctl --service="nginx" --action="reload"
 #=================================================
 # END OF SCRIPT
 #=================================================
+
 ynh_script_progression "Restoration completed for $app"
