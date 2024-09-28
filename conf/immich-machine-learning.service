@@ -16,6 +16,7 @@ ExecStart=__INSTALL_DIR__/app/machine-learning/start.sh
 StandardOutput=append:/var/log/__APP__/__APP__-machine-learning.log
 StandardError=inherit
 Restart=on-failure
+UMask=0077
 
 # Sandboxing options to harden security
 # Depending on specificities of your service/app, you may need to tweak these
