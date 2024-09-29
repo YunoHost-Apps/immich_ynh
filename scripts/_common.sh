@@ -6,6 +6,7 @@
 
 # NodeJS required version
 nodejs_version=20
+npm_with_node_options="node --max-old-space-size=$((($(ynh_get_ram --free) - (1024/2))/1024*1024)) $(which npm)"
 
 # Fail2ban
 failregex="immich-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
@@ -156,17 +157,17 @@ myynh_install_immich() {
 
 	# Install immich-server
 		cd "$source_dir/server"
-		ynh_hide_warnings npm ci
-		ynh_hide_warnings npm run build
-		ynh_hide_warnings npm prune --omit=dev --omit=optional
+		ynh_hide_warnings "$npm_with_node_options" ci
+		ynh_hide_warnings "$npm_with_node_options" run build
+		ynh_hide_warnings "$npm_with_node_options" prune --omit=dev --omit=optional
 
 		cd "$source_dir/open-api/typescript-sdk"
-		ynh_hide_warnings npm ci
-		ynh_hide_warnings npm run build
+		ynh_hide_warnings "$npm_with_node_options" ci
+		ynh_hide_warnings "$npm_with_node_options" run build
 
 		cd "$source_dir/web"
-		ynh_hide_warnings npm ci
-		ynh_hide_warnings npm run build
+		ynh_hide_warnings "$npm_with_node_options" ci
+		ynh_hide_warnings "$npm_with_node_options" run build
 
 		mkdir -p "$install_dir/app/"
 		cp -a "$source_dir/server/node_modules" "$install_dir/app/"
@@ -180,7 +181,7 @@ myynh_install_immich() {
 		# Install custom start.sh script
 			ynh_config_add --template="immich-server-start.sh" --destination="$install_dir/app/start.sh"
 		cd "$install_dir/app/"
-		ynh_hide_warnings npm cache clean --force
+		ynh_hide_warnings "$npm_with_node_options" cache clean --force
 
 	# Install immich-machine-learning
 		cd "$source_dir/machine-learning"
@@ -220,7 +221,7 @@ myynh_install_immich() {
 
 	# Install sharp
 		cd "$install_dir/app"
-		ynh_hide_warnings npm install sharp
+		ynh_hide_warnings "$npm_with_node_options" install sharp
 
 	# Cleanup
 		ynh_safe_rm "$source_dir"
