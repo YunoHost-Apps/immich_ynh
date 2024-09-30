@@ -33,6 +33,8 @@ myynh_drop_psql_db
 
 ynh_nodejs_remove
 
+ynh_safe_rm "$data_dir"
+
 #=================================================
 # END OF SCRIPT
 #=================================================
