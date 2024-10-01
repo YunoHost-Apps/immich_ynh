@@ -33,7 +33,8 @@ myynh_drop_psql_db
 
 ynh_nodejs_remove
 
-ynh_safe_rm "$data_dir"
+# Remove all .immich files in data_dir
+find "$data_dir" -type f -name ".immich" -exec ynh_safe_rm {} \;
 
 #=================================================
 # END OF SCRIPT
