@@ -33,6 +33,8 @@ myynh_drop_psql_db
 
 ynh_nodejs_remove
 
+myynh_remove_lock_files
+
 #=================================================
 # END OF SCRIPT
 #=================================================
