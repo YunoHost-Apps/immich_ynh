@@ -229,11 +229,6 @@ myynh_install_immich() {
 		ynh_safe_rm "$source_dir"
 }
 
-# Remove all lock files in data_dir
-myynh_remove_lock_files() {
-	find "$data_dir" -type f -name ".immich" -exec rm {} \;
-}
-
 # Execute a psql command as root user
 # usage: myynh_execute_psql_as_root --sql=sql [--database=database]
 # | arg: -s, --sql=         - the SQL command to execute
