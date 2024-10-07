@@ -128,7 +128,7 @@ myynh_install_immich() {
 	# Define nodejs options
 		ram_G=$((($(ynh_get_ram --total) - (1024/2))/1024))
 		ram_G=$(($ram_G > 1 ? $ram_G : 1))
-		export NODE_OPTIONS="$NODE_OPTIONS --max_old_space_size=$(($ram_G*1024))"
+		export NODE_OPTIONS="--max_old_space_size=$(($ram_G*1024))"
 
 	# Use 127.0.0.1
 		cd "$source_dir"
@@ -227,11 +227,6 @@ myynh_install_immich() {
 
 	# Cleanup
 		ynh_safe_rm "$source_dir"
-}
-
-# Remove all lock files in data_dir
-myynh_remove_lock_files() {
-	find "$data_dir" -type f -name ".immich" -exec rm {} \;
 }
 
 # Execute a psql command as root user
