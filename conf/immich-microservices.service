@@ -13,7 +13,7 @@ Restart=on-failure
 User=__APP__
 Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/app
-Environment="PATH=__PATH_WITH_NODEJS__"
+Environment="PATH=__INSTALL_DIR__/ffmpeg-static:__PATH_WITH_NODEJS__"
 EnvironmentFile=__INSTALL_DIR__/env-server
 ExecStart=__NODEJS_DIR__/node __INSTALL_DIR__/app/dist/main microservices
 StandardOutput=append:/var/log/__APP__/__APP__-microservices.log
