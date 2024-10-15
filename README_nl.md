@@ -24,7 +24,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Geleverde versie:** 1.117.0~ynh2
+**Geleverde versie:** 1.118.1~ynh1
 
 ## Schermafdrukken
 
