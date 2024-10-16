@@ -11,16 +11,12 @@ ynh_script_progression "Removing system configurations related to $app..."
 if ynh_hide_warnings yunohost service status "$app-server" >/dev/null; then
 	yunohost service remove "$app-server"
 fi
-if ynh_hide_warnings yunohost service status "$app-microservices" >/dev/null; then
-	yunohost service remove "$app-microservices"
-fi
 if ynh_hide_warnings yunohost service status "$app-machine-learning" >/dev/null; then
 	yunohost service remove "$app-machine-learning"
 fi
 
 # Remove the dedicated systemd config
 ynh_config_remove_systemd "immich-server"
-ynh_config_remove_systemd "immich-microservices"
 ynh_config_remove_systemd "immich-machine-learning"
 
 ynh_config_remove_fail2ban

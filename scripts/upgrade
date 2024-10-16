@@ -4,12 +4,16 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+#ynh_script_progression "Ensuring downward compatibility..."
+
+#=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
 ynh_script_progression "Stopping $app's systemd service..."
 
 ynh_systemctl --service="$app-server" --action="stop"
-ynh_systemctl --service="$app-microservices" --action="stop"
 ynh_systemctl --service="$app-machine-learning" --action="stop"
 
 #=================================================
@@ -77,10 +81,8 @@ ynh_script_progression "Upgrading system configurations related to $app..."
 ynh_config_add_nginx
 
 ynh_config_add_systemd --service="$app-server" --template="immich-server.service"
-ynh_config_add_systemd --service="$app-microservices" --template="immich-microservices.service"
 ynh_config_add_systemd --service="$app-machine-learning" --template="immich-machine-learning.service"
 
-yunohost service add "$app-microservices" --description="Immich Microservices" --log="/var/log/$app/$app-microservices.log"
 yunohost service add "$app-machine-learning" --description="Immich Machine Learning" --log="/var/log/$app/$app-machine-learning.log"
 yunohost service add "$app-server" --description="Immich Server" --log="/var/log/$app/$app-server.log"
 
@@ -102,9 +104,8 @@ myynh_set_permissions
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemctl --service="$app-microservices" --action="start" --wait_until="Immich Microservices is running" --log_path="/var/log/$app/$app-microservices.log" --timeout=900
 ynh_systemctl --service="$app-machine-learning" --action="start" --wait_until="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
-ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log" --timeout=300
+ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log" --timeout=900
 
 #=================================================
 # END OF SCRIPT
