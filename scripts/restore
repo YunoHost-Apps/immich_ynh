@@ -38,6 +38,7 @@ ynh_nodejs_install
 ynh_script_progression "Restoring the database..."
 
 db_pwd=$(ynh_app_setting_get --key=psql_pwd)
+myynh_update_psql_db
 myynh_create_psql_db
 myynh_restore_psql_db
 

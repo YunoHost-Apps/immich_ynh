@@ -266,7 +266,9 @@ myynh_create_psql_db() {
 
 # Update the database
 myynh_update_psql_db() {
-	for db in postgres "$app"
+	databases=$(myynh_execute_psql_as_root --sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" --database="postgres")
+
+	for db in $databases
 	do
 		if ynh_hide_warnings myynh_execute_psql_as_root --sql=";" --database="$db" \
 		   | grep -q "collation version mismatch"
