@@ -55,7 +55,7 @@ ram.runtime = "500M"
         arm64.sha256 = "f4149bb2b0784e30e99bdda85471c9b5930d3402014e934a5098b41d0f7201b1"
 
     [resources.ports]
-    main.default = 3001
+    main.default = 2283
     machinelearning.default = 3003
 
     [resources.system_user]

@@ -49,15 +49,12 @@ ynh_script_progression "Restoring system configurations related to $app..."
 ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 ynh_restore "/etc/systemd/system/$app-server.service"
-ynh_restore "/etc/systemd/system/$app-microservices.service"
 ynh_restore "/etc/systemd/system/$app-machine-learning.service"
 
 systemctl enable "$app-server.service" --quiet
-systemctl enable "$app-microservices.service" --quiet
 systemctl enable "$app-machine-learning.service" --quiet
 
 yunohost service add "$app-server" --description="Immich Server" --log="/var/log/$app/$app-server.log"
-yunohost service add "$app-microservices" --description="Immich Microservices" --log="/var/log/$app/$app-microservices.log"
 yunohost service add "$app-machine-learning" --description="Immich Machine Learning" --log="/var/log/$app/$app-machine-learning.log"
 
 ynh_multimedia_build_main_dir
@@ -86,9 +83,8 @@ myynh_set_permissions
 #=================================================
 ynh_script_progression "Reloading NGINX web server and $app's service..."
 
-ynh_systemctl --service="$app-microservices" --action="start" --wait_until="Immich Microservices is running" --log_path="/var/log/$app/$app-microservices.log" --timeout=900
 ynh_systemctl --service="$app-machine-learning" --action="start" --wait_until="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
-ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log" --timeout=300
+ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log" --timeout=900
 
 ynh_systemctl --service="nginx" --action="reload"
 
