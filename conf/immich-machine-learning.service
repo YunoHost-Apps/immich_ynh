@@ -2,8 +2,8 @@
 Description=Immich machine-learning
 Documentation=https://github.com/immich-app/immich
 After=network.target
-PartOf=immich-server.service
-Before=immich-server.service
+PartOf=__APP__-server.service
+Before=__APP__-server.service
 
 [Service]
 Type=simple
@@ -11,10 +11,11 @@ Restart=on-failure
 User=__APP__
 Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/app
-EnvironmentFile=__INSTALL_DIR__/env-machine-learning
+EnvironmentFile=__INSTALL_DIR__/env
 ExecStart=__INSTALL_DIR__/app/machine-learning/start.sh
+SyslogIdentifier=immich-machine-learning
 StandardOutput=append:/var/log/__APP__/__APP__-machine-learning.log
-StandardError=inherit
+StandardError=append:/var/log/__APP__/__APP__-machine-learning.log
 Restart=on-failure
 UMask=0077
 

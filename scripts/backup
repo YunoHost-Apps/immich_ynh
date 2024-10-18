@@ -24,7 +24,6 @@ ynh_backup "$data_dir"
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 ynh_backup "/etc/systemd/system/$app-server.service"
-ynh_backup "/etc/systemd/system/$app-microservices.service"
 ynh_backup "/etc/systemd/system/$app-machine-learning.service"
 
 ynh_backup "/etc/logrotate.d/$app"
