@@ -23,5 +23,3 @@ REDIS_HOSTNAME=127.0.0.1
 ## Third-party information
 IMMICH_THIRD_PARTY_SOURCE_URL=https://github.com/YunoHost-Apps/immich_ynh/
 IMMICH_THIRD_PARTY_BUG_FEATURE_URL=https://github.com/YunoHost-Apps/immich_ynh/issues
-
-

@@ -179,6 +179,7 @@ myynh_install_immich() {
 		cp -a "$source_dir/server/resources" "$install_dir/app/"
 		cp -a "$source_dir/server/package.json" "$install_dir/app/"
 		cp -a "$source_dir/server/package-lock.json" "$install_dir/app/"
+		cp -a "$source_dir/serverserver/start*.sh" "$install_dir/app/"
 		cp -a "$source_dir/LICENSE" "$install_dir/app/"
 		# Install custom start.sh script
 			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/app/start.sh"
