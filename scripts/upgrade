@@ -14,6 +14,7 @@ then
         yunohost service remove "$app-microservices"
     fi
     ynh_config_remove_systemd "$app-microservices"
+    find "/var/log/$app/$app-microservices.log*" -exec rm {} \;
 fi
 
 #=================================================

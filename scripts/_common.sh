@@ -203,7 +203,7 @@ myynh_install_immich() {
 			ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
 		cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
-		cp -a "$source_dir/machine-learning/start.sh" "$install_dir/app/machine-learning/"
+		#cp -a "$source_dir/machine-learning/start.sh" "$install_dir/app/machine-learning/"
 		cp -a "$source_dir/machine-learning/log_conf.json" "$install_dir/app/machine-learning/"
 		cp -a "$source_dir/machine-learning/gunicorn_conf.py" "$install_dir/app/machine-learning/"
  		cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
