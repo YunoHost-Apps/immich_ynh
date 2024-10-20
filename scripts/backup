@@ -41,6 +41,7 @@ ynh_backup "/var/log/$app/"
 #=================================================
 ynh_print_info "Backing up a PostgreSQL database..."
 
+myynh_update_psql_db
 myynh_dump_psql_db
 
 #=================================================
