@@ -4,9 +4,9 @@ test_format = 1.0
 
 [default]
 	# -------------------------------
-	# Commits to test upgrade from dfaa8785a61758eea4fe558ffe6a3090a9efdfb0
-	# v1.105.1 with separeted microservices container/process
+	# Commits to test upgrade from 6c44cf52521b423739b1399102fcc9ead5be6eab
+	# 1.117.0~ynh2 with separeted microservices container/process
 	# -------------------------------
-		# test_upgrade_from.dfaa878.name = "1.105.1~ynh1"
-		# test_upgrade_from.dfaa878.args.domain = "sub.domain.tld"
-		# test_upgrade_from.dfaa878.args.init_main_permission = "visitors"
+		test_upgrade_from.6c44cf5.name = "1.117.0~ynh2"
+		test_upgrade_from.6c44cf5.args.domain = "sub.domain.tld"
+		test_upgrade_from.6c44cf5.args.init_main_permission = "visitors"

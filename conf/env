@@ -1,5 +1,6 @@
 ## General
 NODE_ENV=production
+UPLOAD_LOCATION=__DATA_DIR__
 IMMICH_MEDIA_LOCATION=__DATA_DIR__
 IMMICH_WEB_ROOT=__INSTALL_DIR__/app/www
 IMMICH_VERSION=release
@@ -23,5 +24,3 @@ REDIS_HOSTNAME=127.0.0.1
 ## Third-party information
 IMMICH_THIRD_PARTY_SOURCE_URL=https://github.com/YunoHost-Apps/immich_ynh/
 IMMICH_THIRD_PARTY_BUG_FEATURE_URL=https://github.com/YunoHost-Apps/immich_ynh/issues
-
-

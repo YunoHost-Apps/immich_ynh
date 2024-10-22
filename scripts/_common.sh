@@ -8,7 +8,7 @@
 nodejs_version=20
 
 # Fail2ban
-failregex="immich-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
+failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
 # PostgreSQL required version
 postgresql_version() {
@@ -179,9 +179,10 @@ myynh_install_immich() {
 		cp -a "$source_dir/server/resources" "$install_dir/app/"
 		cp -a "$source_dir/server/package.json" "$install_dir/app/"
 		cp -a "$source_dir/server/package-lock.json" "$install_dir/app/"
+		#cp -a "$source_dir/server/start*.sh" "$install_dir/app/"
 		cp -a "$source_dir/LICENSE" "$install_dir/app/"
 		# Install custom start.sh script
-			ynh_config_add --template="immich-server-start.sh" --destination="$install_dir/app/start.sh"
+			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/app/start.sh"
 		cd "$install_dir/app/"
 		ynh_hide_warnings npm cache clean --force
 
@@ -202,9 +203,12 @@ myynh_install_immich() {
 			ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
 		cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
+		#cp -a "$source_dir/machine-learning/start.sh" "$install_dir/app/machine-learning/"
+		cp -a "$source_dir/machine-learning/log_conf.json" "$install_dir/app/machine-learning/"
+		cp -a "$source_dir/machine-learning/gunicorn_conf.py" "$install_dir/app/machine-learning/"
  		cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
 		# Install custom start.sh script
-			ynh_config_add --template="immich-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
+			ynh_config_add --template="$app-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
 
 	# Install geonames
 		mkdir -p "$source_dir/geonames"
@@ -262,7 +266,9 @@ myynh_create_psql_db() {
 
 # Update the database
 myynh_update_psql_db() {
-	for db in postgres "$app"
+	databases=$(myynh_execute_psql_as_root --sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" --database="postgres")
+
+	for db in $databases
 	do
 		if ynh_hide_warnings myynh_execute_psql_as_root --sql=";" --database="$db" \
 		   | grep -q "collation version mismatch"
