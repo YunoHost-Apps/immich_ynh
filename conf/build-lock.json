@@ -20,7 +20,7 @@
   "packages": [
     {
       "name": "ffmpeg",
-      "version": "?"
+      "version": "__FFMPEG_VERSION__"
     }
   ]
 }
