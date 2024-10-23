@@ -4,13 +4,29 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+ynh_script_progression "Ensuring downward compatibility..."
+
+if ynh_app_upgrading_from_version_before 1.118.2~ynh1
+then
+    if ynh_hide_warnings yunohost service status "$app-microservices" >/dev/null; then
+        yunohost service remove "$app-microservices"
+    fi
+    ynh_config_remove_systemd "$app-microservices"
+    find "/var/log/$app/" -name "$app-microservices.log*" -delete
+    ynh_app_setting_delete "port_microservices"
+    ynh_app_setting_delete "checksum__var_www_immich_env-machine-learning"
+    ynh_app_setting_delete "checksum__var_www_immich_env-server"
+    ynh_app_setting_delete "checksum__etc_systemd_system_immich-microservices.service"
+fi
+
+#=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
 ynh_script_progression "Stopping $app's systemd service..."
 
 ynh_systemctl --service="$app-server" --action="stop"
-ynh_systemctl --service="$app-microservices" --action="stop"
-ynh_systemctl --service="$app-machine-learning" --action="stop"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -63,10 +79,7 @@ ynh_script_progression "Updating $app's configuration files..."
 db_pwd=$(ynh_app_setting_get --key=psql_pwd)
 db_port=$(ynh_app_setting_get --key=psql_port)
 
-ynh_config_add --template="env-server" --destination="$install_dir/env-server"
-
-ynh_config_add --template="env-machine-learning" --destination="$install_dir/env-machine-learning"
-
+ynh_config_add --template="env" --destination="$install_dir/env"
 ynh_config_add --template="build-lock.json" --destination="$install_dir/app/build-lock.json"
 
 #=================================================
@@ -76,11 +89,9 @@ ynh_script_progression "Upgrading system configurations related to $app..."
 
 ynh_config_add_nginx
 
-ynh_config_add_systemd --service="$app-server" --template="immich-server.service"
-ynh_config_add_systemd --service="$app-microservices" --template="immich-microservices.service"
-ynh_config_add_systemd --service="$app-machine-learning" --template="immich-machine-learning.service"
+ynh_config_add_systemd --service="$app-server" --template="$app-server.service"
+ynh_config_add_systemd --service="$app-machine-learning" --template="$app-machine-learning.service"
 
-yunohost service add "$app-microservices" --description="Immich Microservices" --log="/var/log/$app/$app-microservices.log"
 yunohost service add "$app-machine-learning" --description="Immich Machine Learning" --log="/var/log/$app/$app-machine-learning.log"
 yunohost service add "$app-server" --description="Immich Server" --log="/var/log/$app/$app-server.log"
 
@@ -102,9 +113,8 @@ myynh_set_permissions
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemctl --service="$app-microservices" --action="start" --wait_until="Immich Microservices is running" --log_path="/var/log/$app/$app-microservices.log" --timeout=900
 ynh_systemctl --service="$app-machine-learning" --action="start" --wait_until="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
-ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log" --timeout=300
+ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log" --timeout=900
 
 #=================================================
 # END OF SCRIPT

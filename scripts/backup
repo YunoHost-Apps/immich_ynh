@@ -24,7 +24,6 @@ ynh_backup "$data_dir"
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 ynh_backup "/etc/systemd/system/$app-server.service"
-ynh_backup "/etc/systemd/system/$app-microservices.service"
 ynh_backup "/etc/systemd/system/$app-machine-learning.service"
 
 ynh_backup "/etc/logrotate.d/$app"
@@ -42,6 +41,7 @@ ynh_backup "/var/log/$app/"
 #=================================================
 ynh_print_info "Backing up a PostgreSQL database..."
 
+myynh_update_psql_db
 myynh_dump_psql_db
 
 #=================================================
