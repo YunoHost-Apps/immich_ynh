@@ -15,10 +15,10 @@ then
     fi
     ynh_config_remove_systemd "$app-microservices"
     find "/var/log/$app/" -name "$app-microservices.log*" -delete
-    ynh_app_setting_delete "port_microservices"
-    ynh_app_setting_delete "checksum__var_www_immich_env-machine-learning"
-    ynh_app_setting_delete "checksum__var_www_immich_env-server"
-    ynh_app_setting_delete "checksum__etc_systemd_system_immich-microservices.service"
+    ynh_app_setting_delete --app="$app" --key="port_microservices"
+    ynh_app_setting_delete --app="$app" --key="checksum__var_www_immich_env-machine-learning"
+    ynh_app_setting_delete --app="$app" --key="checksum__var_www_immich_env-server"
+    ynh_app_setting_delete --app="$app" --key="checksum__etc_systemd_system_immich-microservices.service"
 fi
 
 #=================================================
