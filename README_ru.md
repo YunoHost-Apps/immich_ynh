@@ -24,7 +24,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Поставляемая версия:** 1.119.1~ynh2
+**Поставляемая версия:** 1.120.1~ynh1
 
 ## Снимки экрана
 
