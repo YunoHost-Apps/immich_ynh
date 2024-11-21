@@ -24,7 +24,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Versión proporcionada:** 1.120.2~ynh1
+**Versión proporcionada:** 1.121.0~ynh1
 
 ## Capturas de pantalla
 
