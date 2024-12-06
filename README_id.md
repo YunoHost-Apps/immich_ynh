@@ -5,7 +5,9 @@ Ini TIDAK boleh diedit dengan tangan.
 
 # Immich untuk YunoHost
 
-[![Tingkat integrasi](https://dash.yunohost.org/integration/immich.svg)](https://ci-apps.yunohost.org/ci/apps/immich/) ![Status kerja](https://ci-apps.yunohost.org/ci/badges/immich.status.svg) ![Status pemeliharaan](https://ci-apps.yunohost.org/ci/badges/immich.maintain.svg)
+[![Tingkat integrasi](https://apps.yunohost.org/badge/integration/immich)](https://ci-apps.yunohost.org/ci/apps/immich/)
+![Status kerja](https://apps.yunohost.org/badge/state/immich)
+![Status pemeliharaan](https://apps.yunohost.org/badge/maintained/immich)
 
 [![Pasang Immich dengan YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=immich)
 
@@ -24,7 +26,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Versi terkirim:** 1.121.0~ynh1
+**Versi terkirim:** 1.122.1~ynh1
 
 ## Tangkapan Layar
 

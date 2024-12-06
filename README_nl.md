@@ -5,7 +5,9 @@ Hij mag NIET handmatig aangepast worden.
 
 # Immich voor Yunohost
 
-[![Integratieniveau](https://dash.yunohost.org/integration/immich.svg)](https://ci-apps.yunohost.org/ci/apps/immich/) ![Mate van functioneren](https://ci-apps.yunohost.org/ci/badges/immich.status.svg) ![Onderhoudsstatus](https://ci-apps.yunohost.org/ci/badges/immich.maintain.svg)
+[![Integratieniveau](https://apps.yunohost.org/badge/integration/immich)](https://ci-apps.yunohost.org/ci/apps/immich/)
+![Mate van functioneren](https://apps.yunohost.org/badge/state/immich)
+![Onderhoudsstatus](https://apps.yunohost.org/badge/maintained/immich)
 
 [![Immich met Yunohost installeren](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=immich)
 
@@ -24,7 +26,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Geleverde versie:** 1.121.0~ynh1
+**Geleverde versie:** 1.122.1~ynh1
 
 ## Schermafdrukken
 
