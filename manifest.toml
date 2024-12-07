@@ -77,6 +77,8 @@ ram.runtime = "500M"
         "python3-dev",
         "ffmpeg",
         "postgresql",
+        "postgresql-common",
+        "postgresql-client-common",
         "wget",
         "build-essential",
         "libreadline-dev",
