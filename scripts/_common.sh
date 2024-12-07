@@ -5,7 +5,7 @@
 #=================================================
 
 # NodeJS required version
-nodejs_version=20
+nodejs_version=22
 
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
