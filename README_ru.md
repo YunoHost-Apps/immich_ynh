@@ -5,7 +5,9 @@
 
 # Immich для YunoHost
 
-[![Уровень интеграции](https://dash.yunohost.org/integration/immich.svg)](https://ci-apps.yunohost.org/ci/apps/immich/) ![Состояние работы](https://ci-apps.yunohost.org/ci/badges/immich.status.svg) ![Состояние сопровождения](https://ci-apps.yunohost.org/ci/badges/immich.maintain.svg)
+[![Уровень интеграции](https://apps.yunohost.org/badge/integration/immich)](https://ci-apps.yunohost.org/ci/apps/immich/)
+![Состояние работы](https://apps.yunohost.org/badge/state/immich)
+![Состояние сопровождения](https://apps.yunohost.org/badge/maintained/immich)
 
 [![Установите Immich с YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=immich)
 
@@ -24,7 +26,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Поставляемая версия:** 1.121.0~ynh1
+**Поставляемая версия:** 1.122.1~ynh1
 
 ## Снимки экрана
 
