@@ -126,9 +126,7 @@ ram.runtime = "500M"
         "libpq-dev",
         "postgresql-16",
         "postgresql-16-pgvector",
-        "postgresql-client-16",
-        "postgresql-common",
-        "postgresql-client-common"
+        "postgresql-client-16"
     ]
 
     [resources.database]
