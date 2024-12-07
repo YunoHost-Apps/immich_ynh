@@ -5,7 +5,9 @@
 
 # YunoHost 上的 Immich
 
-[![集成程度](https://dash.yunohost.org/integration/immich.svg)](https://ci-apps.yunohost.org/ci/apps/immich/) ![工作状态](https://ci-apps.yunohost.org/ci/badges/immich.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/immich.maintain.svg)
+[![集成程度](https://apps.yunohost.org/badge/integration/immich)](https://ci-apps.yunohost.org/ci/apps/immich/)
+![工作状态](https://apps.yunohost.org/badge/state/immich)
+![维护状态](https://apps.yunohost.org/badge/maintained/immich)
 
 [![使用 YunoHost 安装 Immich](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=immich)
 
@@ -24,7 +26,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**分发版本：** 1.121.0~ynh1
+**分发版本：** 1.122.1~ynh1
 
 ## 截图
 
