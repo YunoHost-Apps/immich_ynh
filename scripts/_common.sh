@@ -15,6 +15,9 @@ postgresql_version() {
 	ynh_read_manifest "resources.apt.extras.postgresql.packages" \
 	| grep -o 'postgresql-[0-9][0-9]-pgvector' | head -n1 | cut -d'-' -f2
 }
+postgresql_cluster_port() {
+	pg_lsclusters --no-header | grep "^$postgresql_version" | cut -d' ' -f3
+}
 
 # Retrieve full latest python version from major version
 # usage: py_latest_from_major --python="3.8"
@@ -295,9 +298,7 @@ myynh_drop_psql_db() {
 
 # Dump the database
 myynh_dump_psql_db() {
-	local db_port=$(ynh_app_setting_get --key=psql_port)
-
-	sudo --login --user=postgres pg_dump --port="$db_port" --dbname="$app" > db.sql
+	sudo --login --user=postgres pg_dump --cluster="$(postgresql_version)/main" --dbname="$app" > db.sql
 }
 
 # Restore the database
@@ -312,7 +313,7 @@ myynh_restore_psql_db() {
 
 
 # Set permissions
-myynh_set_permissions () {
+myynh_set_permissions() {
 	chown -R $app: "$install_dir"
 	chmod u=rwX,g=rX,o= "$install_dir"
 	chmod -R o-rwx "$install_dir"
@@ -326,4 +327,20 @@ myynh_set_permissions () {
 
 	chown -R $app: "/var/log/$app"
 	chmod u=rw,g=r,o= "/var/log/$app"
+}
+
+myynh_set_default_psql_cluster_to_debian_default() {
+	local default_port=5432
+	local config_file="/etc/postgresql-common/user_clusters"
+
+	#retrieve informations about default psql cluster
+	default_psql_version=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
+	default_psql_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f2)
+	default_psql_database=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f5)
+
+	# Remove non commented lines
+	sed -i'.bak' -e '/^#/!d' "$config_file"
+
+	# Add new line USER  GROUP   VERSION CLUSTER DATABASE
+	echo -e "* * $default_psql_version $default_psql_cluster $default_psql_database" >> "$config_file"
 }

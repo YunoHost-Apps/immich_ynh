@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.122.1~ynh1"
+version = "1.122.1~ynh2"
 
 maintainers = ["ewilly"]
 
@@ -126,10 +126,9 @@ ram.runtime = "500M"
         "libpq-dev",
         "postgresql-16",
         "postgresql-16-pgvector",
-        "postgresql-client-16",
-        "postgresql-common",
-        "postgresql-client-common"
+        "postgresql-client-16"
     ]
 
-    [resources.database]
-    type = "postgresql"
+    # Commented to avoid provisionning a db on wrong cluster
+    #[resources.database]
+    #type = "postgresql"
