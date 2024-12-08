@@ -10,7 +10,8 @@ ynh_script_progression "Ensuring downward compatibility..."
 
 if ynh_app_upgrading_from_version_before 1.118.2~ynh1
 then
-    if ynh_hide_warnings yunohost service status "$app-microservices" >/dev/null; then
+    if ynh_hide_warnings yunohost service status "$app-microservices" >/dev/null
+    then
         yunohost service remove "$app-microservices"
     fi
     ynh_config_remove_systemd "$app-microservices"
@@ -20,6 +21,13 @@ then
     ynh_app_setting_delete --key="checksum__var_www_immich_env-server"
     ynh_app_setting_delete --key="checksum__etc_systemd_system_immich-microservices.service"
 fi
+
+if ynh_app_upgrading_from_version_before 1.122.1~ynh2
+then
+    ynh_psql_drop_db "$app"
+    ynh_psql_drop_user "$app"
+fi
+
 
 #=================================================
 # STOP SYSTEMD SERVICE
@@ -63,6 +71,8 @@ ynh_nodejs_install
 ynh_script_progression "Udpating a PostgreSQL database..."
 
 myynh_update_psql_db
+
+myynh_set_default_psql_cluster_to_debian_default
 
 #=================================================
 # MAKE INSTALL

@@ -43,6 +43,8 @@ ynh_app_setting_set --key=psql_pwd --value="$db_pwd"
 ynh_app_setting_set --key=psql_version --value="$(postgresql_version)"
 ynh_app_setting_set --key=psql_port --value="$db_port"
 
+myynh_set_default_psql_cluster_to_debian_default
+
 #=================================================
 # MAKE INSTALL
 #=================================================

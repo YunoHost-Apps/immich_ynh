@@ -42,6 +42,8 @@ myynh_update_psql_db
 myynh_create_psql_db
 myynh_restore_psql_db
 
+myynh_set_default_psql_cluster_to_debian_default
+
 #=================================================
 # RESTORE SYSTEM CONFIGURATIONS
 #=================================================
