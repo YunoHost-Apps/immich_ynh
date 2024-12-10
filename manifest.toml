@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.122.1~ynh1"
+version = "1.122.2~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -43,8 +43,8 @@ ram.runtime = "500M"
     [resources.sources]
 
         [resources.sources.main]
-        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.122.1.tar.gz"
-        sha256 = "eba5456527578963b0d34b24b23f6bf5d6f7015acb56eb3ea5fb22a09340824c"
+        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.122.2.tar.gz"
+        sha256 = "28ee2adcfbe34ae72833f1078771fe1561415e450e1cd54a7a29d0cf57164d2e"
 
         autoupdate.strategy = "latest_github_release"
 
@@ -126,10 +126,9 @@ ram.runtime = "500M"
         "libpq-dev",
         "postgresql-16",
         "postgresql-16-pgvector",
-        "postgresql-client-16",
-        "postgresql-common",
-        "postgresql-client-common"
+        "postgresql-client-16"
     ]
 
-    [resources.database]
-    type = "postgresql"
+    # Commented to avoid provisionning a db on wrong cluster
+    #[resources.database]
+    #type = "postgresql"
