@@ -15,15 +15,6 @@ ffmpeg_static_dir="$install_dir/ffmpeg-static"
 ynh_setup_source --source_id="ffmpeg-static" --dest_dir="$ffmpeg_static_dir"
 
 #=================================================
-# CHECK PYTHON VERSION AND COMPILE IF NEEDED
-#=================================================
-ynh_script_progression "Check Python version & compile the required one if needed..."
-
-py_required_major=$(cat "$source_dir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
-myynh_py_latest_from_major --python="$py_required_major"
-myynh_install_python --python="$py_required_version"
-
-#=================================================
 # INSTALL NODEJS
 #=================================================
 ynh_script_progression "Installing nodejs..."
