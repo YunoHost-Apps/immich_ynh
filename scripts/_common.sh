@@ -30,7 +30,7 @@ postgresql_cluster_port=$( \
 
 # Python required version
 py_required_major=$( \
-	curl -Ls "https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$app_version/machine-learning/Dockerfile "
+	curl -Ls "https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$app_version/machine-learning/Dockerfile " \
 	| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1 \
 ) #3.11
 
