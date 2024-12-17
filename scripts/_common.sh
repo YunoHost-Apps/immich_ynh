@@ -293,6 +293,22 @@ myynh_set_permissions() {
 	chmod u=rw,g=r,o= "/var/log/$app"
 }
 
+myynh_drop_provisionned_psql_db() {
+	local default_port=5432
+
+	#retrieve informations about default psql cluster
+	default_psql_version=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
+	default_psql_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f2)
+
+	# Delete provisionned immich db & user
+	myynh_execute_psql_as_root \
+		--cluster="$default_psql_version/$default_psql_cluster" \
+		--sql="DROP DATABASE $app;"
+	myynh_execute_psql_as_root \
+		--cluster="$default_psql_version/$default_psql_cluster" \
+		--sql="DROP USER $app;"
+}
+
 myynh_set_default_psql_cluster_to_debian_default() {
 	local default_port=5432
 	local config_file="/etc/postgresql-common/user_clusters"
@@ -307,12 +323,4 @@ myynh_set_default_psql_cluster_to_debian_default() {
 
 	# Add new line USER  GROUP   VERSION CLUSTER DATABASE
 	echo -e "* * $default_psql_version $default_psql_cluster $default_psql_database" >> "$config_file"
-
-	# Delete provisionned immich db & user
-	myynh_execute_psql_as_root \
-		--cluster="$default_psql_version/$default_psql_cluster" \
-		--sql="DROP DATABASE $app;"
-	myynh_execute_psql_as_root \
-		--cluster="$default_psql_version/$default_psql_cluster" \
-		--sql="DROP USER $app;"
 }
