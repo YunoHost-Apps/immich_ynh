@@ -115,6 +115,5 @@ ram.runtime = "500M"
         "postgresql-client-16"
     ]
 
-    # Commented to avoid provisionning a db on wrong cluster
-    #[resources.database]
-    #type = "postgresql"
+    [resources.database]
+    type = "postgresql"
