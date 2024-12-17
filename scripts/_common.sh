@@ -32,12 +32,12 @@ app_psql_version() {
 }
 app_psql_cluster() {
 	pg_lsclusters --no-header \
-	| grep "^$app_psql_version" \
+	| grep "^$(app_psql_version)" \
 	| cut -d' ' -f2
 }
 app_psql_port() {
 	pg_lsclusters --no-header \
-	| grep "^$app_psql_version" \
+	| grep "^$(app_psql_version)" \
 	| cut -d' ' -f3
 }
 
