@@ -73,6 +73,7 @@ ram.runtime = "500M"
 
     [resources.apt]
     packages = [
+        "postgresql",
         "redis-server",
         "python3-venv",
         "python3-dev",
