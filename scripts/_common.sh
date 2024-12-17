@@ -8,9 +8,8 @@
 ## yq is not a dependencie of yunohost package so tomlq command is not available
 ## (see https://github.com/YunoHost/yunohost/blob/dev/debian/control)
 app_version=$( \
-	cat ../manifest.toml 2>/dev/null \
-	| grep '^version = ' | cut -d '=' -f 2 \
-	| cut -d '~' -f 1 | tr -d ' "' \
+	ynh_read_manifest "version" |
+	| cut -d'~' -f1 \
 ) #1.101.0
 
 # NodeJS required version
@@ -22,16 +21,23 @@ failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 # PostgreSQL required version
 postgresql_version=$( \
 	ynh_read_manifest "resources.apt.extras.postgresql.packages" \
-	| grep -o 'postgresql-[0-9][0-9]-pgvector' | head -n1 | cut -d'-' -f2
+	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
+	| head -n1 \
+	| cut -d'-' -f2 \
 )
 postgresql_cluster_port=$( \
-	pg_lsclusters --no-header | grep "^$postgresql_version" | cut -d' ' -f3
+	pg_lsclusters --no-header \
+	| grep "^$postgresql_version" \
+	| cut -d' ' -f3 \
 )
 
 # Python required version
 py_required_major=$( \
 	curl -Ls "https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$app_version/machine-learning/Dockerfile " \
-	| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1 \
+	| grep "FROM python:" \
+	| head -n1 \
+	| cut -d':' -f2 \
+	| cut -d'-' -f1 \
 ) #3.11
 
 # Install immich
