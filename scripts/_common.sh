@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /usr/share/yunohost/helpers
+
 #=================================================
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
