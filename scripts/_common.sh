@@ -19,15 +19,25 @@ nodejs_version=22
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
 # PostgreSQL required version
-postgresql_version() {
+
+	default_psql_version=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
+	default_psql_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f2)
+	default_psql_database=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f5)
+
+app_psql_version() {
 	ynh_read_manifest "resources.apt.extras.postgresql.packages" \
 	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
 	| head -n1 \
 	| cut -d'-' -f2
 }
-postgresql_cluster_port() {
+app_psql_cluster() {
 	pg_lsclusters --no-header \
-	| grep "^$postgresql_version" \
+	| grep "^$app_psql_version" \
+	| cut -d' ' -f2
+}
+app_psql_port() {
+	pg_lsclusters --no-header \
+	| grep "^$app_psql_version" \
 	| cut -d' ' -f3
 }
 
@@ -160,12 +170,14 @@ myynh_install_immich() {
 
 # Execute a psql command as root user
 # usage: myynh_execute_psql_as_root --sql=sql [--database=database]
+# | arg: -c, --cluster=     - the cluster to connect to
 # | arg: -s, --sql=         - the SQL command to execute
 # | arg: -d, --database=    - the database to connect to
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
 	local legacy_args=sd
-	local -A args_array=([s]=sql= [d]=database=)
+	local -A args_array=([c]=cluster= [s]=sql= [d]=database=)
+	local cluster
 	local sql
 	local database
 	# Manage arguments with getopts
@@ -178,45 +190,79 @@ myynh_execute_psql_as_root() {
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$(postgresql_version)/main" "$database" --command="$sql"
+		psql --cluster="$cluster" "$database" --command="$sql"
 }
 
 # Install the database
 myynh_create_psql_db() {
-	myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
-	myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
-	myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
-	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
-	myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
+	myynh_execute_psql_as_root \
+		--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+		--sql="CREATE DATABASE $app;"
+	myynh_execute_psql_as_root \
+		--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+		--sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" \
+		--database="$app"
+	myynh_execute_psql_as_root \
+		--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+		--sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" \
+		--database="$app"
+	myynh_execute_psql_as_root \
+		--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+		--sql="ALTER USER $app WITH SUPERUSER;" \
+		--database="$app"
+	myynh_execute_psql_as_root \
+		--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+		--sql="CREATE EXTENSION IF NOT EXISTS vector;" \
+		--database="$app"
 }
 
 # Update the database
 myynh_update_psql_db() {
-	databases=$(myynh_execute_psql_as_root --sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" --database="postgres")
+	databases=$(myynh_execute_psql_as_root \
+				--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+				--sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" \
+				--database="postgres")
 
 	for db in $databases
 	do
-		if ynh_hide_warnings myynh_execute_psql_as_root --sql=";" --database="$db" \
-		   | grep -q "collation version mismatch"
+		if ynh_hide_warnings myynh_execute_psql_as_root \
+			--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+			--sql=";" \
+			--database="$db" \
+			| grep -q "collation version mismatch"
 		then
-			ynh_hide_warnings myynh_execute_psql_as_root --sql="REINDEX DATABASE $db;" --database="$db"
-			myynh_execute_psql_as_root --sql="ALTER DATABASE $db REFRESH COLLATION VERSION;" --database="$db"
+			ynh_hide_warnings myynh_execute_psql_as_root \
+				--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+				--sql="REINDEX DATABASE $db;" \
+				--database="$db"
+			myynh_execute_psql_as_root \
+				--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+				--sql="ALTER DATABASE $db REFRESH COLLATION VERSION;" \
+				--database="$db"
 		fi
 	done
 }
 
 # Remove the database
 myynh_drop_psql_db() {
-	myynh_execute_psql_as_root --sql="REVOKE CONNECT ON DATABASE $app FROM public;"
-	myynh_execute_psql_as_root --sql="SELECT pg_terminate_backend (pg_stat_activity.pid) FROM pg_stat_activity \
-										WHERE pg_stat_activity.datname = '$app' AND pid <> pg_backend_pid();"
-	myynh_execute_psql_as_root --sql="DROP DATABASE $app;"
-	myynh_execute_psql_as_root --sql="DROP USER $app;"
+	myynh_execute_psql_as_root \
+		--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+		--sql="REVOKE CONNECT ON DATABASE $app FROM public;"
+	myynh_execute_psql_as_root \
+		--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+		--sql="SELECT pg_terminate_backend (pg_stat_activity.pid) FROM pg_stat_activity \
+				WHERE pg_stat_activity.datname = '$app' AND pid <> pg_backend_pid();"
+	myynh_execute_psql_as_root \
+		--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+		--sql="DROP DATABASE $app;"
+	myynh_execute_psql_as_root \
+		--cluster="$(app_psql_version)/$(app_psql_cluster)" \
+		--sql="DROP USER $app;"
 }
 
 # Dump the database
 myynh_dump_psql_db() {
-	sudo --login --user=postgres pg_dump --cluster="$(postgresql_version)/main" --dbname="$app" > db.sql
+	sudo --login --user=postgres pg_dump --cluster="$(app_psql_version)/$(app_psql_cluster)" --dbname="$app" > db.sql
 }
 
 # Restore the database
@@ -226,7 +272,7 @@ myynh_restore_psql_db() {
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
 	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$(postgresql_version)/main" --dbname="$app" < ./db.sql
+		psql --cluster="$(app_psql_version)/$(app_psql_cluster)" --dbname="$app" < ./db.sql
 }
 
 
@@ -261,4 +307,12 @@ myynh_set_default_psql_cluster_to_debian_default() {
 
 	# Add new line USER  GROUP   VERSION CLUSTER DATABASE
 	echo -e "* * $default_psql_version $default_psql_cluster $default_psql_database" >> "$config_file"
+
+	# Delete provisionned immich db & user
+	myynh_execute_psql_as_root \
+		--cluster="$default_psql_version/$default_psql_cluster" \
+		--sql="DROP DATABASE $app;"
+	myynh_execute_psql_as_root \
+		--cluster="$default_psql_version/$default_psql_cluster" \
+		--sql="DROP USER $app;"
 }
