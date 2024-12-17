@@ -190,7 +190,7 @@ myynh_execute_psql_as_root() {
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$cluster" "$database" --command="$sql"
+		psql --cluster="$(app_psql_version)/$(app_psql_cluster)" "$database" --command="$sql"
 }
 
 # Install the database
