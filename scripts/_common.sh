@@ -10,7 +10,7 @@ source /usr/share/yunohost/helpers
 ## yq is not a dependencie of yunohost package so tomlq command is not available
 ## (see https://github.com/YunoHost/yunohost/blob/dev/debian/control)
 app_version=$( \
-	ynh_read_manifest "version" |
+	ynh_read_manifest "version" \
 	| cut -d'~' -f1 \
 ) #1.101.0
 
