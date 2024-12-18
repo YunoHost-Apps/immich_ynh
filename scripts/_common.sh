@@ -130,7 +130,7 @@ myynh_install_immich() {
 			# add poetry
 				ynh_hide_warnings "$uv" pip --no-cache-dir install --upgrade poetry
 			# poetry install
-				ynh_hide_warnings "$uv" poetry install --no-root --with dev --with cpu
+				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
 		cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
 		cp -a "$source_dir/machine-learning/log_conf.json" "$install_dir/app/machine-learning/"
