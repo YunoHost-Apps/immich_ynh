@@ -121,14 +121,13 @@ myynh_install_immich() {
 			uv="/usr/local/bin/uv"
 		# Create the virtual environment
 		(
-			cd "$install_dir/app/machine-learning"
 			ynh_hide_warnings "$uv" venv "$install_dir/app/machine-learning/venv" --python "$(app_py_version)"
 			# activate the virtual environment
 				set +o nounset
 				source "$install_dir/app/machine-learning/venv/bin/activate"
 				set -o nounset
 			# add poetry
-				ynh_hide_warnings "$uv" pip --no-cache-dir install --upgrade poetry
+				ynh_hide_warnings "$uv" "$install_dir/app/machine-learning/venv/bin/pip3" --no-cache-dir install --upgrade poetry
 			# poetry install
 				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
