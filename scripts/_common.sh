@@ -127,7 +127,7 @@ myynh_install_immich() {
 				source "$install_dir/app/machine-learning/venv/bin/activate"
 				set -o nounset
 			# add poetry
-				ynh_hide_warnings "$uv" "$install_dir/app/machine-learning/venv/bin/pip3" --no-cache-dir install --upgrade poetry
+				ynh_hide_warnings "$uv" pip --no-cache-dir install --upgrade poetry
 			# poetry install
 				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
