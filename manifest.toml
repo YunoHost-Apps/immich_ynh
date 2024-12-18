@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.123.0~ynh1"
+version = "1.123.0~ynh2"
 
 maintainers = ["ewilly"]
 
@@ -19,7 +19,7 @@ userdoc = "https://github.com/immich-app/immich#getting-started"
 code = "https://github.com/immich-app/immich"
 
 [integration]
-yunohost = ">= 11.2.18"
+yunohost = ">= 12"
 helpers_version = "2.1"
 architectures = ["arm64", "amd64"]
 multi_instance = false
@@ -73,25 +73,15 @@ ram.runtime = "500M"
 
     [resources.apt]
     packages = [
-        "python3-venv",
-        "python3-dev",
-        "ffmpeg",
+        "pipx",
+        "curl",
         "postgresql",
-        "wget",
-        "build-essential",
-        "libreadline-dev",
-        "libncursesw5-dev",
-        "libssl-dev",
-        "libsqlite3-dev",
-        "tk-dev",
-        "libgdbm-dev",
-        "libc6-dev",
-        "libbz2-dev",
-        "libffi-dev",
-        "zlib1g-dev",
-        "unzip",
+        "redis-server",
+        "python3",
         "uuid-runtime",
         "autoconf",
+        "build-essential",
+        "unzip",
         "jq",
         "perl",
         "libnet-ssleay-perl",
@@ -113,9 +103,7 @@ ram.runtime = "500M"
         "libmojolicious-perl",
         "libfile-slurper-perl",
         "liblcms2-2",
-        "libllvm16",
-        "libllvm13",
-        "redis-server"
+        "wget"
     ]
 
     [resources.apt.extras.postgresql]

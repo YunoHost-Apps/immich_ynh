@@ -19,6 +19,7 @@ ynh_setup_source --source_id="ffmpeg-static" --dest_dir="$ffmpeg_static_dir"
 #=================================================
 ynh_script_progression "Installing nodejs..."
 
+nodejs_version=$(app_node_version)
 ynh_nodejs_install
 
 #=================================================

@@ -18,7 +18,6 @@ app_node_version() {
 	| cut -d':' -f2 \
 	| cut -d'.' -f1
 }
-nodejs_version=$(app_node_version)
 
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"

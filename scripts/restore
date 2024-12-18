@@ -22,6 +22,7 @@ ynh_restore "$data_dir"
 #=================================================
 ynh_script_progression "Reinstalling nodejs..."
 
+nodejs_version=$(app_node_version)
 ynh_nodejs_install
 
 #=================================================
