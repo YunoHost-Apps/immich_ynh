@@ -119,6 +119,7 @@ myynh_install_immich() {
 		# Install uv
 			PIPX_HOME="/opt/pipx" PIPX_BIN_DIR="/usr/local/bin" pipx install uv --force 2>&1
 			uv="/usr/local/bin/uv"
+			uvx="/usr/local/bin/uvx"
 		# Create the virtual environment
 		(
 			ynh_hide_warnings "$uv" venv "$install_dir/app/machine-learning/venv" --python "$(app_py_version)"
@@ -126,10 +127,8 @@ myynh_install_immich() {
 				set +o nounset
 				source "$install_dir/app/machine-learning/venv/bin/activate"
 				set -o nounset
-			# add poetry
-				ynh_hide_warnings "$uv" pip --no-cache-dir install --upgrade poetry
 			# poetry install
-				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
+				ynh_hide_warnings "$uvx" poetry install --no-root --with dev --with cpu
 		)
 		cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
 		cp -a "$source_dir/machine-learning/log_conf.json" "$install_dir/app/machine-learning/"
