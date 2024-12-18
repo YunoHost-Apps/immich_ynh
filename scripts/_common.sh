@@ -4,121 +4,46 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
+# App version
+app_version() {
+	ynh_read_manifest "version" \
+	| cut -d'~' -f1
+} #1.101.0
+
 # NodeJS required version
-nodejs_version=22
+app_node_version() {
+	curl -Ls "https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$(app_version)/server/Dockerfile" \
+	| grep "FROM node:" \
+	| head -n1 \
+	| cut -d':' -f2 \
+	| cut -d'.' -f1
+}
+nodejs_version=$(app_node_version)
 
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
 # PostgreSQL required version
-postgresql_version() {
+app_psql_version() {
 	ynh_read_manifest "resources.apt.extras.postgresql.packages" \
-	| grep -o 'postgresql-[0-9][0-9]-pgvector' | head -n1 | cut -d'-' -f2
+	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
+	| head -n1 \
+	| cut -d'-' -f2
 }
-postgresql_cluster_port() {
-	pg_lsclusters --no-header | grep "^$postgresql_version" | cut -d' ' -f3
-}
-
-# Retrieve full latest python version from major version
-# usage: py_latest_from_major --python="3.8"
-# | arg: -p, --python=    - the major python version
-myynh_py_latest_from_major() {
-	# Declare an array to define the options of this helper.
-	local legacy_args=u
-	local -A args_array=( [p]=python= )
-	local python
-	# Manage arguments with getopts
-	ynh_handle_getopts_args "$@"
-
-	py_required_version=$(curl -Ls https://www.python.org/ftp/python/ \
-						| grep '>'$python  | cut -d '/' -f 2 \
-						| cut -d '>' -f 2 | sort -rV | head -n 1)
+app_psql_port() {
+	pg_lsclusters --no-header \
+	| grep "^$(app_psql_version)" \
+	| cut -d' ' -f3
 }
 
-# Install specific python version
-# usage: myynh_install_python --python="3.8.6"
-# | arg: -p, --python=    - the python version to install
-myynh_install_python() {
-	# Declare an array to define the options of this helper.
-	local legacy_args=u
-	local -A args_array=( [p]=python= )
-	local python
-	# Manage arguments with getopts
-	ynh_handle_getopts_args "$@"
-
-	# Check python version from APT
-	local py_apt_version=$(python3 --version | cut -d ' ' -f 2)
-
-	# Usefull variables
-	local python_major=${python%.*}
-
-	# Check existing built version of python in /usr/local/bin
-	if [ -e "/usr/local/bin/python$python_major" ]
-	then
-		local py_built_version=$(/usr/local/bin/python$python_major --version \
-			| cut -d ' ' -f 2)
-	else
-		local py_built_version=0
-	fi
-
-	# Compare version
-	if $(dpkg --compare-versions $py_apt_version ge $python)
-	then
-		# APT >= Required
-		ynh_print_info "Using OS provided python3..."
-
-		py_app_version="python3"
-
-	else
-		# Either python already built or to build
-		if $(dpkg --compare-versions $py_built_version ge $python)
-		then
-			# Built >= Required
-			py_app_version="/usr/local/bin/python${py_built_version%.*}"
-
-			ynh_print_info "Using already python3 built version: $py_app_version"
-
-		else
-			# APT < Minimal & Actual < Minimal => Build & install Python into /usr/local/bin
-			ynh_print_info "Building python3 : $python (may take a while)..."
-
-			# Store current direcotry
-			local MY_DIR=$(pwd)
-
-			# Create a temp direcotry
-			tmpdir_py="$(mktemp --directory)"
-			cd "$tmpdir_py"
-
-			# Download
-			wget --output-document="Python-$python.tar.xz" \
-				"https://www.python.org/ftp/python/$python/Python-$python.tar.xz" 2>&1
-
-			# Extract
-			tar xf "Python-$python.tar.xz"
-
-			# Install
-			cd "Python-$python"
-			./configure --enable-optimizations
-			ynh_hide_warnings make -j4
-			ynh_hide_warnings make altinstall
-
-			# Go back to working directory
-			cd "$MY_DIR"
-
-			# Clean
-			ynh_safe_rm "$tmpdir_py"
-
-			# Set version
-			py_app_version="/usr/local/bin/python$python_major"
-		fi
-	fi
-	# Save python version in settings
-	ynh_app_setting_set --key=python --value="$python"
-
-	# Print some version information
-	ynh_print_info "Python version: $($py_app_version -VV)"
-	ynh_print_info "Pip version: $($py_app_version -m pip -V)"
-}
+# Python required version
+app_py_version() {
+	curl -Ls "https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$(app_version)/machine-learning/Dockerfile" \
+	| grep "FROM python:" \
+	| head -n1 \
+	| cut -d':' -f2 \
+	| cut -d'-' -f1
+} #3.11
 
 # Install immich
 myynh_install_immich() {
@@ -182,7 +107,6 @@ myynh_install_immich() {
 		cp -a "$source_dir/server/resources" "$install_dir/app/"
 		cp -a "$source_dir/server/package.json" "$install_dir/app/"
 		cp -a "$source_dir/server/package-lock.json" "$install_dir/app/"
-		#cp -a "$source_dir/server/start*.sh" "$install_dir/app/"
 		cp -a "$source_dir/LICENSE" "$install_dir/app/"
 		cp -a "$source_dir/i18n" "$install_dir/"
 		# Install custom start.sh script
@@ -193,21 +117,23 @@ myynh_install_immich() {
 	# Install immich-machine-learning
 		cd "$source_dir/machine-learning"
 		mkdir -p "$install_dir/app/machine-learning"
-		$py_app_version -m venv "$install_dir/app/machine-learning/venv"
+		# Install uv
+			PIPX_HOME="/opt/pipx" PIPX_BIN_DIR="/usr/local/bin" pipx install uv --force 2>&1
+			uv="/usr/local/bin/uv"
+		# Create the virtual environment
 		(
+			cd "$install_dir/app/machine-learning"
+			ynh_hide_warnings "$uv" venv "$install_dir/app/machine-learning/venv" --python "$(app_py_version)"
 			# activate the virtual environment
-			set +o nounset
-			source "$install_dir/app/machine-learning/venv/bin/activate"
-			set -o nounset
-
+				set +o nounset
+				source "$install_dir/app/machine-learning/venv/bin/activate"
+				set -o nounset
 			# add poetry
-			ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/pip3" install --upgrade poetry
-
+				ynh_hide_warnings "$uv" pip --no-cache-dir install --upgrade poetry
 			# poetry install
-			ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
+				ynh_hide_warnings "$uv" poetry install --no-root --with dev --with cpu
 		)
 		cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
-		#cp -a "$source_dir/machine-learning/start.sh" "$install_dir/app/machine-learning/"
 		cp -a "$source_dir/machine-learning/log_conf.json" "$install_dir/app/machine-learning/"
 		cp -a "$source_dir/machine-learning/gunicorn_conf.py" "$install_dir/app/machine-learning/"
  		cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
@@ -260,7 +186,7 @@ myynh_execute_psql_as_root() {
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$(postgresql_version)/main" "$database" --command="$sql"
+		psql --cluster="$(app_psql_version)/main" "$database" --command="$sql"
 }
 
 # Install the database
@@ -298,7 +224,7 @@ myynh_drop_psql_db() {
 
 # Dump the database
 myynh_dump_psql_db() {
-	sudo --login --user=postgres pg_dump --cluster="$(postgresql_version)/main" --dbname="$app" > db.sql
+	sudo --login --user=postgres pg_dump --cluster="$(app_psql_version)/main" --dbname="$app" > db.sql
 }
 
 # Restore the database
@@ -308,7 +234,7 @@ myynh_restore_psql_db() {
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
 	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$(postgresql_version)/main" --dbname="$app" < ./db.sql
+		psql --cluster="$(app_psql_version)/main" --dbname="$app" < ./db.sql
 }
 
 
