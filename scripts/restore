@@ -18,18 +18,11 @@ ynh_script_progression "Restoring the data directory..."
 ynh_restore "$data_dir"
 
 #=================================================
-# CHECK PYTHON VERSION AND COMPILE IF NEEDED
-#=================================================
-ynh_script_progression "Check Python version & compile the required one if needed..."
-
-py_required_version=$(ynh_app_setting_get --key=python)
-myynh_install_python --python="$py_required_version"
-
-#=================================================
 # INSTALL NODEJS
 #=================================================
 ynh_script_progression "Reinstalling nodejs..."
 
+nodejs_version=$(app_node_version)
 ynh_nodejs_install
 
 #=================================================
