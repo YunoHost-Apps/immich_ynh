@@ -15,19 +15,11 @@ ffmpeg_static_dir="$install_dir/ffmpeg-static"
 ynh_setup_source --source_id="ffmpeg-static" --dest_dir="$ffmpeg_static_dir"
 
 #=================================================
-# CHECK PYTHON VERSION AND COMPILE IF NEEDED
-#=================================================
-ynh_script_progression "Check Python version & compile the required one if needed..."
-
-py_required_major=$(cat "$source_dir/machine-learning/Dockerfile" | grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1)
-myynh_py_latest_from_major --python="$py_required_major"
-myynh_install_python --python="$py_required_version"
-
-#=================================================
 # INSTALL NODEJS
 #=================================================
 ynh_script_progression "Installing nodejs..."
 
+nodejs_version=$(app_node_version)
 ynh_nodejs_install
 
 #=================================================
@@ -40,8 +32,8 @@ myynh_update_psql_db
 myynh_create_psql_db
 db_port=$(myynh_execute_psql_as_root --sql="\conninfo" | awk -F '"' '{ print $(NF-1) }')
 ynh_app_setting_set --key=psql_pwd --value="$db_pwd"
-ynh_app_setting_set --key=psql_version --value="$(postgresql_version)"
-ynh_app_setting_set --key=psql_port --value="$db_port"
+ynh_app_setting_set --key=psql_version --value="$(app_psql_version)"
+ynh_app_setting_set --key=psql_port --value="$(app_psql_port)"
 
 myynh_set_default_psql_cluster_to_debian_default
 
