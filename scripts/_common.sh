@@ -85,33 +85,35 @@ myynh_install_immich() {
 			| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
 
 	# Install immich-server
-		cd "$source_dir/server"
-		ynh_hide_warnings npm ci
-		ynh_hide_warnings npm run build
-		ynh_hide_warnings npm prune --omit=dev --omit=optional
-
-		cd "$source_dir/open-api/typescript-sdk"
-		ynh_hide_warnings npm ci
-		ynh_hide_warnings npm run build
-
-		cd "$source_dir/web"
-		ynh_hide_warnings npm ci
-		ynh_hide_warnings npm run build
-
-		mkdir -p "$install_dir/app/"
-		cp -a "$source_dir/server/node_modules" "$install_dir/app/"
-		cp -a "$source_dir/server/dist" "$install_dir/app/"
-		cp -a "$source_dir/server/bin" "$install_dir/app/"
-		cp -a "$source_dir/web/build" "$install_dir/app/www"
-		cp -a "$source_dir/server/resources" "$install_dir/app/"
-		cp -a "$source_dir/server/package.json" "$install_dir/app/"
-		cp -a "$source_dir/server/package-lock.json" "$install_dir/app/"
-		cp -a "$source_dir/LICENSE" "$install_dir/app/"
-		cp -a "$source_dir/i18n" "$install_dir/"
+		# Build server
+			cd "$source_dir/server"
+			ynh_hide_warnings npm ci
+			ynh_hide_warnings npm run build
+			ynh_hide_warnings npm prune --omit=dev --omit=optional
+		# Build typescript
+			cd "$source_dir/open-api/typescript-sdk"
+			ynh_hide_warnings npm ci
+			ynh_hide_warnings npm run build
+		# Build web
+			cd "$source_dir/web"
+			ynh_hide_warnings npm ci
+			ynh_hide_warnings npm run build
+		# Copy built files
+			mkdir -p "$install_dir/app/"
+			cp -a "$source_dir/server/node_modules" "$install_dir/app/"
+			cp -a "$source_dir/server/dist" "$install_dir/app/"
+			cp -a "$source_dir/server/bin" "$install_dir/app/"
+			cp -a "$source_dir/web/build" "$install_dir/app/www"
+			cp -a "$source_dir/server/resources" "$install_dir/app/"
+			cp -a "$source_dir/server/package.json" "$install_dir/app/"
+			cp -a "$source_dir/server/package-lock.json" "$install_dir/app/"
+			cp -a "$source_dir/LICENSE" "$install_dir/app/"
+			cp -a "$source_dir/i18n" "$install_dir/"
 		# Install custom start.sh script
 			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/app/start.sh"
-		cd "$install_dir/app/"
-		ynh_hide_warnings npm cache clean --force
+		# Clean
+			cd "$install_dir/app/"
+			ynh_hide_warnings npm cache clean --force
 
 	# Install immich-machine-learning
 		cd "$source_dir/machine-learning"
@@ -133,27 +135,31 @@ myynh_install_immich() {
 			# poetry install
 				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 		)
-		cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
-		cp -a "$source_dir/machine-learning/log_conf.json" "$install_dir/app/machine-learning/"
-		cp -a "$source_dir/machine-learning/gunicorn_conf.py" "$install_dir/app/machine-learning/"
- 		cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
+		# Copy built files
+			cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
+			cp -a "$source_dir/machine-learning/log_conf.json" "$install_dir/app/machine-learning/"
+			cp -a "$source_dir/machine-learning/gunicorn_conf.py" "$install_dir/app/machine-learning/"
+			cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
 		# Install custom start.sh script
 			ynh_config_add --template="$app-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
 
 	# Install geonames
 		mkdir -p "$source_dir/geonames"
 		cd "$source_dir/geonames"
-		curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
-		curl -LO "https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
-		curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
-		curl -LO "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_countries.geojson" 2>&1
-		unzip "cities500.zip"
-		mkdir -p "$install_dir/app/geodata/"
-		cp -a "$source_dir/geonames/cities500.txt" "$install_dir/app/geodata/"
-		cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$install_dir/app/geodata/"
-		cp -a "$source_dir/geonames/admin2Codes.txt" "$install_dir/app/geodata/"
-		cp -a "$source_dir/geonames/ne_10m_admin_0_countries.geojson" "$install_dir/app/geodata/"
-		date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
+		# Download files
+			curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
+			curl -LO "https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
+			curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
+			curl -LO "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_countries.geojson" 2>&1
+			unzip "cities500.zip"
+		# Copy built files
+			mkdir -p "$install_dir/app/geodata/"
+			cp -a "$source_dir/geonames/cities500.txt" "$install_dir/app/geodata/"
+			cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$install_dir/app/geodata/"
+			cp -a "$source_dir/geonames/admin2Codes.txt" "$install_dir/app/geodata/"
+			cp -a "$source_dir/geonames/ne_10m_admin_0_countries.geojson" "$install_dir/app/geodata/"
+		# Update geodata-date
+			date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
 
 	# Install sharp
 		cd "$install_dir/app"
