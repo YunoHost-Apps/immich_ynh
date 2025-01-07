@@ -26,7 +26,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**分发版本：** 1.123.0~ynh3
+**分发版本：** 1.124.0~ynh1
 
 ## 截图
 
