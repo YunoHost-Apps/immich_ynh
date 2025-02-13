@@ -1,4 +1,4 @@
-Solution d'autohébergement pour a gestion de vos photos et vidéos.
+Solution d'autohébergement pour la gestion de vos photos et vidéos.
 
 ### Caractéristiques
 
