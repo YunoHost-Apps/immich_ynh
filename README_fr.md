@@ -18,7 +18,7 @@ Il NE doit PAS être modifié à la main.
 
 ## Vue d’ensemble
 
-Solution d'autohébergement pour a gestion de vos photos et vidéos.
+Solution d'autohébergement pour la gestion de vos photos et vidéos.
 
 ### Caractéristiques
 
