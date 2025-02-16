@@ -204,7 +204,10 @@ myynh_deprovision_default() {
 
 # Create the cluster
 myynh_create_psql_cluster() {
-	pg_createcluster $(app_psql_version) main --start
+	if [[ -z `pg_lsclusters | grep $(app_psql_version)` ]]
+	then
+		pg_createcluster $(app_psql_version) main --start
+	fi
 }
 
 # Install the database
