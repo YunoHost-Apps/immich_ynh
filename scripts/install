@@ -27,6 +27,7 @@ ynh_nodejs_install
 #=================================================
 ynh_script_progression "Creating a PostgreSQL database..."
 
+myynh_deprovision_default
 db_pwd=$(ynh_string_random)
 myynh_update_psql_db
 myynh_create_psql_db
