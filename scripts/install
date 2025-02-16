@@ -30,6 +30,10 @@ ynh_script_progression "Creating a PostgreSQL database..."
 myynh_deprovision_default
 
 pg_lsclusters
+pg_upgradecluster 16 main
+pg_lsclusters
+exit 1
+
 
 db_pwd=$(ynh_string_random)
 myynh_update_psql_db
