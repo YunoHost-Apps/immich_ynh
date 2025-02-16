@@ -30,7 +30,7 @@ ynh_script_progression "Creating a PostgreSQL database..."
 myynh_deprovision_default
 
 pg_lsclusters
-pg_createcluster 16 main
+pg_createcluster 16 main --start
 pg_lsclusters
 exit 1
 
