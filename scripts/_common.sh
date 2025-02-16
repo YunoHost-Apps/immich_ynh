@@ -196,6 +196,20 @@ myynh_execute_psql_as_root() {
 		psql --cluster="$(app_psql_version)/main" "$database" --command="$sql"
 }
 
+# Drop default db & user created by [resources.database] in manifest
+myynh_deprovision_default() {
+	ynh_psql_database_exists $app && ynh_psql_drop_db $app || true
+	ynh_psql_user_exists $app && ynh_psql_drop_user $app || true
+}
+
+# Create the cluster
+myynh_create_psql_cluster() {
+	if [[ -z `pg_lsclusters | grep $(app_psql_version)` ]]
+	then
+		pg_createcluster $(app_psql_version) main --start
+	fi
+}
+
 # Install the database
 myynh_create_psql_db() {
 	myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
