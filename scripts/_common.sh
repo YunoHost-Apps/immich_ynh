@@ -202,6 +202,11 @@ myynh_deprovision_default() {
 	ynh_psql_user_exists $app && ynh_psql_drop_user $app || true
 }
 
+# Create the cluster
+myynh_create_psql_cluster() {
+	pg_createcluster $(app_psql_version) main --start
+}
+
 # Install the database
 myynh_create_psql_db() {
 	myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
