@@ -137,8 +137,8 @@ myynh_install_immich() {
 			# add poetry
 				ynh_exec_as_app "$uv" --quiet tool install poetry
 			# poetry install
-				ynh_exec_as_app "$uv" --quiet tool run poetry install --no-root --with dev --with cpu
-				#ynh_exec_as_app poetry install --no-root --with dev --with cpu
+				#ynh_exec_as_app "$uv" --quiet tool run poetry install --no-root --with dev --with cpu
+				ynh_exec_as_app poetry install --no-root --with dev --with cpu
 		)
 		# Copy built files
 			cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
