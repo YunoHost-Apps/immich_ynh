@@ -123,18 +123,21 @@ myynh_install_immich() {
 			uv="/usr/local/bin/uv"
 		# Execute in a subshell
 		(
+			cd "$install_dir/app/machine-learning"
+			chown -R "$app:" "$install_dir/app/machine-learning"
+
 			# Create the virtual environment
-				"$uv" --quiet venv "$install_dir/app/machine-learning/venv" --python "$(app_py_version)"
+				ynh_exec_as_app "$uv" --quiet venv "$install_dir/app/machine-learning/venv" --python "$(app_py_version)"
 			# activate the virtual environment
 				set +o nounset
 				source "$install_dir/app/machine-learning/venv/bin/activate"
 				set -o nounset
 			# add pip
-				"$uv" --quiet pip --no-cache-dir install --upgrade pip
+				ynh_exec_as_app "$uv" --quiet pip --no-cache-dir install --upgrade pip
 			# add poetry
-				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/pip" install --no-cache-dir --upgrade poetry
+				ynh_exec_as_app "$uv" --quiet pip --no-cache-dir install --upgrade poetry
 			# poetry install
-				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
+				ynh_exec_as_app "$uv" --quiet poetry install --no-root --with dev --with cpu
 		)
 		# Copy built files
 			cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
