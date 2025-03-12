@@ -133,12 +133,16 @@ myynh_install_immich() {
 				source "$install_dir/app/machine-learning/venv/bin/activate"
 				set -o nounset
 			# add pip
-				#ynh_exec_as_app "$uv" --quiet pip --no-cache-dir install --upgrade pip
+				ynh_exec_as_app "$uv" --quiet pip --no-cache-dir install --upgrade pip
 			# add poetry
-				ynh_exec_as_app "$uv" --quiet tool install poetry
+				ynh_exec_as_app "$uv" --quiet pip --no-cache-dir install --upgrade poetry
+				ynh_exec_as_app "$install_dir/app/machine-learning/venv/bin/pip" install --no-cache-dir --upgrade poetry
 			# poetry install
+				ynh_exec_as_app "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
 				#ynh_exec_as_app "$uv" --quiet tool run poetry install --no-root --with dev --with cpu
-				ynh_exec_as_app poetry install --no-root --with dev --with cpu
+				#ynh_exec_as_app poetry install --no-root --with dev --with cpu
+				echo $(readlink -f /var/www/immich/app/machine-learning/venv/bin/python)
+
 		)
 		# Copy built files
 			cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
