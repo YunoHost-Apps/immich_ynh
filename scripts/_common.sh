@@ -174,26 +174,28 @@ myynh_install_immich() {
 }
 
 # Execute a psql command as root user
-# usage: myynh_execute_psql_as_root --sql=sql [--database=database]
+# usage: myynh_execute_psql_as_root --sql=sql [--options=options] [--database=database]
 # | arg: -s, --sql=         - the SQL command to execute
+# | arg: -o, --options=     - the options to add to psql
 # | arg: -d, --database=    - the database to connect to
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
-	local legacy_args=sd
-	local -A args_array=([s]=sql= [d]=database=)
+	local legacy_args=sod
+	local -A args_array=([s]=sql= [o]=options= [d]=database=)
 	local sql
+	local options
 	local database
 	# Manage arguments with getopts
 	ynh_handle_getopts_args "$@"
+	options="${options:-}"
 	database="${database:-}"
-
 	if [ -n "$database" ]
 	then
 		database="--dbname=$database"
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$(app_psql_version)/main" "$database" --command="$sql"
+		psql --cluster="$(app_psql_version)/main" "$options" "$database" --command="$sql"
 }
 
 # Drop default db & user created by [resources.database] in manifest
@@ -221,7 +223,8 @@ myynh_create_psql_db() {
 
 # Update the database
 myynh_update_psql_db() {
-	databases=$(myynh_execute_psql_as_root --sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" --database="postgres")
+	databases=$(myynh_execute_psql_as_root --sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" \
+		--options="--tuples-only --no-align" --database="postgres")
 
 	for db in $databases
 	do
