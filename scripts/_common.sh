@@ -12,7 +12,7 @@ app_version() {
 
 # NodeJS required version
 app_node_version() {
-	curl -Ls "https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$(app_version)/server/Dockerfile" \
+	cat "$source_dir/server/Dockerfile" \
 	| grep "FROM node:" \
 	| head -n1 \
 	| cut -d':' -f2 \
@@ -37,7 +37,7 @@ app_psql_port() {
 
 # Python required version
 app_py_version() {
-	curl -Ls "https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$(app_version)/machine-learning/Dockerfile" \
+	cat "$source_dir/machine-learning/Dockerfile" \
 	| grep "FROM python:" \
 	| head -n1 \
 	| cut -d':' -f2 \
@@ -124,17 +124,17 @@ myynh_install_immich() {
 		# Execute in a subshell
 		(
 			# Create the virtual environment
-				"$uv" --quiet venv "$install_dir/app/machine-learning/venv" --python "$(app_py_version)"
+				"$uv" venv --quiet "$install_dir/app/machine-learning/venv" --python "$(app_py_version)"
 			# activate the virtual environment
 				set +o nounset
 				source "$install_dir/app/machine-learning/venv/bin/activate"
 				set -o nounset
 			# add pip
-				"$uv" --quiet pip --no-cache-dir install --upgrade pip
-			# add poetry
-				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/pip" install --no-cache-dir --upgrade poetry
-			# poetry install
-				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/poetry" install --no-root --with dev --with cpu
+				"$uv" pip --quiet --no-cache-dir install --upgrade pip
+			# add uv
+				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/pip" install --no-cache-dir --upgrade uv
+			# uv install
+				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/uv" sync --quiet --no-install-project --no-install-workspace --extra cpu --no-cache --active --link-mode=copy
 		)
 		# Copy built files
 			cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
