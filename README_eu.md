@@ -26,7 +26,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Paketatutako bertsioa:** 1.129.0_858d1e9~ynh1
+**Paketatutako bertsioa:** 1.129.1~ynh1
 
 ## Pantaila-argazkiak
 
