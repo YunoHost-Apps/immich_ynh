@@ -12,7 +12,7 @@ app_version() {
 
 # NodeJS required version
 app_node_version() {
-	curl -Ls "https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$(app_version)/server/Dockerfile" \
+	cat "$source_dir/server/Dockerfile" \
 	| grep "FROM node:" \
 	| head -n1 \
 	| cut -d':' -f2 \
@@ -37,7 +37,7 @@ app_psql_port() {
 
 # Python required version
 app_py_version() {
-	curl -Ls "https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$(app_version)/machine-learning/Dockerfile" \
+	cat "$source_dir/machine-learning/Dockerfile" \
 	| grep "FROM python:" \
 	| head -n1 \
 	| cut -d':' -f2 \
