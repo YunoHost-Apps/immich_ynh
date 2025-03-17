@@ -106,7 +106,8 @@ ram.runtime = "500M"
         "libmojolicious-perl",
         "libfile-slurper-perl",
         "liblcms2-2",
-        "wget"
+        "wget",
+        "yq"
     ]
 
     [resources.apt.extras.postgresql]
