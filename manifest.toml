@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.129.0_858d1e9~ynh1"
+version = "1.129.1~ynh1"
 
 maintainers = ["ewilly"]
 
