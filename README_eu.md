@@ -26,7 +26,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Paketatutako bertsioa:** 1.129.0~ynh1
+**Paketatutako bertsioa:** 1.130.1~ynh1
 
 ## Pantaila-argazkiak
 
@@ -49,7 +49,7 @@ Self-hosted photo and video management solution.
 
 Bidali `pull request`a [`testing` abarrera](https://github.com/YunoHost-Apps/immich_ynh/tree/testing).
 
-`testing` abarra probatzeko, ondorengoa egin:
+`testing` abarra probatzeko, honakoa egin:
 
 ```bash
 sudo yunohost app install https://github.com/YunoHost-Apps/immich_ynh/tree/testing --debug

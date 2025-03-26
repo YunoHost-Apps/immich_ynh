@@ -3,7 +3,7 @@ Este archivo README esta generado automaticamente<https://github.com/YunoHost/ap
 No se debe editar a mano.
 -->
 
-# Immich para Yunohost
+# Immich para YunoHost
 
 [![Nivel de integración](https://apps.yunohost.org/badge/integration/immich)](https://ci-apps.yunohost.org/ci/apps/immich/)
 ![Estado funcional](https://apps.yunohost.org/badge/state/immich)
@@ -26,7 +26,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Versión actual:** 1.129.0~ynh1
+**Versión actual:** 1.130.1~ynh1
 
 ## Capturas
 

@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.129.0~ynh1"
+version = "1.130.1~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -43,8 +43,8 @@ ram.runtime = "500M"
     [resources.sources]
 
         [resources.sources.main]
-        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.129.0.tar.gz"
-        sha256 = "711b72a7d5bdf1d39028d6ab33d9d652bdfe3b413b9358948440dd61f49ed7e3"
+        url = "https://github.com/immich-app/immich/archive/refs/tags/v1.130.1.tar.gz"
+        sha256 = "18be85cc00be6e98ca0a530bdb8d851319f15c476111b78bbd3d25f4ba1eca81"
 
         autoupdate.strategy = "latest_github_release"
 
@@ -106,7 +106,8 @@ ram.runtime = "500M"
         "libmojolicious-perl",
         "libfile-slurper-perl",
         "liblcms2-2",
-        "wget"
+        "wget",
+        "yq"
     ]
 
     [resources.apt.extras.postgresql]
