@@ -1,7 +1,18 @@
 #!/bin/bash
 
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
 source _common.sh
 source /usr/share/yunohost/helpers
+
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Stopping $app's systemd service..."
+
+ynh_systemctl --service="$app-server" --action="stop"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
@@ -21,13 +32,6 @@ then
     ynh_app_setting_delete --key="checksum__var_www_immich_env-server"
     ynh_app_setting_delete --key="checksum__etc_systemd_system_immich-microservices.service"
 fi
-
-#=================================================
-# STOP SYSTEMD SERVICE
-#=================================================
-ynh_script_progression "Stopping $app's systemd service..."
-
-ynh_systemctl --service="$app-server" --action="stop"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -78,7 +82,7 @@ ynh_config_add --template="env" --destination="$install_dir/env"
 ynh_config_add --template="build-lock.json" --destination="$install_dir/app/build-lock.json"
 
 #=================================================
-# REAPPLY SYSTEM CONFIGURATIONS
+# REAPPLY SYSTEM CONFIGURATION
 #=================================================
 ynh_script_progression "Upgrading system configurations related to $app..."
 
@@ -87,8 +91,8 @@ ynh_config_add_nginx
 ynh_config_add_systemd --service="$app-server" --template="$app-server.service"
 ynh_config_add_systemd --service="$app-machine-learning" --template="$app-machine-learning.service"
 
-yunohost service add "$app-machine-learning" --description="Immich Machine Learning" --log="/var/log/$app/$app-machine-learning.log"
 yunohost service add "$app-server" --description="Immich Server" --log="/var/log/$app/$app-server.log"
+yunohost service add "$app-machine-learning" --description="Immich Machine Learning" --log="/var/log/$app/$app-machine-learning.log"
 
 ynh_multimedia_build_main_dir
 ynh_multimedia_addaccess "$app"

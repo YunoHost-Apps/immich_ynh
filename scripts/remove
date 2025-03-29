@@ -1,27 +1,31 @@
 #!/bin/bash
 
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
 source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# REMOVE SYSTEM CONFIGURATIONS
+# REMOVE SYSTEM CONFIGURATION
 #=================================================
 ynh_script_progression "Removing system configurations related to $app..."
-
-if ynh_hide_warnings yunohost service status "$app-server" >/dev/null; then
-	yunohost service remove "$app-server"
-fi
-if ynh_hide_warnings yunohost service status "$app-machine-learning" >/dev/null; then
-	yunohost service remove "$app-machine-learning"
-fi
-
-# Remove the dedicated systemd config
-ynh_config_remove_systemd "$app-server"
-ynh_config_remove_systemd "$app-machine-learning"
 
 ynh_config_remove_fail2ban
 
 ynh_config_remove_logrotate
+
+# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
+if ynh_hide_warnings yunohost service status "$app-server" >/dev/null; then
+    yunohost service remove "$app-server"
+fi
+ynh_config_remove_systemd "$app-server"
+
+if ynh_hide_warnings yunohost service status "$app-machine-learning" >/dev/null; then
+    yunohost service remove "$app-machine-learning"
+fi
+ynh_config_remove_systemd "$app-machine-learning"
 
 ynh_config_remove_nginx
 
@@ -32,4 +36,5 @@ ynh_nodejs_remove
 #=================================================
 # END OF SCRIPT
 #=================================================
+
 ynh_script_progression "Removal of $app completed"

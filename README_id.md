@@ -26,7 +26,7 @@ Self-hosted photo and video management solution.
 - Easy-to-use and friendly interface ;
 
 
-**Versi terkirim:** 1.130.2~ynh1
+**Versi terkirim:** 1.130.3~ynh1
 
 ## Tangkapan Layar
 
