@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
@@ -18,16 +23,20 @@ ynh_backup "$install_dir"
 ynh_backup "$data_dir"
 
 #=================================================
-# SYSTEM CONFIGURATION
+# BACKUP SYSTEM CONFIGURATION
 #=================================================
 
+# Backup the NGINX configuration
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
+# Backup the systemd service unit
 ynh_backup "/etc/systemd/system/$app-server.service"
 ynh_backup "/etc/systemd/system/$app-machine-learning.service"
 
+# Backup the logrotate configuration
 ynh_backup "/etc/logrotate.d/$app"
 
+# Backup the Fail2Ban config
 ynh_backup "/etc/fail2ban/jail.d/$app.conf"
 ynh_backup "/etc/fail2ban/filter.d/$app.conf"
 
@@ -47,4 +56,5 @@ myynh_dump_psql_db
 #=================================================
 # END OF SCRIPT
 #=================================================
+
 ynh_print_info "Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."
