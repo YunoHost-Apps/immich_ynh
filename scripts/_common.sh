@@ -57,30 +57,10 @@ myynh_install_immich() {
 		ram_G=$(($ram_G > 1 ? $ram_G : 1))
 		export NODE_OPTIONS="--max_old_space_size=$(($ram_G*1024))"
 
-	# Use 127.0.0.1
-		cd "$source_dir"
-		find . -type f \( -name '*.ts' -o -name '*.js' \) \
-			-exec grep app.listen {} + \
-			| sed 's/.*app.listen//' | grep -v '()' \
-			| grep '^(' \
-			| tr -d "[:blank:]" | awk -F"[(),]" '{print $2}' \
-			| sort \
-			| uniq \
-			| while read port; do
-				find . -type f \( -name '*.ts' -o -name '*.js' \) \
-					-exec sed -i -e "s@app.listen(${port})@app.listen(${port}, '127.0.0.1')@g" {} +
-			done
-		find . -type f \( -name '*.ts' -o -name '*.js' \) \
-			-exec sed -i -e "s@PrometheusExporter({ port })@PrometheusExporter({ host: '127.0.0.1', port: port })@g" {} +
-		grep -RlE "\"0\.0\.0\.0\"|'0\.0\.0\.0'" \
-			| xargs -n1 sed -i -e "s@'0\.0\.0\.0'@'127.0.0.1'@g" -e 's@"0\.0\.0\.0"@"127.0.0.1"@g'
-
 	# Replace /usr/src
 		cd "$source_dir"
 		grep -Rl "/usr/src" | xargs -n1 sed -i -e "s@/usr/src@$install_dir@g"
 		mkdir -p "$install_dir/cache"
-		grep -RlE "\"/cache\"|'/cache'" \
-			| xargs -n1 sed -i -e "s@\"/cache\"@\"$install_dir/cache\"@g" -e "s@'/cache'@'$install_dir/cache'@g"
 		grep -RlE "\"/build\"|'/build'" \
 			| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
 
@@ -137,10 +117,7 @@ myynh_install_immich() {
 				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/uv" sync --quiet --no-install-project --no-install-workspace --extra cpu --no-cache --active --link-mode=copy
 		)
 		# Copy built files
-			cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
-			cp -a "$source_dir/machine-learning/log_conf.json" "$install_dir/app/machine-learning/"
-			cp -a "$source_dir/machine-learning/gunicorn_conf.py" "$install_dir/app/machine-learning/"
-			cp -a "$source_dir/machine-learning/app" "$install_dir/app/machine-learning/"
+			cp -a "$source_dir/machine-learning/immich_ml" "$install_dir/app/machine-learning/"
 		# Install custom start.sh script
 			ynh_config_add --template="$app-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
 
