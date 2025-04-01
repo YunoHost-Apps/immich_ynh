@@ -60,7 +60,8 @@ myynh_install_immich() {
 	# Replace /usr/src
 		cd "$source_dir"
 		grep -Rl "/usr/src" | xargs -n1 sed -i -e "s@/usr/src@$install_dir@g"
-		mkdir -p "$install_dir/cache"
+
+	# Replace /build
 		grep -RlE "\"/build\"|'/build'" \
 			| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
 
@@ -120,6 +121,8 @@ myynh_install_immich() {
 			cp -a "$source_dir/machine-learning/immich_ml" "$install_dir/app/machine-learning/"
 		# Install custom start.sh script
 			ynh_config_add --template="$app-machine-learning-start.sh" --destination="$install_dir/app/machine-learning/start.sh"
+		# Create the cache direcotry
+			mkdir -p "$install_dir/.cache_ml"
 
 	# Install geonames
 		mkdir -p "$source_dir/geonames"
