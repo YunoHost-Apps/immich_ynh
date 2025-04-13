@@ -145,6 +145,7 @@ myynh_install_immich() {
 	# Install sharp
 		cd "$install_dir/app"
 		ynh_hide_warnings npm install sharp
+		ynh_hide_warnings npm cache clean --force
 
 	# Retrieve dependencies version
 		ffmpeg_version=$("$install_dir/ffmpeg-static/ffmpeg" -version | grep "ffmpeg version" | cut -d" " -f3)
