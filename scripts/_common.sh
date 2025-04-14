@@ -145,6 +145,7 @@ myynh_install_immich() {
 	# Install sharp
 		cd "$install_dir/app"
 		ynh_hide_warnings npm install sharp
+		ynh_hide_warnings npm cache clean --force
 
 	# Retrieve dependencies version
 		ffmpeg_version=$("$install_dir/ffmpeg-static/ffmpeg" -version | grep "ffmpeg version" | cut -d" " -f3)
@@ -273,4 +274,17 @@ myynh_set_default_psql_cluster_to_debian_default() {
 
 	# Add new line USER  GROUP   VERSION CLUSTER DATABASE
 	echo -e "* * $default_psql_version $default_psql_cluster $default_psql_database" >> "$config_file"
+
+	# Remove the autoprovisionned db if not on right cluster
+	if [ "$(app_psql_port)" -ne "$default_port" ]
+	then
+		if ynh_psql_database_exists "$app"
+		then
+			ynh_psql_drop_db "$app"
+		fi
+		if ynh_psql_user_exists "$app"
+		then
+			ynh_psql_drop_user "$app"
+		fi
+	fi
 }
