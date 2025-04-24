@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.131.3~ynh1"
+version = "1.132.1~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -44,8 +44,8 @@ ram.runtime = "500M"
     [resources.sources]
 
     [resources.sources.main]
-    url = "https://github.com/immich-app/immich/archive/refs/tags/v1.131.3.tar.gz"
-    sha256 = "3bd949520a978a8faf15c12003e24ba6279931522bdbd1b96b3e3d8c275ef3fe"
+    url = "https://github.com/immich-app/immich/archive/refs/tags/v1.132.1.tar.gz"
+    sha256 = "7c5a5cc4eb914a38b141c91d47b1da82ea8e79eb401151d6eb25d8477c9a94e0"
 
     autoupdate.strategy = "latest_github_release"
 
