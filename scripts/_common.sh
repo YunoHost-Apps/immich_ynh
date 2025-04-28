@@ -44,6 +44,16 @@ app_py_version() {
 	| cut -d'-' -f1
 } #3.11
 
+# Check hardware requirements
+myynh_check_hardware() {
+	# CPU need to have Advanced Vector Extensions (AVX)
+		if [ -z "$(grep -o 'avx[^ ]*' /proc/cpuinfo)" ]
+		then
+			ynh_die "Your CPU is too old and not supported. Installation of $app in not possible on your system."
+		fi
+}
+
+
 # Install immich
 myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native

@@ -8,6 +8,11 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
+# CHECK HARDWARE REQUIREMENTS
+#=================================================
+myynh_check_hardware
+
+#=================================================
 # INITIALIZE AND STORE SETTINGS
 #=================================================
 
