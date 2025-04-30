@@ -10,7 +10,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # CHECK HARDWARE REQUIREMENTS
 #=================================================
-myynh_check_hardware
+#myynh_check_hardware
 
 #=================================================
 # STOP SYSTEMD SERVICE
