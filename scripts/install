@@ -10,6 +10,8 @@ source /usr/share/yunohost/helpers
 #=================================================
 # CHECK HARDWARE REQUIREMENTS
 #=================================================
+ynh_script_progression "Checking hardware requirements..."
+
 myynh_check_hardware
 
 #=================================================
