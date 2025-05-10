@@ -46,13 +46,16 @@ app_py_version() {
 
 # Check hardware requirements
 myynh_check_hardware() {
-	# CPU need to have Advanced Vector Extensions (AVX)
-		if [ -z "$(grep -o 'avx[^ ]*' /proc/cpuinfo)" ]
+	# CPU: Prebuilt binaries for linux-x64 require v2 microarchitecture
+		local file_test="/lib64/ld-linux-x86-64.so.2"
+		if [ -f "$file_test" ]
 		then
-			ynh_die "Your CPU is too old and not supported. Installation of $app in not possible on your system."
+			if [ -z "$( $file_test --help | grep 'x86-64-v2 (supported' )" ]
+			then
+				ynh_die "Your CPU is too old and not supported. Installation of $app is not possible on your system."
+			fi
 		fi
 }
-
 
 # Install immich
 myynh_install_immich() {

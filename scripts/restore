@@ -11,7 +11,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # CHECK HARDWARE REQUIREMENTS
 #=================================================
-#myynh_check_hardware
+myynh_check_hardware
 
 #=================================================
 # RESTORE THE APP MAIN DIR
