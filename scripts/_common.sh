@@ -62,12 +62,6 @@ myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native
 	# Check https://github.com/immich-app/base-images/blob/main/server/Dockerfile for changes
 
-	# Fix migration issue introduced in 1.132.1
-		ynh_replace \
-			--match="await sql\`CREATE EXTENSION IF NOT EXISTS \"vectors\";\`.execute(db);" \
-			--replace="await sql\`CREATE EXTENSION IF NOT EXISTS \"vector\";\`.execute(db);" \
-			--file="$source_dir/server/src/schema/migrations/1744910873969-InitialMigration.ts"
-
 	# Add ffmpeg-static direcotry to $PATH
 		PATH="$ffmpeg_static_dir:$PATH"
 
