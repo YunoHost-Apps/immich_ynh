@@ -45,7 +45,7 @@ ram.runtime = "500M"
 
     [resources.sources.main]
     url = "https://github.com/immich-app/immich/archive/feb475561e6e20bb9ce3a831f4327d4887871403.tar.gz"
-    sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    sha256 = "017174806793cee6173caca6a518988883adbd2d661116902a1e4e427f338646"
 
     autoupdate.strategy = "latest_github_release"
 
