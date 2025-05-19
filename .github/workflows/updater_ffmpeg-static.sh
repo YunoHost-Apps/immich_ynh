@@ -15,11 +15,11 @@ repo=$(cat manifest.toml | tomlq -j '.upstream.code|split("https://github.com/")
 
 amd64_url=$(cat manifest.toml | tomlq -j '.resources.sources."ffmpeg-static".amd64.url')
 amd64_sha_current=$(cat manifest.toml | tomlq -j '.resources.sources."ffmpeg-static".amd64.sha256')
-amd64_sha_last=$(curl --silent "$amd64_url" | sha256sum - | cut -d " " -f1)
+amd64_sha_last=$(curl -fsSL --retry 3 "$amd64_url" | sha256sum - | cut -d " " -f1)
 
 arm64_url=$(cat manifest.toml | tomlq -j '.resources.sources."ffmpeg-static".arm64.url')
 arm64_sha_current=$(cat manifest.toml | tomlq -j '.resources.sources."ffmpeg-static".arm64.sha256')
-arm64_sha_last=$(curl --silent "$arm64_url" | sha256sum - | cut -d " " -f1)
+arm64_sha_last=$(curl -fsSL --retry 3 "$arm64_url" | sha256sum - | cut -d " " -f1)
 # For the time being, let's assume the script will fail
 echo "PROCEED=false" >> $GITHUB_ENV
 
