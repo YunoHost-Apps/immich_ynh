@@ -55,10 +55,11 @@ ram.runtime = "500M"
     arm64.url = "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-arm64-static.tar.xz"
     arm64.sha256 = "f4149bb2b0784e30e99bdda85471c9b5930d3402014e934a5098b41d0f7201b1"
 
-    autoupdate.strategy = "latest_webpage_link"
-    autoupdate.upstream = "https://johnvansickle.com/ffmpeg/releases/"
-    autoupdate.asset.amd64 = "^ffmpeg-release-amd64-static.tar.xz$"
-    autoupdate.asset.arm64 = "^ffmpeg-release-arm64-static.tar.xz$"
+    # Autoupdate does not work as not finding tags
+    #autoupdate.strategy = "latest_webpage_link"
+    #autoupdate.upstream = "https://johnvansickle.com/ffmpeg/releases/"
+    #autoupdate.asset.amd64 = "^ffmpeg-release-amd64-static.tar.xz$"
+    #autoupdate.asset.arm64 = "^ffmpeg-release-arm64-static.tar.xz$"
 
     [resources.system_user]
 
