@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.132.3~ynh1"
+version = "1.133.1~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -44,8 +44,8 @@ ram.runtime = "500M"
     [resources.sources]
 
     [resources.sources.main]
-    url = "https://github.com/immich-app/immich/archive/refs/tags/v1.132.3.tar.gz"
-    sha256 = "eb07a3ce3fd4b3f1cd3d9cbed9c17227a07a41846629aec2426be338c106aa4f"
+    url = "https://github.com/immich-app/immich/archive/refs/tags/v1.133.1.tar.gz"
+    sha256 = "1c1b9512f3f56f56b1e40af74db6d554de2b4639bfa7e341ce0f37dd95a036f4"
 
     autoupdate.strategy = "latest_github_release"
 
@@ -54,6 +54,12 @@ ram.runtime = "500M"
     amd64.sha256 = "abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67"
     arm64.url = "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-arm64-static.tar.xz"
     arm64.sha256 = "f4149bb2b0784e30e99bdda85471c9b5930d3402014e934a5098b41d0f7201b1"
+
+    # Autoupdate does not work as not finding tags
+    #autoupdate.strategy = "latest_webpage_link"
+    #autoupdate.upstream = "https://johnvansickle.com/ffmpeg/releases/"
+    #autoupdate.asset.amd64 = "^ffmpeg-release-amd64-static.tar.xz$"
+    #autoupdate.asset.arm64 = "^ffmpeg-release-arm64-static.tar.xz$"
 
     [resources.system_user]
 

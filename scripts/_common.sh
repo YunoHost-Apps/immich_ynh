@@ -46,24 +46,21 @@ app_py_version() {
 
 # Check hardware requirements
 myynh_check_hardware() {
-	# CPU need to have Advanced Vector Extensions (AVX)
-		if [ -z "$(grep -o 'avx[^ ]*' /proc/cpuinfo)" ]
+	# CPU: Prebuilt binaries for linux-x64 require v2 microarchitecture
+		local file_test="/lib64/ld-linux-x86-64.so.2"
+		if [ -f "$file_test" ]
 		then
-			ynh_die "Your CPU is too old and not supported. Installation of $app in not possible on your system."
+			if [ -z "$( $file_test --help | grep 'x86-64-v2 (supported' )" ]
+			then
+				ynh_die "Your CPU is too old and not supported. Installation of $app is not possible on your system."
+			fi
 		fi
 }
-
 
 # Install immich
 myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native
 	# Check https://github.com/immich-app/base-images/blob/main/server/Dockerfile for changes
-
-	# Fix migration issue introduced in 1.132.1
-		ynh_replace \
-			--match="await sql\`CREATE EXTENSION IF NOT EXISTS \"vectors\";\`.execute(db);" \
-			--replace="await sql\`CREATE EXTENSION IF NOT EXISTS \"vector\";\`.execute(db);" \
-			--file="$source_dir/server/src/schema/migrations/1744910873969-InitialMigration.ts"
 
 	# Add ffmpeg-static direcotry to $PATH
 		PATH="$ffmpeg_static_dir:$PATH"
@@ -117,7 +114,8 @@ myynh_install_immich() {
 		mkdir -p "$install_dir/app/machine-learning"
 		# Install uv
 			PIPX_HOME="/opt/pipx" PIPX_BIN_DIR="/usr/local/bin" pipx install uv --force 2>&1
-			uv="/usr/local/bin/uv"
+			PIPX_HOME="/opt/pipx" PIPX_BIN_DIR="/usr/local/bin" pipx upgrade uv --force 2>&1
+			local uv="/usr/local/bin/uv"
 		# Execute in a subshell
 		(
 			# Create the virtual environment
