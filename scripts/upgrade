@@ -43,7 +43,7 @@ if ynh_app_upgrading_from_version_before 1.132.0~ynh1
 then
     ynh_die "This update requires applications to have started up at least once on 1.132.0+. \
         \nPlease first manually update with 1.136.0~ynh1 with the following command: \
-        \nyunohost app upgrade immich -u https://github.com/YunoHost-Apps/immich_ynh/tree/d70256707e598e5817b600036a742da65939746a \
+        \n's\0u\0d\0o yunohost app upgrade immich -u https://github.com/YunoHost-Apps/immich_ynh/tree/d70256707e598e5817b600036a742da65939746a' \
         \nOnce done you can upgrade to the latest version."
 fi
 
