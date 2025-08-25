@@ -99,7 +99,7 @@ myynh_install_immich() {
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$install_dir/app/"
 			cp "$install_dir/app/package.json" "$install_dir/app/bin"
-			sed -i 's|^start|./start|' "$install_dir/app/bin/immich-admin"
+			ynh_replace --match="^start" --replace="./start" --file="$install_dir/app/bin/immich-admin"
 		# Build openapi & web
 			cd "$source_dir"
 			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
@@ -114,6 +114,7 @@ myynh_install_immich() {
 		# Copy remaining assets
 			cp -a LICENSE "$install_dir/app/"
 		# Install custom start.sh script
+			ynh_safe_rm "$install_dir/app/bin/start.sh"
 			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/app/bin/start.sh"
 		# Cleanup
 			ynh_hide_warnings pnpm prune
