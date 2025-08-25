@@ -6,17 +6,19 @@
 
 # App version
 app_version() {
-	ynh_read_manifest "version" | cut -d'~' -f1
+	ynh_read_manifest "version" \
+	| cut -d'~' -f1
 } # 1.101.0
 
 # NodeJS required version
 app_node_version() {
-	cat "$source_dir/server/.nvmrc" | cut -d '.' -f1
+	cat "$source_dir/server/.nvmrc" \
+	| cut -d '.' -f1
 } # 22
 
 # pnpm required version
 app_pnpm_version() {
-	cat "$source_dir/package.json "
+	cat "$source_dir/package.json" \
 	| jq -r '.packageManager | split("@")[1] | split(".")[0]'
 } #10
 
