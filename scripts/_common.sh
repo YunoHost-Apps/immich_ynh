@@ -5,41 +5,46 @@
 #=================================================
 
 # App version
-app_version="$( \
-	ynh_read_manifest "version" \
-	| cut -d'~' -f1
-)" # 1.101.0
+app_version() {
+	ynh_read_manifest "version" | cut -d'~' -f1
+} # 1.101.0
 
 # NodeJS required version
-app_node_version=$( \
-	cat "$source_dir/server/.nvmrc" \
+app_node_version() {
+	cat "$source_dir/server/.nvmrc"
 	| cut -d '.' -f1
-) # 22
+} # 22
+
+# pnpm required version
+app_pnpm_version() {
+	cat "$source_dir/package.json "
+	| jq -r '.packageManager | split("@")[1] | split(".")[0]'
+} #10
 
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
 # PostgreSQL required version
-app_psql_version=$( \
+app_psql_version() {
 	ynh_read_manifest "resources.apt.extras.postgresql.packages" \
 	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
 	| head -n1 \
 	| cut -d'-' -f2
-) #16
-app_psql_port=$( \
+} #16
+app_psql_port() {
 	pg_lsclusters --no-header \
 	| grep "^$(app_psql_version)" \
 	| cut -d' ' -f3
-) # 5433
+} # 5433
 
 # Python required version
-app_py_version="$(
+app_py_version() {
 	cat "$source_dir/machine-learning/Dockerfile" \
 	| grep "FROM python:" \
 	| head -n1 \
 	| cut -d':' -f2 \
 	| cut -d'-' -f1
-)" # 3.11
+} # 3.11
 
 # Check hardware requirements
 myynh_check_hardware() {
@@ -70,7 +75,6 @@ myynh_install_immich() {
 		export NODE_ENV=production
 
 	# Install pnpm
-		app_pnpm_version=$(cat package.json | jq -r '.packageManager | split("@")[1] | split(".")[0]') #10
 		ynh_hide_warnings npm install --global corepack@latest
 		export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 		export CI=1
