@@ -274,7 +274,7 @@ myynh_set_permissions() {
 	chmod -R o-rwx "$install_dir"
 
 	chmod +x "$install_dir/app/start.sh"
-	chmod +x "$install_dir/app/machine-learning/start.sh"
+	chmod +x "$install_dir/app/machine-learning/ml_start.sh"
 
 	chown -R $app: "$data_dir"
 	chmod u=rwX,g=rX,o= "$data_dir"
