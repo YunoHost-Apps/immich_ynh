@@ -11,8 +11,7 @@ app_version() {
 
 # NodeJS required version
 app_node_version() {
-	cat "$source_dir/server/.nvmrc"
-	| cut -d '.' -f1
+	cat "$source_dir/server/.nvmrc" | cut -d '.' -f1
 } # 22
 
 # pnpm required version
