@@ -115,7 +115,7 @@ myynh_install_immich() {
 			cp -a LICENSE "$install_dir/app/"
 #			cp -a i18n "$install_dir/app/"
 			cp -a server/bin/get-cpus.sh "$install_dir/app/"
-			cp -a server/bin/start.sh "$install_dir/app/"
+# 			cp -a server/bin/start.sh "$install_dir/app/"
 		# Install custom start.sh script
 			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/app/bin/start.sh"
 
