@@ -80,7 +80,7 @@ myynh_install_immich() {
 		export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 		export CI=1
 		corepack enable pnpm
-		corepack use pnpm@latest-$app_pnpm_version
+		corepack use pnpm@latest-$(app_pnpm_version)
 
 	# Print versions
 		echo "node version: {$(node -v)}"
