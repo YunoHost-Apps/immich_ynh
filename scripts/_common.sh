@@ -113,9 +113,6 @@ myynh_install_immich() {
 			ln -s "$install_dir/app/cli/bin/immich" "$install_dir/app/bin/immich"
 		# Copy remaining assets
 			cp -a LICENSE "$install_dir/app/"
-#			cp -a i18n "$install_dir/app/"
-			cp -a server/bin/get-cpus.sh "$install_dir/app/"
-# 			cp -a server/bin/start.sh "$install_dir/app/"
 		# Install custom start.sh script
 			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/app/bin/start.sh"
 
@@ -175,7 +172,7 @@ myynh_install_immich() {
 		ffmpeg_version=$("$install_dir/ffmpeg-static/ffmpeg" -version | grep "ffmpeg version" | cut -d" " -f3)
 
 	# Cleanup
-# 		ynh_safe_rm "$source_dir"
+		ynh_safe_rm "$source_dir"
 }
 
 # Execute a psql command as root user
