@@ -79,8 +79,8 @@ myynh_install_immich() {
 		ynh_hide_warnings npm install --global corepack@latest
 		export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 		export CI=1
-		corepack enable pnpm
-		corepack use pnpm@latest-$(app_pnpm_version)
+		ynh_hide_warnings corepack enable pnpm
+		ynh_hide_warnings corepack use pnpm@latest-$(app_pnpm_version)
 
 	# Print versions
 		echo "node version: {$(node -v)}"
@@ -96,25 +96,28 @@ myynh_install_immich() {
 				| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
 		# Build server
 			cd "$source_dir/server"
-			pnpm --filter immich --frozen-lockfile build
-			pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$install_dir/app/"
+			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
+			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$install_dir/app/"
 			cp "$install_dir/app/package.json" "$install_dir/app/bin"
 			sed -i 's|^start|./start|' "$install_dir/app/bin/immich-admin"
 		# Build openapi & web
 			cd "$source_dir"
 			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
-			pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
-			pnpm --filter @immich/sdk --filter immich-web build
+			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
+			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
 			cp -a web/build "$install_dir/app/www"
 		# Build cli
-			pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
-			pnpm --filter @immich/sdk --filter @immich/cli build
-			pnpm --filter @immich/cli --prod --no-optional deploy "$install_dir/app/cli"
+			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
+			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli build
+			ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$install_dir/app/cli"
 			ln -s "$install_dir/app/cli/bin/immich" "$install_dir/app/bin/immich"
 		# Copy remaining assets
 			cp -a LICENSE "$install_dir/app/"
 		# Install custom start.sh script
 			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/app/bin/start.sh"
+		# Cleanup
+			ynh_hide_warnings pnpm prune
+			ynh_hide_warnings pnpm store prune
 
 	# Install immich-machine-learning
 		cd "$source_dir/machine-learning"
@@ -166,7 +169,9 @@ myynh_install_immich() {
 
 	# Install sharp
 		cd "$install_dir/app"
-		pnpm add --force sharp
+		ynh_hide_warnings pnpm add --force sharp
+		ynh_hide_warnings pnpm prune
+		ynh_hide_warnings pnpm store prune
 
 	# Retrieve dependencies version
 		ffmpeg_version=$("$install_dir/ffmpeg-static/ffmpeg" -version | grep "ffmpeg version" | cut -d" " -f3)
