@@ -96,6 +96,7 @@ myynh_install_immich() {
 				| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
 		# Build server
 			cd "$source_dir/server"
+			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$install_dir/app/"
 			cp "$install_dir/app/package.json" "$install_dir/app/bin"
