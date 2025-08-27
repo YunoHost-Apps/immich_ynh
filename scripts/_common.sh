@@ -16,12 +16,6 @@ app_node_version() {
 	| cut -d '.' -f1
 } # 22
 
-# pnpm required version
-app_pnpm_version() {
-	cat "$source_dir/package.json" \
-	| jq -r '.packageManager | split("@")[1] | split(".")[0]'
-} #10
-
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
@@ -80,7 +74,6 @@ myynh_install_immich() {
 		export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 		export CI=1
 		ynh_hide_warnings corepack enable pnpm
-		ynh_hide_warnings corepack use pnpm@latest-$(app_pnpm_version)
 
 	# Print versions
 		echo "node version: {$(node -v)}"
@@ -96,13 +89,14 @@ myynh_install_immich() {
 				| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
 		# Build server
 			cd "$source_dir/server"
+   			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$install_dir/app/"
 			cp "$install_dir/app/package.json" "$install_dir/app/bin"
 			ynh_replace --match="^start" --replace="./start" --file="$install_dir/app/bin/immich-admin"
 		# Build openapi & web
 			cd "$source_dir"
-			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
+   			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
 			cp -a web/build "$install_dir/app/www"
@@ -119,6 +113,7 @@ myynh_install_immich() {
 		# Cleanup
 			ynh_hide_warnings pnpm prune
 			ynh_hide_warnings pnpm store prune
+   			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning
 		cd "$source_dir/machine-learning"
