@@ -26,9 +26,6 @@ ynh_script_progression "Setting up source files..."
 source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir"
 
-ffmpeg_static_dir="$install_dir/ffmpeg-static"
-ynh_setup_source --source_id="ffmpeg-static" --dest_dir="$ffmpeg_static_dir"
-
 #=================================================
 # INSTALL NODEJS
 #=================================================

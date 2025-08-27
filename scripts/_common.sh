@@ -59,8 +59,8 @@ myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native, https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh, https://github.com/loeeeee/immich-in-lxc/blob/main/install.sh
 	# Check https://github.com/immich-app/base-images/blob/main/server/Dockerfile for changes
 
-	# Add ffmpeg-static direcotry to $PATH
-		PATH="$ffmpeg_static_dir:$PATH"
+	# Add jellyfin-ffmpeg direcotry to $PATH
+		PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
 
 	# Define nodejs options
 		ram_G=$((($(ynh_get_ram --total) - (1024/2))/1024))
@@ -170,7 +170,7 @@ myynh_install_immich() {
 		ynh_hide_warnings pnpm store prune
 
 	# Retrieve dependencies version
-		ffmpeg_version=$("$install_dir/ffmpeg-static/ffmpeg" -version | grep "ffmpeg version" | cut -d" " -f3)
+		ffmpeg_version=$(/usr/lib/jellyfin-ffmpeg/ffmpeg -version | grep "ffmpeg version" | cut -d" " -f3)
 
 	# Cleanup
 		ynh_safe_rm "$source_dir"
