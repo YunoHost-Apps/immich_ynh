@@ -120,7 +120,7 @@ ram.runtime = "500M"
     repo = "deb https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"
     key = "https://repo.jellyfin.org/jellyfin_team.gpg.key"
     packages = [
-        "jellyfin-ffmpeg"
+        "jellyfin-ffmpeg7"
     ]
 
     [resources.database]
