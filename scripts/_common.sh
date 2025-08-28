@@ -98,8 +98,6 @@ myynh_install_immich() {
 			cd "$source_dir/server"
    			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
-			unset SHARP_IGNORE_GLOBAL_LIBVIPS
-			export SHARP_FORCE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$install_dir/app/"
 			cp "$install_dir/app/package.json" "$install_dir/app/bin"
 			ynh_replace --match="^start" --replace="./start" --file="$install_dir/app/bin/immich-admin"
@@ -121,7 +119,7 @@ myynh_install_immich() {
 		# Cleanup
 			ynh_hide_warnings pnpm prune
 			ynh_hide_warnings pnpm store prune
-			unset SHARP_FORCE_GLOBAL_LIBVIPS
+			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning
 		cd "$source_dir/machine-learning"
