@@ -121,6 +121,12 @@ myynh_install_immich() {
 			ynh_hide_warnings pnpm store prune
 			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
+	# Install sharp
+		cd "$install_dir/app"
+		ynh_hide_warnings pnpm install --force sharp
+		ynh_hide_warnings pnpm prune
+		ynh_hide_warnings pnpm store prune
+
 	# Install immich-machine-learning
 		cd "$source_dir/machine-learning"
 		mkdir -p "$install_dir/app/machine-learning"
