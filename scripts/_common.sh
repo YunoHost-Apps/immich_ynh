@@ -280,7 +280,7 @@ myynh_set_permissions() {
 		"$install_dir/app/machine-learning/ml_start.sh"
 	)
 	for file in "${FILE_LIST[@]}"; do
-		test -f "$file" && && chmod +x "$file"
+		test -f "$file" && chmod +x "$file"
 	done
 
 	chown -R $app: "$data_dir"
