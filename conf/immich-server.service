@@ -12,7 +12,7 @@ Restart=on-failure
 User=__APP__
 Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/app
-Environment="PATH=__INSTALL_DIR__/ffmpeg-static:__PATH_WITH_NODEJS__"
+Environment="PATH=/usr/lib/jellyfin-ffmpeg/:__PATH_WITH_NODEJS__"
 EnvironmentFile=__INSTALL_DIR__/env
 ExecStart=__NODEJS_DIR__/node __INSTALL_DIR__/app/dist/main
 SyslogIdentifier=immich-server
@@ -27,11 +27,11 @@ UMask=0077
 # Details for these options: https://www.freedesktop.org/software/systemd/man/systemd.exec.html
 NoNewPrivileges=yes
 PrivateTmp=yes
-PrivateDevices=yes
+PrivateDevices=no
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 RestrictNamespaces=yes
 RestrictRealtime=yes
-DevicePolicy=closed
+DevicePolicy=auto
 ProtectSystem=full
 ProtectControlGroups=yes
 ProtectKernelModules=yes

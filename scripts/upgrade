@@ -57,9 +57,6 @@ ynh_safe_rm "$install_dir"
 source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace
 
-ffmpeg_static_dir="$install_dir/ffmpeg-static"
-ynh_setup_source --source_id="ffmpeg-static" --dest_dir="$ffmpeg_static_dir" --full_replace
-
 #=================================================
 # INSTALL NODEJS
 #=================================================
