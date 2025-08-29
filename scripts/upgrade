@@ -90,7 +90,6 @@ db_pwd=$(ynh_app_setting_get --key=psql_pwd)
 db_port=$(ynh_app_setting_get --key=psql_port)
 
 ynh_config_add --template="env" --destination="$install_dir/env"
-ynh_config_add --template="build-lock.json" --destination="$install_dir/app/build-lock.json"
 
 #=================================================
 # REAPPLY SYSTEM CONFIGURATION

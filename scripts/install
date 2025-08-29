@@ -65,7 +65,6 @@ myynh_install_immich
 ynh_script_progression "Adding $app's configuration files..."
 
 ynh_config_add --template="env" --destination="$install_dir/env"
-ynh_config_add --template="build-lock.json" --destination="$install_dir/app/build-lock.json"
 
 #=================================================
 # SYSTEM CONFIGURATION
