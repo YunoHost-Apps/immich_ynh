@@ -16,6 +16,12 @@ app_node_version() {
 	| cut -d '.' -f1
 } # 22
 
+# pnpm required version
+app_pnpm_version() {
+	cat "$source_dir/package.json" \
+	| jq -r '.packageManager | split("@")[1] | split(".")[0]'
+} #10
+
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
@@ -59,8 +65,8 @@ myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native, https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh, https://github.com/loeeeee/immich-in-lxc/blob/main/install.sh
 	# Check https://github.com/immich-app/base-images/blob/main/server/Dockerfile for changes
 
-	# Add ffmpeg-static direcotry to $PATH
-		PATH="$ffmpeg_static_dir:$PATH"
+	# Add jellyfin-ffmpeg direcotry to $PATH
+		PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
 
 	# Define nodejs options
 		ram_G=$((($(ynh_get_ram --total) - (1024/2))/1024))
@@ -74,6 +80,7 @@ myynh_install_immich() {
 		export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 		export CI=1
 		ynh_hide_warnings corepack enable pnpm
+		ynh_hide_warnings corepack use pnpm@latest-$(app_pnpm_version)
 
 	# Print versions
 		echo "node version: {$(node -v)}"
@@ -91,12 +98,12 @@ myynh_install_immich() {
 			cd "$source_dir/server"
    			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
-			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$install_dir/app/"
+ 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$install_dir/app/"
+
 			cp "$install_dir/app/package.json" "$install_dir/app/bin"
 			ynh_replace --match="^start" --replace="./start" --file="$install_dir/app/bin/immich-admin"
 		# Build openapi & web
 			cd "$source_dir"
-   			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
 			cp -a web/build "$install_dir/app/www"
@@ -113,7 +120,7 @@ myynh_install_immich() {
 		# Cleanup
 			ynh_hide_warnings pnpm prune
 			ynh_hide_warnings pnpm store prune
-   			unset SHARP_IGNORE_GLOBAL_LIBVIPS
+ 			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning
 		cd "$source_dir/machine-learning"
@@ -163,14 +170,8 @@ myynh_install_immich() {
 		# Update geodata-date
 			date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
 
-	# Install sharp
-		cd "$install_dir/app"
-		ynh_hide_warnings pnpm add --force sharp
-		ynh_hide_warnings pnpm prune
-		ynh_hide_warnings pnpm store prune
-
 	# Retrieve dependencies version
-		ffmpeg_version=$("$install_dir/ffmpeg-static/ffmpeg" -version | grep "ffmpeg version" | cut -d" " -f3)
+		ffmpeg_version=$(/usr/lib/jellyfin-ffmpeg/ffmpeg -version | grep "ffmpeg version" | cut -d" " -f3)
 
 	# Cleanup
 		ynh_safe_rm "$source_dir"
@@ -271,8 +272,15 @@ myynh_set_permissions() {
 	chmod u=rwX,g=rX,o= "$install_dir"
 	chmod -R o-rwx "$install_dir"
 
-	chmod +x "$install_dir/app/bin/start.sh"
-	chmod +x "$install_dir/app/machine-learning/ml_start.sh"
+	FILE_LIST=(
+		"$install_dir/app/start.sh"
+		"$install_dir/app/bin/start.sh"
+		"$install_dir/app/machine-learning/start.sh"
+		"$install_dir/app/machine-learning/ml_start.sh"
+	)
+	for file in "${FILE_LIST[@]}"; do
+		test -f "$file" && chmod +x "$file"
+	done
 
 	chown -R $app: "$data_dir"
 	chmod u=rwX,g=rX,o= "$data_dir"
@@ -280,6 +288,11 @@ myynh_set_permissions() {
 
 	chown -R $app: "/var/log/$app"
 	chmod u=rw,g=r,o= "/var/log/$app"
+
+	# Upgade user groups
+	local user_groups=""
+	[ -n $(getent group video) ] && adduser --quiet "$app" video 2>&1
+	[ -n $(getent group render) ] && adduser --quiet "$app" render 2>&1
 }
 
 myynh_set_default_psql_cluster_to_debian_default() {

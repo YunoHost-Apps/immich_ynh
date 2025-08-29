@@ -57,9 +57,6 @@ ynh_safe_rm "$install_dir"
 source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace
 
-ffmpeg_static_dir="$install_dir/ffmpeg-static"
-ynh_setup_source --source_id="ffmpeg-static" --dest_dir="$ffmpeg_static_dir" --full_replace
-
 #=================================================
 # INSTALL NODEJS
 #=================================================
@@ -93,7 +90,6 @@ db_pwd=$(ynh_app_setting_get --key=psql_pwd)
 db_port=$(ynh_app_setting_get --key=psql_port)
 
 ynh_config_add --template="env" --destination="$install_dir/env"
-ynh_config_add --template="build-lock.json" --destination="$install_dir/app/build-lock.json"
 
 #=================================================
 # REAPPLY SYSTEM CONFIGURATION
