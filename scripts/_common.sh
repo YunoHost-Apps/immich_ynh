@@ -72,7 +72,7 @@ myynh_install_immich() {
 		ram_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
 		ram_G=$(($ram_G > 1 ? $ram_G : 1))
 		ram_G=$(($ram_G*1024))
-		export NODE_OPTIONS="${NODE_OPTIONS} --max_old_space_size=$ram_G"
+		export NODE_OPTIONS="${NODE_OPTIONS:-} --max_old_space_size=$ram_G"
 		export NODE_ENV=production
 
 	# Install pnpm
