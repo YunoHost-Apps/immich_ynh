@@ -69,10 +69,10 @@ myynh_install_immich() {
 		PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
 
 	# Define nodejs options
-		ram_G=$((($(ynh_get_ram --total) - (1024/2))/1024))
+		ram_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
 		ram_G=$(($ram_G > 1 ? $ram_G : 1))
 		ram_G=$(($ram_G*1024))
-		export NODE_OPTIONS="--max_old_space_size=$ram_G"
+		export NODE_OPTIONS="${NODE_OPTIONS:-} --max_old_space_size=$ram_G"
 		export NODE_ENV=production
 
 	# Install pnpm
@@ -131,18 +131,26 @@ myynh_install_immich() {
 			local uv="/usr/local/bin/uv"
 		# Execute in a subshell
 		(
+			# Define some options for uv
+				export UV_PYTHON_INSTALL_DIR="$install_dir/app/machine-learning"
+				export UV_NO_CACHE=true
+				export UV_NO_MODIFY_PATH=true
 			# Create the virtual environment
 				"$uv" venv --quiet "$install_dir/app/machine-learning/venv" --python "$(app_py_version)"
-			# activate the virtual environment
+			# Activate the virtual environment
 				set +o nounset
 				source "$install_dir/app/machine-learning/venv/bin/activate"
 				set -o nounset
-			# add pip
+			# Add pip
 				"$uv" pip --quiet --no-cache-dir install --upgrade pip
-			# add uv
+			# Add uv
 				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/pip" install --no-cache-dir --upgrade uv
-			# uv install
+			# Install with uv
 				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/uv" sync --quiet --no-install-project --no-install-workspace --extra cpu --no-cache --active --link-mode=copy
+			# Clear uv options
+				unset UV_PYTHON_INSTALL_DIR
+				unset UV_NO_CACHE
+				unset UV_NO_MODIFY_PATH
 		)
 		# Copy built files
 			cp -a "$source_dir/machine-learning/ann" "$install_dir/app/machine-learning/"
