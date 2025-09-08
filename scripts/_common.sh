@@ -358,3 +358,16 @@ myynh_set_default_psql_cluster_to_debian_default() {
 		fi
 	fi
 }
+
+#=================================================
+# WORKAROUND FOR CHATTR COMPATIBILITY ON BTRFS AND NON-BTRFS INSTANCES
+#=================================================
+chattr() {
+	if findmnt -n -o FSTYPE / | grep -q btrfs
+	then
+		echo "Running chattr $* (Btrfs detected)"
+		command chattr "$@"
+	else
+		echo "Skipping chattr $* (not Btrfs)"
+	fi
+}
