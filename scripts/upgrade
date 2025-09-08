@@ -75,6 +75,16 @@ myynh_update_psql_db
 myynh_set_default_psql_cluster_to_debian_default
 
 #=================================================
+# ADD SWAP IF NEEDED
+#=================================================
+ynh_print_info --message="Adding swap if needed..."
+
+#if [ ${PACKAGE_CHECK_EXEC:-0} -eq 0 ]
+#then
+	myynh_add_swap
+#fi
+
+#=================================================
 # MAKE INSTALL
 #=================================================
 ynh_script_progression "Making install..."

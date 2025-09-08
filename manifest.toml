@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.140.1~ynh2"
+version = "1.140.1~ynh3"
 
 maintainers = ["ewilly"]
 
@@ -19,7 +19,7 @@ userdoc = "https://github.com/immich-app/immich#getting-started"
 code = "https://github.com/immich-app/immich"
 
 [integration]
-yunohost = ">= 12"
+yunohost = ">= 12.1.17"
 helpers_version = "2.1"
 architectures = ["arm64", "amd64"]
 multi_instance = false
@@ -29,8 +29,8 @@ ldap = false
 sso = false
 
 disk = "2G"
-ram.build = "2G"
-ram.runtime = "500M"
+ram.build = "4G"
+ram.runtime = "2G"
 
 [install]
     [install.domain]
