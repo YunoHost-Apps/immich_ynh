@@ -82,7 +82,7 @@ myynh_add_swap() {
 		fi
 		if [ $swap_needed_M -gt 0 ]
 		then
-			ynh_script_progression "Adding $swap_needed_M Mo to swap..."
+			ynh_print_info "Adding $swap_needed_M Mo to swap..."
 			ynh_add_swap --size=$swap_needed_M
 		fi
 }
