@@ -62,6 +62,8 @@ myynh_check_hardware() {
 
 # Add swap if needed
 myynh_add_swap() {
+	# Remove existing SWAP
+		ynh_del_swap
 	# Retrieve RAM needed in G
 		local ram_needed_full=$(ynh_read_manifest "integration.ram.build")
 		local ram_needed_value=${ram_needed_full::-1}
@@ -82,7 +84,7 @@ myynh_add_swap() {
 		fi
 		if [ $swap_needed_M -gt 0 ]
 		then
-			ynh_print_info "Adding $swap_needed_M Mo to swap..."
+			ynh_print_info "Adding $swap_needed_M Mb to swap..."
 			ynh_add_swap --size=$swap_needed_M
 		fi
 }

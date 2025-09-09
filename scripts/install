@@ -55,7 +55,7 @@ myynh_set_default_psql_cluster_to_debian_default
 #=================================================
 # ADD SWAP IF NEEDED
 #=================================================
-ynh_script_progression "Adding swap if needed..."
+ynh_script_progression "Temporary adding additional swap if needed..."
 
 myynh_add_swap
 
@@ -65,6 +65,13 @@ myynh_add_swap
 ynh_script_progression "Making install..."
 
 myynh_install_immich
+
+#=================================================
+# REMOVE TEMPORARY SWAP IF ADDED
+#=================================================
+ynh_script_progression "Remove temporary swap if added..."
+
+ynh_del_swap
 
 #=================================================
 # APP INITIAL CONFIGURATION
