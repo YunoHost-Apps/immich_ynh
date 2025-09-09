@@ -62,6 +62,8 @@ myynh_check_hardware() {
 
 # Add swap if needed
 myynh_add_swap() {
+	# Remove existing SWAP
+		ynh_del_swap
 	# Retrieve RAM needed in G
 		local ram_needed_full=$(ynh_read_manifest "integration.ram.build")
 		local ram_needed_value=${ram_needed_full::-1}
@@ -82,7 +84,7 @@ myynh_add_swap() {
 		fi
 		if [ $swap_needed_M -gt 0 ]
 		then
-			ynh_print_info "Adding $swap_needed_M Mo to swap..."
+			ynh_print_info "Adding $swap_needed_M Mb to swap..."
 			ynh_add_swap --size=$swap_needed_M
 		fi
 }
@@ -356,5 +358,18 @@ myynh_set_default_psql_cluster_to_debian_default() {
 		then
 			ynh_psql_drop_user "$app"
 		fi
+	fi
+}
+
+#=================================================
+# WORKAROUND FOR CHATTR COMPATIBILITY ON BTRFS AND NON-BTRFS INSTANCES
+#=================================================
+chattr() {
+	if findmnt -n -o FSTYPE / | grep -q btrfs
+	then
+		echo "Running chattr $* (Btrfs detected)"
+		command chattr "$@"
+	else
+		echo "Skipping chattr $* (not Btrfs)"
 	fi
 }
