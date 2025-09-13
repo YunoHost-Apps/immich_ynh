@@ -207,9 +207,6 @@ myynh_install_immich() {
 		# Update geodata-date
 			date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
 
-	# Retrieve dependencies version
-		ffmpeg_version=$(/usr/lib/jellyfin-ffmpeg/ffmpeg -version | grep "ffmpeg version" | cut -d" " -f3)
-
 	# Cleanup
 		ynh_safe_rm "$source_dir"
 }
@@ -358,18 +355,5 @@ myynh_set_default_psql_cluster_to_debian_default() {
 		then
 			ynh_psql_drop_user "$app"
 		fi
-	fi
-}
-
-#=================================================
-# WORKAROUND FOR CHATTR COMPATIBILITY ON BTRFS AND NON-BTRFS INSTANCES
-#=================================================
-chattr() {
-	if findmnt -n -o FSTYPE / | grep -q btrfs
-	then
-		echo "Running chattr $* (Btrfs detected)"
-		command chattr "$@"
-	else
-		echo "Skipping chattr $* (not Btrfs)"
 	fi
 }
