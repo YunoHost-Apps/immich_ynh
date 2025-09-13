@@ -207,9 +207,6 @@ myynh_install_immich() {
 		# Update geodata-date
 			date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
 
-	# Retrieve dependencies version
-		ffmpeg_version=$(/usr/lib/jellyfin-ffmpeg/ffmpeg -version | grep "ffmpeg version" | cut -d" " -f3)
-
 	# Cleanup
 		ynh_safe_rm "$source_dir"
 }
