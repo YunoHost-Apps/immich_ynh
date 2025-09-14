@@ -247,6 +247,8 @@ myynh_create_psql_cluster() {
 	if [[ -z `pg_lsclusters | grep $(app_psql_version)` ]]
 	then
 		pg_createcluster $(app_psql_version) main --start
+	else
+		myynh_update_psql_db
 	fi
 }
 
