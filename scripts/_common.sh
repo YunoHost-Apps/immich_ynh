@@ -4,48 +4,18 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
-# App version
-app_version() {
-	ynh_read_manifest "version" \
-	| cut -d'~' -f1
-} # 1.101.0
+# PostgreSQL root password
+PSQL_ROOT_PWD="$(cat $PSQL_ROOT_PWD_FILE)"
 
-# NodeJS required version
-app_node_version() {
-	cat "$source_dir/server/.nvmrc" \
-	| cut -d '.' -f1
-} # 22
-
-# pnpm required version
-app_pnpm_version() {
-	cat "$source_dir/package.json" \
-	| jq -r '.packageManager | split("@")[1] | split(".")[0]'
-} #10
-
-# Fail2ban
+# Fail2ban (install, upgrade & _common)
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
-# PostgreSQL required version
-app_psql_version() {
-	ynh_read_manifest "resources.apt.extras.postgresql.packages" \
+# PostgreSQL required version (install & _common)
+app_psql_version=$(ynh_read_manifest "resources.apt.extras.postgresql.packages" \
 	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
 	| head -n1 \
-	| cut -d'-' -f2
-} #16
-app_psql_port() {
-	pg_lsclusters --no-header \
-	| grep "^$(app_psql_version)" \
-	| cut -d' ' -f3
-} # 5433
-
-# Python required version
-app_py_version() {
-	cat "$source_dir/machine-learning/Dockerfile" \
-	| grep "FROM python:" \
-	| head -n1 \
-	| cut -d':' -f2 \
-	| cut -d'-' -f1
-} # 3.11
+	| cut -d'-' -f2 \
+	) # 16
 
 # Check hardware requirements
 myynh_check_hardware() {
@@ -105,16 +75,19 @@ myynh_install_immich() {
 		export NODE_ENV=production
 
 	# Install pnpm
+		app_pnpm_version=$(cat "$source_dir/package.json" \
+			| jq -r '.packageManager | split("@")[1] | split(".")[0]' \
+		) #10
 		ynh_hide_warnings npm install --global corepack@latest
 		export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 		export CI=1
 		ynh_hide_warnings corepack enable pnpm
-		ynh_hide_warnings corepack use pnpm@latest-$(app_pnpm_version)
+		ynh_hide_warnings corepack use pnpm@latest-$app_pnpm_version
 
 	# Print versions
-		echo "node version: {$(node -v)}"
-		echo "npm version: {$(npm -v)}"
-		echo "pnpm version: {$(pnpm -v)}"
+		echo "node version: $(node -v)"
+		echo "npm version: $(npm -v)"
+		echo "pnpm version: $(pnpm -v)"
 
 	# Install immich-server
 		# Replace /usr/src
@@ -164,8 +137,15 @@ myynh_install_immich() {
 				export UV_PYTHON_INSTALL_DIR="$install_dir/app/machine-learning"
 				export UV_NO_CACHE=true
 				export UV_NO_MODIFY_PATH=true
+			# Retrive python required version
+				app_py_version=$(cat "$source_dir/machine-learning/Dockerfile" \
+					| grep "FROM python:" \
+					| head -n1 \
+					| cut -d':' -f2 \
+					| cut -d'-' -f1 \
+					) # 3.11
 			# Create the virtual environment
-				"$uv" venv --quiet "$install_dir/app/machine-learning/venv" --python "$(app_py_version)"
+				"$uv" venv --quiet "$install_dir/app/machine-learning/venv" --python "$app_py_version"
 			# Activate the virtual environment
 				set +o nounset
 				source "$install_dir/app/machine-learning/venv/bin/activate"
@@ -207,9 +187,6 @@ myynh_install_immich() {
 		# Update geodata-date
 			date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
 
-	# Retrieve dependencies version
-		ffmpeg_version=$(/usr/lib/jellyfin-ffmpeg/ffmpeg -version | grep "ffmpeg version" | cut -d" " -f3)
-
 	# Cleanup
 		ynh_safe_rm "$source_dir"
 }
@@ -235,8 +212,8 @@ myynh_execute_psql_as_root() {
 		database="--dbname=$database"
 	fi
 
-	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$(app_psql_version)/main" $options "$database" --command="$sql"
+	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$PSQL_ROOT_PWD" \
+		psql --cluster="$app_psql_version/main" $options "$database" --command="$sql"
 }
 
 # Drop default db & user created by [resources.database] in manifest
@@ -247,9 +224,9 @@ myynh_deprovision_default() {
 
 # Create the cluster
 myynh_create_psql_cluster() {
-	if [[ -z `pg_lsclusters | grep $(app_psql_version)` ]]
+	if [[ -z `pg_lsclusters | grep $app_psql_version` ]]
 	then
-		pg_createcluster $(app_psql_version) main --start
+		pg_createcluster $app_psql_version main --start
 	fi
 }
 
@@ -264,7 +241,8 @@ myynh_create_psql_db() {
 
 # Update the database
 myynh_update_psql_db() {
-	databases=$(myynh_execute_psql_as_root --sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" \
+	databases=$(myynh_execute_psql_as_root \
+		--sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" \
 		--options="--tuples-only --no-align" --database="postgres")
 
 	for db in $databases
@@ -289,7 +267,7 @@ myynh_drop_psql_db() {
 
 # Dump the database
 myynh_dump_psql_db() {
-	sudo --login --user=postgres pg_dump --cluster="$(app_psql_version)/main" --dbname="$app" > db.sql
+	sudo --login --user=postgres pg_dump --cluster="$app_psql_version/main" --dbname="$app" > db.sql
 }
 
 # Restore the database
@@ -298,8 +276,8 @@ myynh_restore_psql_db() {
 	ynh_replace --match="SELECT pg_catalog.set_config('search_path', '', false);" \
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
-	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$(app_psql_version)/main" --dbname="$app" < ./db.sql
+	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$PSQL_ROOT_PWD" \
+		psql --cluster="$app_psql_version/main" --dbname="$app" < ./db.sql
 }
 
 
@@ -332,6 +310,7 @@ myynh_set_permissions() {
 	[ -n $(getent group render) ] && adduser --quiet "$app" render 2>&1
 }
 
+# Set default cluster back to debian and remove autoprovisionned db if not on right cluster
 myynh_set_default_psql_cluster_to_debian_default() {
 	local default_port=5432
 	local config_file="/etc/postgresql-common/user_clusters"
@@ -348,7 +327,7 @@ myynh_set_default_psql_cluster_to_debian_default() {
 	echo -e "* * $default_psql_version $default_psql_cluster $default_psql_database" >> "$config_file"
 
 	# Remove the autoprovisionned db if not on right cluster
-	if [ "$(app_psql_port)" -ne "$default_port" ]
+	if [ "$db_port" -ne "$default_port" ]
 	then
 		if ynh_psql_database_exists "$app"
 		then
