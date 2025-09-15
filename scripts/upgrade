@@ -70,9 +70,10 @@ ynh_nodejs_install
 #=================================================
 ynh_script_progression "Udpating a PostgreSQL database..."
 
-myynh_update_psql_db
-
+db_psql_version=$(ynh_app_setting_get --key=psql_version)
 db_port=$(ynh_app_setting_get --key=psql_port)
+
+myynh_update_psql_db
 myynh_set_default_psql_cluster_to_debian_default
 
 #=================================================

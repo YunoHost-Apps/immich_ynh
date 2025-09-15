@@ -4,18 +4,8 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
-# PostgreSQL root password
-PSQL_ROOT_PWD="$(cat /etc/yunohost/psql)"
-
 # Fail2ban (install, upgrade & _common)
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
-
-# PostgreSQL required version (install & _common)
-app_psql_version=$(ynh_read_manifest "resources.apt.extras.postgresql.packages" \
-	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
-	| head -n1 \
-	| cut -d'-' -f2 \
-	) # 16
 
 # Check hardware requirements
 myynh_check_hardware() {
@@ -212,21 +202,15 @@ myynh_execute_psql_as_root() {
 		database="--dbname=$database"
 	fi
 
-	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$PSQL_ROOT_PWD" \
-		psql --cluster="$app_psql_version/main" $options "$database" --command="$sql"
-}
-
-# Drop default db & user created by [resources.database] in manifest
-myynh_deprovision_default() {
-	ynh_psql_database_exists $app && ynh_psql_drop_db $app || true
-	ynh_psql_user_exists $app && ynh_psql_drop_user $app || true
+	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
+		psql --cluster="$db_psql_version/main" $options "$database" --command="$sql"
 }
 
 # Create the cluster
 myynh_create_psql_cluster() {
-	if [[ -z `pg_lsclusters | grep $app_psql_version` ]]
+	if [[ -z `pg_lsclusters | grep $db_psql_version` ]]
 	then
-		pg_createcluster $app_psql_version main --start
+		pg_createcluster $db_psql_version main --start
 	fi
 }
 
@@ -267,7 +251,7 @@ myynh_drop_psql_db() {
 
 # Dump the database
 myynh_dump_psql_db() {
-	sudo --login --user=postgres pg_dump --cluster="$app_psql_version/main" --dbname="$app" > db.sql
+	sudo --login --user=postgres pg_dump --cluster="$db_psql_version/main" --dbname="$app" > db.sql
 }
 
 # Restore the database
@@ -276,38 +260,8 @@ myynh_restore_psql_db() {
 	ynh_replace --match="SELECT pg_catalog.set_config('search_path', '', false);" \
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
-	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$PSQL_ROOT_PWD" \
-		psql --cluster="$app_psql_version/main" --dbname="$app" < ./db.sql
-}
-
-
-# Set permissions
-myynh_set_permissions() {
-	chown -R $app: "$install_dir"
-	chmod u=rwX,g=rX,o= "$install_dir"
-	chmod -R o-rwx "$install_dir"
-
-	FILE_LIST=(
-		"$install_dir/app/start.sh"
-		"$install_dir/app/bin/start.sh"
-		"$install_dir/app/machine-learning/start.sh"
-		"$install_dir/app/machine-learning/ml_start.sh"
-	)
-	for file in "${FILE_LIST[@]}"; do
-		test -f "$file" && chmod +x "$file"
-	done
-
-	chown -R $app: "$data_dir"
-	chmod u=rwX,g=rX,o= "$data_dir"
-	chmod -R o-rwx "$data_dir"
-
-	chown -R $app: "/var/log/$app"
-	chmod u=rw,g=r,o= "/var/log/$app"
-
-	# Upgade user groups
-	local user_groups=""
-	[ -n $(getent group video) ] && adduser --quiet "$app" video 2>&1
-	[ -n $(getent group render) ] && adduser --quiet "$app" render 2>&1
+	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
+		psql --cluster="$db_psql_version/main" --dbname="$app" < ./db.sql
 }
 
 # Set default cluster back to debian and remove autoprovisionned db if not on right cluster
@@ -340,15 +294,31 @@ myynh_set_default_psql_cluster_to_debian_default() {
 	fi
 }
 
-#=================================================
-# WORKAROUND FOR CHATTR COMPATIBILITY ON BTRFS AND NON-BTRFS INSTANCES
-#=================================================
-chattr() {
-	if findmnt -n -o FSTYPE / | grep -q btrfs
-	then
-		echo "Running chattr $* (Btrfs detected)"
-		command chattr "$@"
-	else
-		echo "Skipping chattr $* (not Btrfs)"
-	fi
+# Set permissions
+myynh_set_permissions() {
+	chown -R $app: "$install_dir"
+	chmod u=rwX,g=rX,o= "$install_dir"
+	chmod -R o-rwx "$install_dir"
+
+	FILE_LIST=(
+		"$install_dir/app/start.sh"
+		"$install_dir/app/bin/start.sh"
+		"$install_dir/app/machine-learning/start.sh"
+		"$install_dir/app/machine-learning/ml_start.sh"
+	)
+	for file in "${FILE_LIST[@]}"; do
+		test -f "$file" && chmod +x "$file"
+	done
+
+	chown -R $app: "$data_dir"
+	chmod u=rwX,g=rX,o= "$data_dir"
+	chmod -R o-rwx "$data_dir"
+
+	chown -R $app: "/var/log/$app"
+	chmod u=rw,g=r,o= "/var/log/$app"
+
+	# Upgade user groups
+	local user_groups=""
+	[ -n $(getent group video) ] && adduser --quiet "$app" video 2>&1
+	[ -n $(getent group render) ] && adduser --quiet "$app" render 2>&1
 }
