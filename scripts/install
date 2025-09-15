@@ -42,6 +42,11 @@ ynh_script_progression "Creating a PostgreSQL database..."
 myynh_deprovision_default
 
 db_pwd=$(ynh_string_random)
+app_psql_version=$(ynh_read_manifest "resources.apt.extras.postgresql.packages" \
+	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
+	| head -n1 \
+	| cut -d'-' -f2 \
+	) # 16
 myynh_create_psql_cluster
 myynh_update_psql_db
 myynh_create_psql_db
