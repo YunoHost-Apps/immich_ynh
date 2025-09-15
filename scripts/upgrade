@@ -68,7 +68,7 @@ ynh_nodejs_install
 #=================================================
 # UPDATE A POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression "Udpating a PostgreSQL database..."
+ynh_script_progression "Updating a PostgreSQL database..."
 
 db_psql_version=$(ynh_app_setting_get --key=psql_version)
 db_port=$(ynh_app_setting_get --key=psql_port)

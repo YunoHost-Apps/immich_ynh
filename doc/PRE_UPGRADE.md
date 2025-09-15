@@ -1,3 +1,3 @@
-- Please ensure **your mobile app and server are on the same version**. Otherwise, you won't be able to access the app.
+- Please look at the upstream [disclaimer](https://github.com/immich-app/immich?tab=readme-ov-file#disclaimer).
 
 - The installation requires some free memory to succeed. A swap file will be created if needed.
