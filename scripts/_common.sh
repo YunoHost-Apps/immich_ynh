@@ -5,7 +5,7 @@
 #=================================================
 
 # PostgreSQL root password
-PSQL_ROOT_PWD="$(cat $PSQL_ROOT_PWD_FILE)"
+PSQL_ROOT_PWD="$(cat /etc/yunohost/psql)"
 
 # Fail2ban (install, upgrade & _common)
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
