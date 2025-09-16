@@ -42,14 +42,15 @@ ynh_nodejs_install
 #=================================================
 ynh_script_progression "Restoring the database..."
 
-db_pwd=$(ynh_app_setting_get --key=db_pwd)
 db_cluster=$(ynh_app_setting_get --key=db_cluster)
-db_port=$(ynh_app_setting_get --key=db_port)
-
 myynh_create_psql_cluster
 myynh_update_psql_db
+
+db_pwd=$(ynh_app_setting_get --key=db_pwd)
 myynh_create_psql_db
 myynh_restore_psql_db
+
+db_port=$(ynh_app_setting_get --key=db_port)
 myynh_set_default_psql_cluster_to_debian_default
 
 #=================================================
