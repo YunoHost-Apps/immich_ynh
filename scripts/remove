@@ -29,6 +29,7 @@ ynh_config_remove_systemd "$app-machine-learning"
 
 ynh_config_remove_nginx
 
+db_psql_version=$(ynh_app_setting_get --key=psql_version)
 myynh_drop_psql_db
 
 ynh_nodejs_remove
