@@ -46,6 +46,8 @@ db_cluster=$(ynh_read_manifest "resources.apt.extras.postgresql.packages" \
 	| cut -d'-' -f2)
 db_cluster="$db_cluster/main" # 16/main
 ynh_app_setting_set --key=db_cluster --value="$db_cluster"
+db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
+ynh_app_setting_set --key=db_port --value=$db_port
 
 myynh_create_psql_cluster
 myynh_update_psql_db

@@ -68,10 +68,10 @@ myynh_install_immich() {
 		ynh_hide_warnings npm install --global corepack@latest
 		export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 		export CI=1
-		app_pnpm_version=$(cat "$source_dir/package.json" \
+		pnpm_version=$(cat "$source_dir/package.json" \
 			| jq -r '.packageManager | split("@")[1] | split(".")[0]') #10
 		ynh_hide_warnings corepack enable pnpm
-		ynh_hide_warnings corepack use pnpm@latest-$app_pnpm_version
+		ynh_hide_warnings corepack use pnpm@latest-$pnpm_version
 
 	# Print versions
 		echo "node version: $(node -v)"
@@ -129,7 +129,7 @@ myynh_install_immich() {
 			# Create the virtual environment
 				python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
 					| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
-				ynh_app_setting_set --key=python_version --value="$python_version"
+				ynh_app_setting_set --key=python_version --value=$python_version
 				"$uv" venv --quiet "$install_dir/app/machine-learning/venv" --python "$python_version"
 			# Activate the virtual environment
 				set +o nounset
@@ -278,10 +278,7 @@ myynh_set_default_psql_cluster_to_debian_default() {
 	echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
 
 	# Remove the autoprovisionned db if not on right cluster
-	local db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
-	ynh_app_setting_set --key=db_port --value="$db_port"
-
-	if [ "$db_port" -ne "$default_port" ]
+	if [[ $db_port -ne $default_port ]]
 	then
 		if ynh_psql_database_exists "$app"
 		then
