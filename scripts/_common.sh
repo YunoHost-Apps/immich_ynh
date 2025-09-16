@@ -205,7 +205,7 @@ myynh_execute_psql_as_root() {
 myynh_create_psql_cluster() {
 	if [[ -z `pg_lsclusters | grep "$db_cluster"` ]]
 	then
-		pg_createcluster "${db_cluster\// }" --start
+		pg_createcluster "${db_cluster/\// }" --start
 	else
 		myynh_update_psql_db
 	fi
