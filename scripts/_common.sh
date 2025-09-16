@@ -216,6 +216,8 @@ myynh_create_psql_cluster() {
 
 # Install the database
 myynh_create_psql_db() {
+	db_pwd=$(ynh_app_setting_get --key=db_pwd)
+
 	myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
 	myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 	myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
@@ -281,6 +283,8 @@ myynh_set_default_psql_cluster_to_debian_default() {
 	echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
 
 	# Remove the autoprovisionned db if not on right cluster
+	local db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
+	ynh_app_setting_set --key=db_port --value=$db_port
 	if [[ $db_port -ne $default_port ]]
 	then
 		if ynh_psql_database_exists "$app"
