@@ -30,6 +30,14 @@ ynh_config_remove_systemd "$app-machine-learning"
 ynh_config_remove_nginx
 
 db_psql_version=$(ynh_app_setting_get --key=psql_version)
+if [[ -z $db_psql_version ]]
+then
+    db_psql_version=$(ynh_read_manifest "resources.apt.extras.postgresql.packages" \
+        | grep -o 'postgresql-[0-9][0-9]-pgvector' \
+        | head -n1 \
+        | cut -d'-' -f2 \
+        ) # 16
+fi
 myynh_drop_psql_db
 
 ynh_nodejs_remove
