@@ -85,6 +85,8 @@ myynh_install_immich() {
 		# Replace /build
 			grep -RlE "\"/build\"|'/build'" \
 				| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
+		# Definie pnpm options
+			export PNPM_HOME="$source_dir/pnpm"
 		# Build server
 			cd "$source_dir/server"
    			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
@@ -111,6 +113,7 @@ myynh_install_immich() {
 		# Cleanup
 			ynh_hide_warnings pnpm prune
 			ynh_hide_warnings pnpm store prune
+			unset PNPM_HOME
  			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning
