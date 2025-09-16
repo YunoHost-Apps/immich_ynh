@@ -65,12 +65,11 @@ myynh_install_immich() {
 		export NODE_ENV=production
 
 	# Install pnpm
-		app_pnpm_version=$(cat "$source_dir/package.json" \
-			| jq -r '.packageManager | split("@")[1] | split(".")[0]' \
-		) #10
 		ynh_hide_warnings npm install --global corepack@latest
 		export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 		export CI=1
+		app_pnpm_version=$(cat "$source_dir/package.json" \
+			| jq -r '.packageManager | split("@")[1] | split(".")[0]') #10
 		ynh_hide_warnings corepack enable pnpm
 		ynh_hide_warnings corepack use pnpm@latest-$app_pnpm_version
 
@@ -127,15 +126,11 @@ myynh_install_immich() {
 				export UV_PYTHON_INSTALL_DIR="$install_dir/app/machine-learning"
 				export UV_NO_CACHE=true
 				export UV_NO_MODIFY_PATH=true
-			# Retrive python required version
-				app_py_version=$(cat "$source_dir/machine-learning/Dockerfile" \
-					| grep "FROM python:" \
-					| head -n1 \
-					| cut -d':' -f2 \
-					| cut -d'-' -f1 \
-					) # 3.11
 			# Create the virtual environment
-				"$uv" venv --quiet "$install_dir/app/machine-learning/venv" --python "$app_py_version"
+				python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
+					| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
+				ynh_app_setting_set --key=python_version --value="$python_version"
+				"$uv" venv --quiet "$install_dir/app/machine-learning/venv" --python "$python_version"
 			# Activate the virtual environment
 				set +o nounset
 				source "$install_dir/app/machine-learning/venv/bin/activate"
@@ -203,14 +198,14 @@ myynh_execute_psql_as_root() {
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$db_psql_version/main" $options "$database" --command="$sql"
+		psql --cluster="$db_cluster" $options "$database" --command="$sql"
 }
 
 # Create the cluster
 myynh_create_psql_cluster() {
-	if [[ -z `pg_lsclusters | grep $db_psql_version` ]]
+	if [[ -z `pg_lsclusters | grep "$db_cluster"` ]]
 	then
-		pg_createcluster $db_psql_version main --start
+		pg_createcluster "${db_cluster\// }" --start
 	else
 		myynh_update_psql_db
 	fi
@@ -253,7 +248,7 @@ myynh_drop_psql_db() {
 
 # Dump the database
 myynh_dump_psql_db() {
-	sudo --login --user=postgres pg_dump --cluster="$db_psql_version/main" --dbname="$app" > db.sql
+	sudo --login --user=postgres pg_dump --cluster="$db_cluster" --dbname="$app" > db.sql
 }
 
 # Restore the database
@@ -263,7 +258,7 @@ myynh_restore_psql_db() {
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
 	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$db_psql_version/main" --dbname="$app" < ./db.sql
+		psql --cluster="$db_cluster" --dbname="$app" < ./db.sql
 }
 
 # Set default cluster back to debian and remove autoprovisionned db if not on right cluster
@@ -271,8 +266,8 @@ myynh_set_default_psql_cluster_to_debian_default() {
 	local default_port=5432
 	local config_file="/etc/postgresql-common/user_clusters"
 
-	#retrieve informations about default psql cluster
-	default_psql_version=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
+	# Retrieve informations about default psql cluster
+	default_db_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
 	default_psql_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f2)
 	default_psql_database=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f5)
 
@@ -280,9 +275,12 @@ myynh_set_default_psql_cluster_to_debian_default() {
 	sed -i'.bak' -e '/^#/!d' "$config_file"
 
 	# Add new line USER  GROUP   VERSION CLUSTER DATABASE
-	echo -e "* * $default_psql_version $default_psql_cluster $default_psql_database" >> "$config_file"
+	echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
 
 	# Remove the autoprovisionned db if not on right cluster
+	local db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
+	ynh_app_setting_set --key=db_port --value="$db_port"
+
 	if [ "$db_port" -ne "$default_port" ]
 	then
 		if ynh_psql_database_exists "$app"

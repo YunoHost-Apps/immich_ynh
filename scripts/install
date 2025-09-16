@@ -31,7 +31,7 @@ ynh_setup_source --source_id="main" --dest_dir="$source_dir"
 #=================================================
 ynh_script_progression "Installing nodejs..."
 
-nodejs_version=$(cat "$source_dir/server/.nvmrc" | cut -d '.' -f1)
+nodejs_version=$(cat "$source_dir/server/.nvmrc" | cut -d '.' -f1) # 22
 ynh_nodejs_install
 
 #=================================================
@@ -39,22 +39,17 @@ ynh_nodejs_install
 #=================================================
 ynh_script_progression "Creating a PostgreSQL database..."
 
-db_pwd=$(ynh_string_random)
-db_psql_version=$(ynh_read_manifest "resources.apt.extras.postgresql.packages" \
+db_pwd=$(ynh_app_setting_get --key=db_pwd)
+db_cluster=$(ynh_read_manifest "resources.apt.extras.postgresql.packages" \
 	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
 	| head -n1 \
-	| cut -d'-' -f2 \
-	) # 16
+	| cut -d'-' -f2)
+db_cluster="$db_cluster/main" # 16/main
+ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 
 myynh_create_psql_cluster
 myynh_update_psql_db
 myynh_create_psql_db
-
-db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
-ynh_app_setting_set --key=psql_pwd --value="$db_pwd"
-ynh_app_setting_set --key=psql_version --value="$db_psql_version"
-ynh_app_setting_set --key=psql_port --value="$db_port"
-
 myynh_set_default_psql_cluster_to_debian_default
 
 #=================================================

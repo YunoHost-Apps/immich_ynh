@@ -34,7 +34,7 @@ ynh_restore "$data_dir"
 #=================================================
 ynh_script_progression "Reinstalling nodejs..."
 
-nodejs_version=$(yq -r .nodejs_version "../settings/settings.yml")
+nodejs_version=$(ynh_app_setting_get --key=nodejs_version)
 ynh_nodejs_install
 
 #=================================================
@@ -42,9 +42,8 @@ ynh_nodejs_install
 #=================================================
 ynh_script_progression "Restoring the database..."
 
-db_pwd=$(ynh_app_setting_get --key=psql_pwd)
-db_psql_version=$(ynh_app_setting_get --key=psql_version)
-db_port=$(ynh_app_setting_get --key=psql_port)
+db_pwd=$(ynh_app_setting_get --key=db_pwd)
+db_cluster=$(ynh_app_setting_get --key=db_cluster)
 
 myynh_create_psql_cluster
 myynh_update_psql_db

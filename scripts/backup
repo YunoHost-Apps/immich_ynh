@@ -50,7 +50,7 @@ ynh_backup "/var/log/$app/"
 #=================================================
 ynh_print_info "Backing up a PostgreSQL database..."
 
-db_psql_version=$(ynh_app_setting_get --key=psql_version)
+db_cluster=$(ynh_app_setting_get --key=db_cluster)
 
 myynh_update_psql_db
 myynh_dump_psql_db

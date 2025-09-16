@@ -62,7 +62,7 @@ ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace
 #=================================================
 ynh_script_progression "Installing nodejs..."
 
-nodejs_version=$(cat "$source_dir/server/.nvmrc" | cut -d '.' -f1)
+nodejs_version=$(cat "$source_dir/server/.nvmrc" | cut -d '.' -f1) # 22
 ynh_nodejs_install
 
 #=================================================
@@ -70,8 +70,12 @@ ynh_nodejs_install
 #=================================================
 ynh_script_progression "Updating a PostgreSQL database..."
 
-db_psql_version=$(ynh_app_setting_get --key=psql_version)
-db_port=$(ynh_app_setting_get --key=psql_port)
+db_cluster=$(ynh_read_manifest "resources.apt.extras.postgresql.packages" \
+	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
+	| head -n1 \
+	| cut -d'-' -f2)
+db_cluster="$db_cluster/main" # 16/main
+ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 
 myynh_update_psql_db
 myynh_set_default_psql_cluster_to_debian_default
@@ -102,7 +106,9 @@ ynh_del_swap
 #=================================================
 ynh_script_progression "Updating $app's configuration files..."
 
-db_pwd=$(ynh_app_setting_get --key=psql_pwd)
+db_pwd=$(ynh_app_setting_get --key=db_pwd)
+db_port=$(ynh_app_setting_get --key=db_port)
+
 ynh_config_add --template="env" --destination="$install_dir/env"
 
 #=================================================
