@@ -49,6 +49,7 @@ fi
 if ynh_app_upgrading_from_version_before 1.142.0~ynh2
 then
 	ynh_app_setting_delete --key=python
+	ynh_app_setting_set --key=db_cluster --value="$(ynh_app_setting_get --key=psql_version)/main"
 	ynh_app_setting_delete --key=psql_version
 	ynh_app_setting_delete --key=psql_port
 	ynh_app_setting_set --key=db_pwd --value="$(ynh_app_setting_get --key=psql_pwd)"
