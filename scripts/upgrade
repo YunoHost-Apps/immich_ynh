@@ -111,8 +111,6 @@ ynh_del_swap
 ynh_script_progression "Updating $app's configuration files..."
 
 db_pwd=$(ynh_app_setting_get --key=db_pwd)
-db_port=$(ynh_app_setting_get --key=db_port)
-
 ynh_config_add --template="env" --destination="$install_dir/env"
 
 #=================================================

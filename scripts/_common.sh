@@ -283,7 +283,7 @@ myynh_set_default_psql_cluster_to_debian_default() {
 	echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
 
 	# Remove the autoprovisionned db if not on right cluster
-	local db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
+	db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
 	ynh_app_setting_set --key=db_port --value=$db_port
 	if [[ $db_port -ne $default_port ]]
 	then
