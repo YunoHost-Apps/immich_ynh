@@ -113,6 +113,7 @@ ynh_script_progression "Updating $app's configuration files..."
 
 db_pwd=$(ynh_app_setting_get --key=db_pwd)
 ynh_config_add --template="env" --destination="$install_dir/env"
+ynh_config_add --template="restore_immich_db_backup.sh" --destination="$data_dir/bin/restore_immich_db_backup.sh"
 
 #=================================================
 # REAPPLY SYSTEM CONFIGURATION
