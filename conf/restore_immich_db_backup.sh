@@ -34,9 +34,9 @@ EOF
 read -r -p "Are you sure you want to continue restoring? [y/N] " response
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
-	app=__APP__
-	db_cluster=__DB_CLUSTER__
-	db_name=__APP__
+	app="__APP__"
+	db_cluster="__DB_CLUSTER__"
+	db_name="__APP__"
 
 	ynh_systemctl --service="$app-server" --action="stop"
 
