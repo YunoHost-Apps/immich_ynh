@@ -261,7 +261,7 @@ myynh_drop_psql_db() {
 
 # Dump the database
 myynh_dump_psql_db() {
-	myynh_execute_psql_as_root --command="pg_dump" --dbname="$app" > db.sql
+	myynh_execute_psql_as_root --command="pg_dump" --database="$app" > db.sql
 }
 
 # Restore the database
@@ -270,7 +270,7 @@ myynh_restore_psql_db() {
 	ynh_replace --match="SELECT pg_catalog.set_config('search_path', '', false);" \
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
-	myynh_execute_psql_as_root --dbname="$app" < ./db.sql
+	myynh_execute_psql_as_root --database="$app" < ./db.sql
 }
 
 # Set default cluster back to debian and remove autoprovisionned db if not on right cluster
