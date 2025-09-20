@@ -80,7 +80,8 @@ ynh_del_swap
 ynh_script_progression "Adding $app's configuration files..."
 
 ynh_config_add --template="env" --destination="$install_dir/env"
-ynh_config_add --template="restore_immich_db_backup.sh" --destination="$data_dir/bin/restore_immich_db_backup.sh"
+mkdir "$data_dir/backups"
+ynh_config_add --template="restore_immich_db_backup.sh" --destination="$data_dir/backups/restore_immich_db_backup.sh"
 
 #=================================================
 # SYSTEM CONFIGURATION

@@ -3,7 +3,7 @@
 source /etc/yunohost/apps/__APP__/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
-backup_files=( "__DATA_DIR__/backups/"*.sql.gz )
+backup_files=( *.sql.gz )
 
 PS3='Select file to restore, or 0 to exit: '
 select backup_file in "${backup_files[@]}"
