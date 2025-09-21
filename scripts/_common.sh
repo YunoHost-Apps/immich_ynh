@@ -180,28 +180,36 @@ myynh_install_immich() {
 }
 
 # Execute a psql command as root user
-# usage: myynh_execute_psql_as_root --sql=sql [--options=options] [--database=database]
+# usage: myynh_execute_psql_as_root [--command=command] --sql=sql [--options=options] [--database=database]
+# | arg: -c, --command=     - the psql command to run (default: psql)
 # | arg: -s, --sql=         - the SQL command to execute
 # | arg: -o, --options=     - the options to add to psql
 # | arg: -d, --database=    - the database to connect to
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
 	local legacy_args=sod
-	local -A args_array=([s]=sql= [o]=options= [d]=database=)
+	local -A args_array=([c]=command= [s]=sql= [o]=options= [d]=database=)
+	local command
 	local sql
 	local options
 	local database
 	# Manage arguments with getopts
 	ynh_handle_getopts_args "$@"
+	command="${command:-psql}"
+	sql="${sql:-}"
 	options="${options:-}"
 	database="${database:-}"
+	if [ -n "$sql" ]
+	then
+		sql="--command=$sql"
+	fi
 	if [ -n "$database" ]
 	then
 		database="--dbname=$database"
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$db_cluster" $options "$database" --command="$sql"
+		$command --cluster="$db_cluster" $options "$database" "$sql"
 }
 
 # Create the cluster
@@ -253,7 +261,7 @@ myynh_drop_psql_db() {
 
 # Dump the database
 myynh_dump_psql_db() {
-	sudo --login --user=postgres pg_dump --cluster="$db_cluster" --dbname="$app" > db.sql
+	myynh_execute_psql_as_root --command="pg_dump" --database="$app" > db.sql
 }
 
 # Restore the database
@@ -262,8 +270,7 @@ myynh_restore_psql_db() {
 	ynh_replace --match="SELECT pg_catalog.set_config('search_path', '', false);" \
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
-	sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		psql --cluster="$db_cluster" --dbname="$app" < ./db.sql
+	myynh_execute_psql_as_root --database="$app" < ./db.sql
 }
 
 # Set default cluster back to debian and remove autoprovisionned db if not on right cluster
@@ -317,6 +324,7 @@ myynh_set_permissions() {
 	chown -R $app: "$data_dir"
 	chmod u=rwX,g=rX,o= "$data_dir"
 	chmod -R o-rwx "$data_dir"
+	setfacl --modify u:$app:rwX,g:$app:rwX "$data_dir/backups/restore_immich_db_backup.sh"
 
 	chown -R $app: "/var/log/$app"
 	chmod u=rw,g=r,o= "/var/log/$app"
