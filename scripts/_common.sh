@@ -322,7 +322,7 @@ myynh_set_permissions() {
 	done
 
 	chown -R $app: "$data_dir"
-	chmod u=rwX,g=rX,o= "$data_dir"
+	chmod -R u=rwX,g=rX,o= "$data_dir"
 	chmod -R o-rwx "$data_dir"
 
 	chown -R $app: "/var/log/$app"

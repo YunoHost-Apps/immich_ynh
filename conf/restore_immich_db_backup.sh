@@ -1,21 +1,22 @@
 #!/bin/bash
 
-source /etc/yunohost/apps/__APP__/scripts/_common.sh
-source /usr/share/yunohost/helpers
+source /etc/yunohost/apps/immich/scripts/_common.sh
+YNH_HELPERS_VERSION="2.1" source /usr/share/yunohost/helpers
 
+YNH_STDINFO=1
 backup_files=( *.sql.gz )
 
-PS3='Select file to restore, or 0 to exit: '
+PS3="Select backup file to restore, or 0 to exit:"
 select backup_file in "${backup_files[@]}"
 do
 	if [[ $REPLY == "0" ]]
 	then
-		echo 'Bye!' >&2
-		exit
+			ynh_print_info "[####################] Bye!"
+			exit
 	elif [[ -z $backup_file ]]; then
-		echo 'Invalid choice, try again' >&2
+				ynh_print_info "[....................] Invalid choice, try again"
 	else
-		break
+			break
 	fi
 done
 
@@ -38,19 +39,28 @@ then
 	db_cluster="__DB_CLUSTER__"
 	db_name="__APP__"
 
+	ynh_print_info "[+...................] Stopping immich..."
 	ynh_systemctl --service="$app-server" --action="stop"
 
-	myynh_drop_psql_db
+	ynh_print_info "[#+..................] Droping current immich db..."
+	myynh_drop_psql_db 1>/dev/null
 
-	gunzip --stdout "$backup_file" > db.sql
-	myynh_restore_psql_db
-	ynh_safe_rm db.sql
+	ynh_print_info "[##+.................] Creating an empty immich db..."
+	myynh_update_psql_db 1>/dev/null
+	myynh_create_psql_db 1>/dev/null
 
+	ynh_print_info "[###++++++++++++++++.] Restoring immich db backup... (Depending on your database size, this may take a long while)"
+	{
+		gunzip --stdout "$backup_file" > "db.sql"
+		myynh_restore_psql_db
+		ynh_safe_rm "db.sql"
+		set +o xtrace
+	} &>/dev/null
+
+	ynh_print_info "[###################+] Restarting immich..."
 	ynh_systemctl --service="$app-server" --action="start"
 
-	echo 'Done!' >&2
-	exit
+	ynh_print_info "[####################] Restoration of the immich db backup completed!"
 else
-	echo 'Bye!' >&2
-	exit
+	ynh_print_info "[####################] Bye!"
 fi
