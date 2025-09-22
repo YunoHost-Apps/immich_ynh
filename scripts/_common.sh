@@ -23,7 +23,7 @@ myynh_check_hardware() {
 # Add swap if needed
 myynh_add_swap() {
 	# Remove existing SWAP
-		ynh_del_swap
+		ynh_del_swap_fixed
 	# Retrieve RAM needed in G
 		local ram_needed_full=$(ynh_read_manifest "integration.ram.build")
 		local ram_needed_value=${ram_needed_full::-1}
@@ -46,6 +46,15 @@ myynh_add_swap() {
 		then
 			ynh_print_info "Adding $swap_needed_M Mb to swap..."
 			ynh_add_swap_fixed --size=$swap_needed_M
+		fi
+	# Recheck free RAM in G
+		local ram_free_G=$(($(ynh_get_ram --free)/1024))
+		if [ $ram_free_G -lt $ram_needed_G ]
+		then
+			# Remove existing SWAP
+				ynh_del_swap_fixed
+			# Terminate install/upgarde script
+				ynh_die "There is no enough free memory on your system ($ram_needed_G GB are needed to build successfully $app). You need to either add RAM or manually add swap to your system."
 		fi
 }
 
