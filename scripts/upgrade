@@ -104,7 +104,7 @@ myynh_install_immich
 #=================================================
 ynh_script_progression "Remove temporary swap if added..."
 
-ynh_del_swap
+ynh_del_swap_fixed
 
 #=================================================
 # UPDATE A CONFIG FILE
