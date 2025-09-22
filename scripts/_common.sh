@@ -45,7 +45,7 @@ myynh_add_swap() {
 		if [ $swap_needed_M -gt 0 ]
 		then
 			ynh_print_info "Adding $swap_needed_M Mb to swap..."
-			ynh_add_swap --size=$swap_needed_M
+			ynh_add_swap_fixed --size=$swap_needed_M
 		fi
 }
 
@@ -339,7 +339,7 @@ myynh_set_permissions() {
 #
 # usage: ynh_add_swap --size=SWAP in Mb
 # | arg: -s, --size= - Amount of SWAP to add in Mb.
-myynh_add_swap() {
+ynh_add_swap_fixed() {
 	if systemd-detect-virt --container --quiet; then
 		ynh_print_warn "You are inside a container/VM. swap will not be added, but that can cause troubles for the app $app. Please make sure you have enough RAM available."
 		return
@@ -404,7 +404,7 @@ myynh_add_swap() {
 	fi
 }
 
-myynh_del_swap() {
+ynh_del_swap_fixed() {
 	# If there a swap at this place
 	if [ -e "/swap_$app" ]; then
 		# Clean the fstab
