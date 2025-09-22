@@ -72,7 +72,7 @@ myynh_install_immich
 #=================================================
 ynh_script_progression "Remove temporary swap if added..."
 
-ynh_del_swap
+myynh_del_swap
 
 #=================================================
 # APP INITIAL CONFIGURATION
