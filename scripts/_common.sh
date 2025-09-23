@@ -419,8 +419,10 @@ ynh_del_swap_fixed() {
 	if [ -e "/swap_$app" ]; then
 		# Clean the fstab
 		sed -i "/#Swap added by $app/d" /etc/fstab
-		# Desactive the swap file
-		swapoff "/swap_$app" 2> /dev/null
+		# Desactive the swap file if active
+		if grep -qs "/swap_$app" /proc/swaps; then
+			swapoff "/swap_$app"
+		fi
 		# And remove it
 		rm "/swap_$app"
 	fi
