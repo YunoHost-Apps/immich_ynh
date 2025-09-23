@@ -57,6 +57,10 @@ then
 		set +o xtrace
 	} &>/dev/null
 
+	ynh_print_info "[##################+.] Updating the immich db password..."
+	db_pwd="$(ynh_app_setting_get --key=db_pwd)"
+	myynh_execute_psql_as_root --sql="ALTER USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app" 1>/dev/null
+
 	ynh_print_info "[###################+] Restarting immich..."
 	ynh_systemctl --service="$app-server" --action="start"
 
