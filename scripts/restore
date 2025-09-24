@@ -38,6 +38,13 @@ nodejs_version=$(ynh_app_setting_get --key=nodejs_version)
 ynh_nodejs_install
 
 #=================================================
+# INSTALL PACKAGES
+#=================================================
+ynh_script_progression "Installing additionnal packages (if needed)..."
+
+install_postgresql_packages
+
+#=================================================
 # RESTORE THE DATABASE
 #=================================================
 ynh_script_progression "Restoring the database..."
