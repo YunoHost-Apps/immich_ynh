@@ -235,7 +235,7 @@ myynh_execute_psql_as_root() {
 	database="${database:-}"
 	if [ -n "$sql" ]
 	then
-		sql="--tool=$sql"
+		sql="--command=$sql"
 	fi
 	cluster="--cluster=$cluster"
 	if [ -n "$database" ]
