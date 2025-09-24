@@ -20,6 +20,16 @@ myynh_check_hardware() {
 		fi
 }
 
+# Add postgresql packages from postgresql repo if needed
+myynh_install_postgresql_packages() {
+	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]; then
+		ynh_apt_install_dependencies_from_extra_repository \
+			--repo="deb https://apt.postgresql.org/pub/repos/apt __YNH_DEBIAN_VERSION__-pgdg main 16" \
+			 --key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
+			 --package="libpq5 libpq-dev postgresql-16 postgresql-16-pgvector postgresql-client-16"
+	fi
+}
+
 # Add swap if needed
 myynh_add_swap() {
 	# Remove existing SWAP
