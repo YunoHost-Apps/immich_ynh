@@ -24,7 +24,7 @@ myynh_check_hardware() {
 myynh_install_postgresql_packages() {
 	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]; then
 		ynh_apt_install_dependencies_from_extra_repository \
-			--repo="deb https://apt.postgresql.org/pub/repos/apt __YNH_DEBIAN_VERSION__-pgdg main 16" \
+			--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main 16" \
 			 --key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
 			 --package="libpq5 libpq-dev postgresql-16 postgresql-16-pgvector postgresql-client-16"
 	fi
