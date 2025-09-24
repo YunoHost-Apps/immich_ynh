@@ -104,17 +104,20 @@ ram.runtime = "2G"
         "wget",
         "yq"
     ]
+    packages_from_raw_bash = """
+    if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
+        echo "postgresql-17-pgvector"; 
+	fi
+    """
 
     [resources.apt.extras.postgresql]
     repo = "deb https://apt.postgresql.org/pub/repos/apt __YNH_DEBIAN_VERSION__-pgdg main 16"
     key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
-    packages = [
-        "libpq5",
-        "libpq-dev",
-        "postgresql-16",
-        "postgresql-16-pgvector",
-        "postgresql-client-16"
-    ]
+    packages_from_raw_bash = """
+    if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]; then
+        echo "libpq5 libpq-dev, postgresql-16, postgresql-16-pgvector, postgresql-client-16";
+    fi
+    """
 
     [resources.apt.extras.jellyfin-ffmpeg]
     repo = "deb https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"
