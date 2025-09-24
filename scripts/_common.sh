@@ -4,6 +4,10 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
+# Postgresql version
+psql_bookworm=16
+psql_trixie=17
+
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
@@ -22,12 +26,19 @@ myynh_check_hardware() {
 
 # Add postgresql packages from postgresql repo if needed
 myynh_install_postgresql_packages() {
-	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]; then
+	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+	then
 		ynh_apt_install_dependencies_from_extra_repository \
-			--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main 16" \
+			--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_bookworm" \
 			 --key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
-			 --package="libpq5 libpq-dev postgresql-16 postgresql-16-pgvector postgresql-client-16"
+			 --package="libpq5 libpq-dev postgresql-$psql_bookworm postgresql-$psql_bookworm-pgvector postgresql-client-$psql_bookworm"
+		db_cluster="$psql_bookworm/main"
+	elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
+	then
+		ynh_apt_install_dependencies "postgresql-$psql_trixie-pgvector"
+		db_cluster="$psql_trixie/main"
 	fi
+	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 }
 
 # Add swap if needed
@@ -200,36 +211,40 @@ myynh_install_immich() {
 }
 
 # Execute a psql command as root user
-# usage: myynh_execute_psql_as_root [--command=command] --sql=sql [--options=options] [--database=database]
-# | arg: -c, --command=     - the psql command to run (default: psql)
+# usage: myynh_execute_psql_as_root [--tool=tool] --sql=sql [--options=options] [--cluster=cluster] [--database=database]
+# | arg: -t, --tool=        - the psql tool to run (default: psql)
 # | arg: -s, --sql=         - the SQL command to execute
 # | arg: -o, --options=     - the options to add to psql
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
 # | arg: -d, --database=    - the database to connect to
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
 	local legacy_args=sod
-	local -A args_array=([c]=command= [s]=sql= [o]=options= [d]=database=)
-	local command
+	local -A args_array=([t]=tool= [s]=sql= [o]=options= [c]=cluster= [d]=database=)
+	local tool
 	local sql
 	local options
+	local cluster
 	local database
 	# Manage arguments with getopts
 	ynh_handle_getopts_args "$@"
-	command="${command:-psql}"
+	tool="${tool:-psql}"
 	sql="${sql:-}"
 	options="${options:-}"
+	cluster="${cluster:-$db_cluster}"
 	database="${database:-}"
 	if [ -n "$sql" ]
 	then
-		sql="--command=$sql"
+		sql="--tool=$sql"
 	fi
+	cluster="--cluster=$cluster"
 	if [ -n "$database" ]
 	then
 		database="--dbname=$database"
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		$command --cluster="$db_cluster" $options "$database" "$sql"
+		$tool "$cluster" $options "$database" "$sql"
 }
 
 # Create the cluster
@@ -271,26 +286,61 @@ myynh_update_psql_db() {
 }
 
 # Remove the database
+# usage: myynh_drop_psql_db [--cluster=cluster]
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
 myynh_drop_psql_db() {
-	myynh_execute_psql_as_root --sql="REVOKE CONNECT ON DATABASE $app FROM public;"
-	myynh_execute_psql_as_root --sql="SELECT pg_terminate_backend (pg_stat_activity.pid) FROM pg_stat_activity \
-										WHERE pg_stat_activity.datname = '$app' AND pid <> pg_backend_pid();"
-	myynh_execute_psql_as_root --sql="DROP DATABASE $app;"
-	myynh_execute_psql_as_root --sql="DROP USER $app;"
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="REVOKE CONNECT ON DATABASE $app FROM public;"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="SELECT pg_terminate_backend (pg_stat_activity.pid) FROM pg_stat_activity \
+															WHERE pg_stat_activity.datname = '$app' AND pid <> pg_backend_pid();"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="DROP DATABASE $app;"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="DROP USER $app;"
 }
 
 # Dump the database
+# usage: myynh_dump_psql_db [--cluster=cluster]
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
 myynh_dump_psql_db() {
-	myynh_execute_psql_as_root --command="pg_dump" --database="$app" > db.sql
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
+	myynh_execute_psql_as_root --tool="pg_dump" --cluster="$cluster" --database="$app" > db.sql
 }
 
 # Restore the database
+# usage: myynh_restore_psql_db [--cluster=cluster]
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
 myynh_restore_psql_db() {
-	# https://github.com/immich-app/immich/issues/5630#issuecomment-1866581570
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
+	# Adjust the content cf. https://github.com/immich-app/immich/issues/5630#issuecomment-1866581570
 	ynh_replace --match="SELECT pg_catalog.set_config('search_path', '', false);" \
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
-	myynh_execute_psql_as_root --database="$app" < ./db.sql
+	# Restore the db
+	myynh_execute_psql_as_root --cluster="$cluster" --database="$app" < ./db.sql
+
+	# Restore the password
+	db_pwd="$(ynh_app_setting_get --key=db_pwd)"
+	myynh_execute_psql_as_root --cluster="$new_cluster" --sql="ALTER USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 }
 
 # Set default cluster back to debian and remove autoprovisionned db if not on right cluster

@@ -86,11 +86,31 @@ myynh_install_postgresql_packages
 #=================================================
 ynh_script_progression "Updating a PostgreSQL database..."
 
-# TODO:the day the Postgresql cluster version change, that part will need to be reviewed
-db_cluster=$(ynh_app_setting_get --key=db_cluster)
-myynh_update_psql_db
+if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+then
+	myynh_set_default_psql_cluster_to_debian_default
+elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
+then
+	# Check if the db is still on cluster 16 and if yes dumb and restore the db to 17 + delete the db on 16
+	old_cluster="$psql_bookworm/main"
+	new_cluster="$psql_trixie/main"
+	if [[ $(myynh_execute_psql_as_root \
+		--cluster="$old_cluster" \
+		--sql="SELECT datname FROM pg_database WHERE datname = '$app';" \
+		--options="--tuples-only --no-align") == "immich" ]]
+	then
+		# Dump db on old cluster
+		myynh_dump_psql_db --cluster="$old_cluster"
+		# Drop empty db on new cluster
+		myynh_drop_psql_db --cluster="$new_cluster"
+		# Restore db on new cluster
+		myynh_restore_psql_db --cluster="$new_cluster"
+		# Drop db on old cluster
+		myynh_drop_psql_db --cluster="$old_cluster"
+	fi
+fi
 
-myynh_set_default_psql_cluster_to_debian_default
+myynh_update_psql_db
 
 #=================================================
 # ADD SWAP IF NEEDED

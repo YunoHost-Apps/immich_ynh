@@ -50,13 +50,16 @@ myynh_install_postgresql_packages
 ynh_script_progression "Restoring the database..."
 
 db_cluster=$(ynh_app_setting_get --key=db_cluster)
-myynh_create_psql_cluster
-myynh_update_psql_db
 
-myynh_create_psql_db
+if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+then
+	myynh_create_psql_cluster
+	myynh_create_psql_db
+	myynh_set_default_psql_cluster_to_debian_default
+fi
+
 myynh_restore_psql_db
-
-myynh_set_default_psql_cluster_to_debian_default
+myynh_update_psql_db
 
 #=================================================
 # RESTORE SYSTEM CONFIGURATION
