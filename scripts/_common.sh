@@ -174,7 +174,8 @@ myynh_install_immich() {
 			# Add uv
 				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/pip" install --no-cache-dir --upgrade uv
 			# Install with uv
-				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/uv" sync --quiet --no-install-project --no-install-workspace --extra cpu --no-cache --active --link-mode=copy
+				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/uv" sync \
+					--quiet --frozen --extra cpu --no-dev --no-editable --no-install-project --compile-bytecode --no-progress --active --link-mode copy
 			# Clear uv options
 				unset UV_PYTHON_INSTALL_DIR
 				unset UV_NO_CACHE
