@@ -139,6 +139,7 @@ ynh_del_swap_fixed
 ynh_script_progression "Updating $app's configuration files..."
 
 db_pwd=$(ynh_app_setting_get --key=db_pwd)
+db_port=$(ynh_app_setting_get --key=db_port)
 ynh_config_add --template="env" --destination="$install_dir/env"
 mkdir --parents "$data_dir/backups"
 ynh_config_add --template="restore_immich_db_backup.sh" --destination="$data_dir/backups/restore_immich_db_backup.sh"

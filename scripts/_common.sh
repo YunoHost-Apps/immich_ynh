@@ -343,6 +343,22 @@ myynh_restore_psql_db() {
 	myynh_execute_psql_as_root --cluster="$cluster" --sql="ALTER USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 }
 
+# Retrieve the postgresql port of the cluster
+myynh_retrieve_psql_port() {
+# usage: myynh_dump_psql_db [--cluster=cluster]
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
+	db_port=$(myynh_execute_psql_as_root --cluster="$cluster" --sql="\echo :PORT")
+	ynh_app_setting_set --key=db_port --value=$db_port
+}
+
 # Set default cluster back to debian and remove autoprovisionned db if not on right cluster
 myynh_set_default_psql_cluster_to_debian_default() {
 	local default_port=5432
@@ -360,8 +376,7 @@ myynh_set_default_psql_cluster_to_debian_default() {
 	echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
 
 	# Remove the autoprovisionned db if not on right cluster
-	db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
-	ynh_app_setting_set --key=db_port --value=$db_port
+	myynh_retrieve_psql_port
 	if [[ $db_port -ne $default_port ]]
 	then
 		if ynh_psql_database_exists "$app"
