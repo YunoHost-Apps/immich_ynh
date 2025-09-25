@@ -340,7 +340,7 @@ myynh_restore_psql_db() {
 
 	# Restore the password
 	db_pwd="$(ynh_app_setting_get --key=db_pwd)"
-	myynh_execute_psql_as_root --cluster="$new_cluster" --sql="ALTER USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="ALTER USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 }
 
 # Set default cluster back to debian and remove autoprovisionned db if not on right cluster
