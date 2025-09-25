@@ -35,7 +35,7 @@ myynh_install_postgresql_packages() {
 		db_cluster="$psql_bookworm/main"
 	elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
 	then
-		ynh_apt_install_dependencies "postgresql-$psql_trixie-pgvector"
+		YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-$psql_trixie-pgvector"
 		db_cluster="$psql_trixie/main"
 	fi
 	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
