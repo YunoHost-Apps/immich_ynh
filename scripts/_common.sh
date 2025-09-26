@@ -289,7 +289,7 @@ myynh_update_psql_db() {
 
 	# Tune immich db
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
-	myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
+	ynh_hide_warnings myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
 }
 
 # Remove the database
