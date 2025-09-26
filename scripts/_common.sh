@@ -265,12 +265,11 @@ myynh_create_psql_db() {
 	myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
 	myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 	myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
-	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
-	myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
 }
 
 # Update the database
 myynh_update_psql_db() {
+	# Fix collation version mismatch
 	databases=$(myynh_execute_psql_as_root \
 		--sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" \
 		--options="--tuples-only --no-align" --database="postgres")
@@ -284,6 +283,10 @@ myynh_update_psql_db() {
 			myynh_execute_psql_as_root --sql="ALTER DATABASE $db REFRESH COLLATION VERSION;" --database="$db"
 		fi
 	done
+
+	# Tune immich db
+	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
+	myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
 }
 
 # Remove the database
