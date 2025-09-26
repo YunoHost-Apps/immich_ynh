@@ -35,23 +35,25 @@ nodejs_version=$(cat "$source_dir/server/.nvmrc" | cut -d '.' -f1) # 22
 ynh_nodejs_install
 
 #=================================================
+# INSTALL PACKAGES
+#=================================================
+ynh_script_progression "Installing additionnal packages (if needed)..."
+
+myynh_install_postgresql_packages
+
+#=================================================
 # CREATE A POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression "Creating a PostgreSQL database..."
+ynh_script_progression "Creating a PostgreSQL database (if needed)..."
 
-db_cluster=$(ynh_read_manifest "resources.apt.extras.postgresql.packages" \
-	| grep -o 'postgresql-[0-9][0-9]-pgvector' \
-	| head -n1 \
-	| cut -d'-' -f2)
-db_cluster="$db_cluster/main" # 16/main
-ynh_app_setting_set --key=db_cluster --value="$db_cluster"
+if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+then
+	myynh_create_psql_cluster
+	myynh_create_psql_db
+	myynh_set_default_psql_cluster_to_debian_default
+fi
 
-myynh_create_psql_cluster
 myynh_update_psql_db
-
-myynh_create_psql_db
-
-myynh_set_default_psql_cluster_to_debian_default
 
 #=================================================
 # ADD SWAP IF NEEDED
@@ -79,6 +81,7 @@ ynh_del_swap_fixed
 #=================================================
 ynh_script_progression "Adding $app's configuration files..."
 
+myynh_retrieve_psql_port
 ynh_config_add --template="env" --destination="$install_dir/env"
 mkdir --parents "$data_dir/backups"
 ynh_config_add --template="restore_immich_db_backup.sh" --destination="$data_dir/backups/restore_immich_db_backup.sh"

@@ -21,7 +21,7 @@ exec gunicorn immich_ml.main:app \
 	--bind "$IMMICH_HOST":"$MACHINE_LEARNING_PORT" \
 	--workers "$MACHINE_LEARNING_WORKERS" \
 	--timeout "$MACHINE_LEARNING_WORKER_TIMEOUT" \
-	--log-config-json log_conf.json \
+	--log-config-json immich_ml/log_conf.json \
 	--keep-alive "$MACHINE_LEARNING_HTTP_KEEPALIVE_TIMEOUT_S" \
 	--graceful-timeout 10 \
 	--log-level debug \
