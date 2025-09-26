@@ -5,8 +5,13 @@
 #=================================================
 
 # Postgresql version
-psql_bookworm=16
-psql_trixie=17
+if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+then
+	psql_version=16
+elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
+then
+	psql_version=17
+fi
 
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
@@ -29,14 +34,14 @@ myynh_install_postgresql_packages() {
 	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 	then
 		ynh_apt_install_dependencies_from_extra_repository \
-			--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_bookworm" \
+			--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
 			 --key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
-			 --package="libpq5 libpq-dev postgresql-$psql_bookworm postgresql-$psql_bookworm-pgvector postgresql-client-$psql_bookworm"
-		db_cluster="$psql_bookworm/main"
+			 --package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
+		db_cluster="$psql_version/main"
 	elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
 	then
-		YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-$psql_trixie-pgvector"
-		db_cluster="$psql_trixie/main"
+		YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-$psql_version-pgvector"
+		db_cluster="$psql_version/main"
 	fi
 	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 }
@@ -253,8 +258,6 @@ myynh_create_psql_cluster() {
 	if [[ -z `pg_lsclusters | grep "$db_cluster"` ]]
 	then
 		pg_createcluster ${db_cluster/\// } --start
-	else
-		myynh_update_psql_db
 	fi
 }
 
