@@ -416,7 +416,7 @@ myynh_set_permissions() {
 	chown -R $app: "$data_dir"
 	chmod u=rwX,g=rX,o= "$data_dir"
 	chmod -R o-rwx "$data_dir"
-	setfacl --modify u:$app:rwX,g:$app:rwX "$data_dir/backups/restore_immich_db_backup.sh"
+	chmod +x "$data_dir/backups/restore_immich_db_backup.sh"
 
 	chown -R $app: "/var/log/$app"
 	chmod u=rw,g=r,o= "/var/log/$app"
