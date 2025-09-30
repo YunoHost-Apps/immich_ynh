@@ -50,6 +50,11 @@ myynh_install_postgresql_packages() {
 myynh_add_swap() {
 	# Remove existing SWAP
 		ynh_del_swap_fixed
+	# No swap in container/VM context
+	if systemd-detect-virt --container --quiet; then
+		ynh_print_warn "You are inside a container/VM. swap will not be added, but that can cause troubles for the app $app. Please make sure you have enough RAM available."
+		return
+	fi
 	# Retrieve RAM needed in G
 		local ram_needed_full=$(ynh_read_manifest "integration.ram.build")
 		local ram_needed_value=${ram_needed_full::-1}
