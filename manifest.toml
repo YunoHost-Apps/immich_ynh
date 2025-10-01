@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "1.143.1~ynh1"
+version = "1.144.1~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -44,8 +44,8 @@ ram.runtime = "2G"
     [resources.sources]
 
     [resources.sources.main]
-    url = "https://github.com/immich-app/immich/archive/refs/tags/v1.143.1.tar.gz"
-    sha256 = "21cedcbf832124652e65655881e9abbad8348980cd400acf489f51fcf3df4c2d"
+    url = "https://github.com/immich-app/immich/archive/refs/tags/v1.144.1.tar.gz"
+    sha256 = "735394e97bcd2aaa2c7aa23cc12dfa3065fb9b8c13e3d3f614fb2b9dd672fe09"
 
     autoupdate.strategy = "latest_github_release"
 
@@ -104,17 +104,11 @@ ram.runtime = "2G"
         "wget",
         "yq"
     ]
-
-    [resources.apt.extras.postgresql]
-    repo = "deb https://apt.postgresql.org/pub/repos/apt __YNH_DEBIAN_VERSION__-pgdg main 16"
-    key = "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
-    packages = [
-        "libpq5",
-        "libpq-dev",
-        "postgresql-16",
-        "postgresql-16-pgvector",
-        "postgresql-client-16"
-    ]
+    packages_from_raw_bash = """
+    if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
+        echo "postgresql-17-pgvector"; 
+	fi
+    """
 
     [resources.apt.extras.jellyfin-ffmpeg]
     repo = "deb https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"

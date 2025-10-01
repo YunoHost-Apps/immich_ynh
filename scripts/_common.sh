@@ -4,6 +4,15 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
+# Postgresql version
+if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+then
+	psql_version=16
+elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
+then
+	psql_version=17
+fi
+
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
@@ -18,6 +27,23 @@ myynh_check_hardware() {
 				ynh_die "Your CPU is too old and not supported. Installation of $app is not possible on your system."
 			fi
 		fi
+}
+
+# Add postgresql packages from postgresql repo if needed
+myynh_install_postgresql_packages() {
+	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+	then
+		ynh_apt_install_dependencies_from_extra_repository \
+			--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
+			 --key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
+			 --package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
+		db_cluster="$psql_version/main"
+	elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
+	then
+		YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-$psql_version-pgvector"
+		db_cluster="$psql_version/main"
+	fi
+	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 }
 
 # Add swap if needed
@@ -143,7 +169,7 @@ myynh_install_immich() {
 				python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
 					| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
 				ynh_app_setting_set --key=python_version --value=$python_version
-				"$uv" venv --quiet "$install_dir/app/machine-learning/venv" --python "$python_version"
+				"$uv" venv --quiet "$install_dir/app/machine-learning/venv" --python "$python_version" --python-preference only-managed
 			# Activate the virtual environment
 				set +o nounset
 				source "$install_dir/app/machine-learning/venv/bin/activate"
@@ -153,7 +179,8 @@ myynh_install_immich() {
 			# Add uv
 				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/pip" install --no-cache-dir --upgrade uv
 			# Install with uv
-				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/uv" sync --quiet --no-install-project --no-install-workspace --extra cpu --no-cache --active --link-mode=copy
+				ynh_hide_warnings "$install_dir/app/machine-learning/venv/bin/uv" sync \
+					--quiet --frozen --extra cpu --no-dev --no-editable --no-install-project --compile-bytecode --no-progress --active --link-mode copy
 			# Clear uv options
 				unset UV_PYTHON_INSTALL_DIR
 				unset UV_NO_CACHE
@@ -190,36 +217,40 @@ myynh_install_immich() {
 }
 
 # Execute a psql command as root user
-# usage: myynh_execute_psql_as_root [--command=command] --sql=sql [--options=options] [--database=database]
-# | arg: -c, --command=     - the psql command to run (default: psql)
+# usage: myynh_execute_psql_as_root [--tool=tool] --sql=sql [--options=options] [--cluster=cluster] [--database=database]
+# | arg: -t, --tool=        - the psql tool to run (default: psql)
 # | arg: -s, --sql=         - the SQL command to execute
 # | arg: -o, --options=     - the options to add to psql
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
 # | arg: -d, --database=    - the database to connect to
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
 	local legacy_args=sod
-	local -A args_array=([c]=command= [s]=sql= [o]=options= [d]=database=)
-	local command
+	local -A args_array=([t]=tool= [s]=sql= [o]=options= [c]=cluster= [d]=database=)
+	local tool
 	local sql
 	local options
+	local cluster
 	local database
 	# Manage arguments with getopts
 	ynh_handle_getopts_args "$@"
-	command="${command:-psql}"
+	tool="${tool:-psql}"
 	sql="${sql:-}"
 	options="${options:-}"
+	cluster="${cluster:-$db_cluster}"
 	database="${database:-}"
 	if [ -n "$sql" ]
 	then
 		sql="--command=$sql"
 	fi
+	cluster="--cluster=$cluster"
 	if [ -n "$database" ]
 	then
 		database="--dbname=$database"
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		$command --cluster="$db_cluster" $options "$database" "$sql"
+		$tool "$cluster" $options "$database" "$sql"
 }
 
 # Create the cluster
@@ -227,8 +258,6 @@ myynh_create_psql_cluster() {
 	if [[ -z `pg_lsclusters | grep "$db_cluster"` ]]
 	then
 		pg_createcluster ${db_cluster/\// } --start
-	else
-		myynh_update_psql_db
 	fi
 }
 
@@ -239,12 +268,11 @@ myynh_create_psql_db() {
 	myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
 	myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 	myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
-	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
-	myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
 }
 
 # Update the database
 myynh_update_psql_db() {
+	# Fix collation version mismatch
 	databases=$(myynh_execute_psql_as_root \
 		--sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" \
 		--options="--tuples-only --no-align" --database="postgres")
@@ -258,29 +286,84 @@ myynh_update_psql_db() {
 			myynh_execute_psql_as_root --sql="ALTER DATABASE $db REFRESH COLLATION VERSION;" --database="$db"
 		fi
 	done
+
+	# Tune immich db
+	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
+	ynh_hide_warnings myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
 }
 
 # Remove the database
+# usage: myynh_drop_psql_db [--cluster=cluster]
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
 myynh_drop_psql_db() {
-	myynh_execute_psql_as_root --sql="REVOKE CONNECT ON DATABASE $app FROM public;"
-	myynh_execute_psql_as_root --sql="SELECT pg_terminate_backend (pg_stat_activity.pid) FROM pg_stat_activity \
-										WHERE pg_stat_activity.datname = '$app' AND pid <> pg_backend_pid();"
-	myynh_execute_psql_as_root --sql="DROP DATABASE $app;"
-	myynh_execute_psql_as_root --sql="DROP USER $app;"
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="REVOKE CONNECT ON DATABASE $app FROM public;"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="SELECT pg_terminate_backend (pg_stat_activity.pid) FROM pg_stat_activity \
+															WHERE pg_stat_activity.datname = '$app' AND pid <> pg_backend_pid();"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="DROP DATABASE $app;"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="DROP USER $app;"
 }
 
 # Dump the database
+# usage: myynh_dump_psql_db [--cluster=cluster]
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
 myynh_dump_psql_db() {
-	myynh_execute_psql_as_root --command="pg_dump" --database="$app" > db.sql
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
+	myynh_execute_psql_as_root --tool="pg_dump" --cluster="$cluster" --database="$app" > db.sql
 }
 
 # Restore the database
+# usage: myynh_restore_psql_db [--cluster=cluster]
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
 myynh_restore_psql_db() {
-	# https://github.com/immich-app/immich/issues/5630#issuecomment-1866581570
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
+	# Adjust the content cf. https://github.com/immich-app/immich/issues/5630#issuecomment-1866581570
 	ynh_replace --match="SELECT pg_catalog.set_config('search_path', '', false);" \
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
-	myynh_execute_psql_as_root --database="$app" < ./db.sql
+	# Restore the db
+	myynh_execute_psql_as_root --cluster="$cluster" --database="$app" < ./db.sql
+
+	# Restore the password
+	db_pwd="$(ynh_app_setting_get --key=db_pwd)"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="ALTER USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
+}
+
+# Retrieve the postgresql port of the cluster
+myynh_retrieve_psql_port() {
+# usage: myynh_dump_psql_db [--cluster=cluster]
+# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
+	db_port=$(myynh_execute_psql_as_root --cluster="$cluster" --sql="\echo :PORT")
+	ynh_app_setting_set --key=db_port --value=$db_port
 }
 
 # Set default cluster back to debian and remove autoprovisionned db if not on right cluster
@@ -300,8 +383,7 @@ myynh_set_default_psql_cluster_to_debian_default() {
 	echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
 
 	# Remove the autoprovisionned db if not on right cluster
-	db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
-	ynh_app_setting_set --key=db_port --value=$db_port
+	myynh_retrieve_psql_port
 	if [[ $db_port -ne $default_port ]]
 	then
 		if ynh_psql_database_exists "$app"
@@ -334,7 +416,7 @@ myynh_set_permissions() {
 	chown -R $app: "$data_dir"
 	chmod u=rwX,g=rX,o= "$data_dir"
 	chmod -R o-rwx "$data_dir"
-	setfacl --modify u:$app:rwX,g:$app:rwX "$data_dir/backups/restore_immich_db_backup.sh"
+	chmod +x "$data_dir/backups/restore_immich_db_backup.sh"
 
 	chown -R $app: "/var/log/$app"
 	chmod u=rw,g=r,o= "/var/log/$app"
