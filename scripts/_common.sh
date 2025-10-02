@@ -5,12 +5,14 @@
 #=================================================
 
 # Postgresql version
+psql_bookworm=16
+psql_trixie=17
 if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 then
-	psql_version=16
+	psql_version=$psql_bookworm
 elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
 then
-	psql_version=17
+	psql_version=$psql_trixie
 fi
 
 # Fail2ban
