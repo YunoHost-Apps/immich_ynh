@@ -1,3 +1,3 @@
-- Please look at the upstream [disclaimer](https://github.com/immich-app/immich?tab=readme-ov-file#disclaimer).
+- ⚠️ Always follow [3-2-1](https://www.backblaze.com/blog/the-3-2-1-backup-strategy/) backup plan for your precious photos and videos!
 
-- The installation requires some free memory to succeed. A swap file will be created if needed.
+- ℹ️ The installation requires some free memory to succeed. A swap file will be created if needed.
