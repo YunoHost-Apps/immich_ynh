@@ -46,8 +46,8 @@ then
 	myynh_drop_psql_db 1>/dev/null
 
 	ynh_print_info "[##+.................] Creating an empty immich db..."
-	myynh_update_psql_db 1>/dev/null
 	myynh_create_psql_db 1>/dev/null
+	myynh_update_psql_db 1>/dev/null
 
 	ynh_print_info "[###++++++++++++++++.] Restoring immich db backup... (Depending on your database size, this may take a long while)"
 	{
