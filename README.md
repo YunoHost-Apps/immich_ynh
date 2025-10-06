@@ -11,6 +11,7 @@ It shall NOT be edited by hand.
 Photo and video backup solution directly from your mobile phone
 
 [![🌐 Official app website](https://img.shields.io/badge/Official_app_website-darkgreen?style=for-the-badge)](https://immich.app)
+[![App Demo](https://img.shields.io/badge/App_Demo-blue?style=for-the-badge)](https://demo.immich.app)
 [![Version: 2.0.1~ynh1](https://img.shields.io/badge/Version-2.0.1~ynh1-rgb(18,138,11)?style=for-the-badge)](https://ci-apps.yunohost.org/ci/apps/immich/)
 
 <div align="center">
