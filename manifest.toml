@@ -14,6 +14,7 @@ maintainers = ["ewilly"]
 [upstream]
 license = "AGPL-3.0-or-later"
 website = "https://immich.app"
+demo = "https://demo.immich.app"
 admindoc = "https://github.com/immich-app/immich#getting-started"
 userdoc = "https://github.com/immich-app/immich#getting-started"
 code = "https://github.com/immich-app/immich"
