@@ -105,8 +105,7 @@ ram.runtime = "2G"
         "wget",
         "yq",
         "ccache",
-        "libsm6",
-        "libxext6"
+        "libgl1"
     ]
     packages_from_raw_bash = """
     if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
