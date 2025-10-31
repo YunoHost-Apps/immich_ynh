@@ -103,7 +103,10 @@ ram.runtime = "2G"
         "libfile-slurper-perl",
         "liblcms2-2",
         "wget",
-        "yq"
+        "yq",
+        "ccache",
+        "libsm6",
+        "libxext6"
     ]
     packages_from_raw_bash = """
     if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
