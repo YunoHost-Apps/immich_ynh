@@ -126,20 +126,10 @@ myynh_install_immich() {
 		# Definie pnpm options
 			export PNPM_HOME="$source_dir/pnpm"
 		# Build server
-		cd "$source_dir/server"
+			cd "$source_dir/server"
 			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
-
-			if [[ $YNH_DEBIAN_VERSION == " bookworm" ]]
-			then
-				ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$install_dir/app/"
-			elif  [[ $YNH_DEBIAN_VERSION == "trixie" ]]
-			then
-				unset SHARP_IGNORE_GLOBAL_LIBVIPS
-				export SHARP_FORCE_GLOBAL_LIBVIPS=true
-				ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$install_dir/app/"
-			fi
-
+			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$install_dir/app/"
 			cp "$install_dir/app/package.json" "$install_dir/app/bin"
 			ynh_replace --match="^start" --replace="./start" --file="$install_dir/app/bin/immich-admin"
 		# Build openapi & web
@@ -162,7 +152,6 @@ myynh_install_immich() {
 			ynh_hide_warnings pnpm store prune
 			unset PNPM_HOME
  			unset SHARP_IGNORE_GLOBAL_LIBVIPS
- 			unset SHARP_FORCE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning
 		cd "$source_dir/machine-learning"
@@ -223,6 +212,15 @@ myynh_install_immich() {
 			cp -a "$source_dir/geonames/ne_10m_admin_0_countries.geojson" "$install_dir/app/geodata/"
 		# Update geodata-date
 			date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
+
+	# Build sharp
+		if  [[ $YNH_DEBIAN_VERSION == "trixie" ]]
+		then
+			cd "$install_dir/app"
+			ynh_hide_warnings pnpm remove sharp
+			ynh_hide_warnings npm_config_build_from_source=true pnpm add sharp --ignore-scripts=false
+			ynh_hide_warnings pnpm approve-builds
+		fi
 
 	# Cleanup
 		ynh_safe_rm "$source_dir"
