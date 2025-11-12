@@ -147,6 +147,14 @@ myynh_install_immich() {
 		# Install custom start.sh script
 			ynh_safe_rm "$install_dir/app/bin/start.sh"
 			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/app/bin/start.sh"
+		# Build sharp
+			if  [[ $YNH_DEBIAN_VERSION == "trixie" ]]
+			then
+				cd "$install_dir/app"
+				ynh_hide_warnings pnpm remove sharp
+				ynh_hide_warnings npm_config_build_from_source=true pnpm add sharp --ignore-scripts=false
+				ynh_hide_warnings pnpm approve-builds
+			fi
 		# Cleanup
 			ynh_hide_warnings pnpm prune
 			ynh_hide_warnings pnpm store prune
@@ -212,15 +220,6 @@ myynh_install_immich() {
 			cp -a "$source_dir/geonames/ne_10m_admin_0_countries.geojson" "$install_dir/app/geodata/"
 		# Update geodata-date
 			date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
-
-	# Build sharp
-		if  [[ $YNH_DEBIAN_VERSION == "trixie" ]]
-		then
-			cd "$install_dir/app"
-			ynh_hide_warnings pnpm remove sharp
-			ynh_hide_warnings npm_config_build_from_source=true pnpm add sharp --ignore-scripts=false
-			ynh_hide_warnings pnpm approve-builds
-		fi
 
 	# Cleanup
 		ynh_safe_rm "$source_dir"
