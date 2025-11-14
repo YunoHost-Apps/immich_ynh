@@ -93,6 +93,15 @@ ynh_systemctl --service="fail2ban" --action="restart"
 ynh_restore "/var/log/$app/"
 
 #=================================================
+# UPDATE A CONFIG FILE
+#=================================================
+ynh_script_progression "Updating $app's configuration files..."
+
+# In case the psql port is not the same between old system vs new system, stor the new port and apply it in env file
+myynh_retrieve_psql_port
+ynh_replace --match="DB_PORT=.*" --replace="DB_PORT=$db_port" --file="$install_dir/env"
+
+#=================================================
 # SET FILE OWNERSHIP / PERMISSIONS
 #=================================================
 
