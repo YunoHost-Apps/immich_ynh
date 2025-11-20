@@ -150,8 +150,8 @@ myynh_install_immich() {
 			ynh_hide_warnings mise trust ./plugins/mise.toml
 			cd "$source_dir/plugins"
 			MISE_VERBOSE=1 mise install
-			export PATH="$HOME/.local/share/mise/shims:$PATH"
-			which extism-js
+			export PATH="/root/.local/share/mise/shims:$PATH"
+			echo $(which extism-js)
 			MISE_VERBOSE=1 mise run build
 			mkdir -p "$install_dir/app/corePlugin"
 			cp -r dist "$install_dir/app/corePlugin/dist"
