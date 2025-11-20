@@ -122,7 +122,7 @@ ram.runtime = "2G"
 
 	[resources.apt.extras.mise]
 	repo = "deb https://mise.jdx.dev/deb stable main"
-	key = "https://mise.jdx.dev/gpg-key.pubh"
+	key = "https://mise.jdx.dev/gpg-key.pub"
 	packages = [
 		"mise"
 	]
