@@ -149,8 +149,8 @@ myynh_install_immich() {
 			ynh_hide_warnings mise trust --ignore ./mise.toml
 			ynh_hide_warnings mise trust ./plugins/mise.toml
 			cd "$source_dir/plugins"
-			ynh_hide_warnings MISE_VERBOSE=1 mise install
-			ynh_hide_warnings MISE_VERBOSE=1 mise run build
+			MISE_VERBOSE=1 mise install
+			MISE_VERBOSE=1 mise run build
 			mkdir -p "$install_dir/app/corePlugin"
 			cp -r dist "$install_dir/app/corePlugin/dist"
 			cp manifest.json "$install_dir/app/corePlugin"
