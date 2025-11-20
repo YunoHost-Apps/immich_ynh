@@ -139,10 +139,20 @@ myynh_install_immich() {
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
 			cp -a web/build "$install_dir/app/www"
 		# Build cli
+			cd "$source_dir"
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli build
 			ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$install_dir/app/cli"
 			ln -s "$install_dir/app/cli/bin/immich" "$install_dir/app/bin/immich"
+		# Build plugins
+			cd "$source_dir/plugins"
+			ynh_hide_warnings mise trust --ignore ../mise.toml
+			ynh_hide_warnings mise trust mise.toml
+			ynh_hide_warnings mise install
+			ynh_hide_warnings mise run build
+			mkdir -p "$install_dir/app/corePlugin"
+			cp -r dist "$install_dir/app/corePlugin/dist"
+			cp manifest.json "$install_dir/app/corePlugin"
 		# Copy remaining assets
 			cp -a LICENSE "$install_dir/app/"
 		# Install custom start.sh script
