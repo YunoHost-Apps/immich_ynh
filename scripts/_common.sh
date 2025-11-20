@@ -145,17 +145,24 @@ myynh_install_immich() {
 			ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$install_dir/app/cli"
 			ln -s "$install_dir/app/cli/bin/immich" "$install_dir/app/bin/immich"
 		# Build plugins
-			cd "$source_dir"
+		## only on trixie because mise install extism/js-pdk wich currently require glibc > 2.39 and bookworm is 2.36
+		cd "$source_dir"
+		mkdir -p "$install_dir/app/corePlugin"
+		if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+		then
+			echo "{}" > "$install_dir/app/corePlugin/manifest.json"
+		elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
+		then
 			ynh_hide_warnings mise trust --ignore ./mise.toml
 			ynh_hide_warnings mise trust ./plugins/mise.toml
 			cd "$source_dir/plugins"
-			MISE_VERBOSE=1 mise install
-			export PATH="/root/.local/share/mise/shims:$PATH"
-			echo $(which extism-js)
-			MISE_VERBOSE=1 mise run build
+			ynh_hide_warnings mise install
+			PATH="/root/.local/share/mise/shims:$PATH"
+			ynh_hide_warnings mise run build
 			mkdir -p "$install_dir/app/corePlugin"
 			cp -r dist "$install_dir/app/corePlugin/dist"
 			cp manifest.json "$install_dir/app/corePlugin"
+		fi
 		# Copy remaining assets
 			cp -a LICENSE "$install_dir/app/"
 		# Install custom start.sh script
@@ -164,6 +171,7 @@ myynh_install_immich() {
 		# Cleanup
 			ynh_hide_warnings pnpm prune
 			ynh_hide_warnings pnpm store prune
+			ynh_hide_warnings mise implode
 			unset PNPM_HOME
  			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
