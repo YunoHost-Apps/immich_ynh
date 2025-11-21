@@ -146,13 +146,15 @@ myynh_install_immich() {
 			ln -s "$install_dir/app/cli/bin/immich" "$install_dir/app/bin/immich"
 		# Build plugins
 		## only on trixie because mise install extism/js-pdk wich currently require glibc > 2.39 and bookworm is 2.36
-		cd "$source_dir"
-		mkdir -p "$install_dir/app/corePlugin"
-		if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
-		then
-			echo "{}" > "$install_dir/app/corePlugin/manifest.json"
-		elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
-		then
+			cd "$source_dir"
+			mkdir -p "$install_dir/app/corePlugin"
+			if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+			then
+				ynh_replace \
+					--match="github:extism/js-pdk" \
+					--replace="github:ewilly/js-pdk" \
+					--file="$source_dir/plugins/mise.toml"
+			fi
 			ynh_hide_warnings mise trust --ignore ./mise.toml
 			ynh_hide_warnings mise trust ./plugins/mise.toml
 			cd "$source_dir/plugins"
@@ -162,7 +164,6 @@ myynh_install_immich() {
 			mkdir -p "$install_dir/app/corePlugin"
 			cp -r dist "$install_dir/app/corePlugin/dist"
 			cp manifest.json "$install_dir/app/corePlugin"
-		fi
 		# Copy remaining assets
 			cp -a LICENSE "$install_dir/app/"
 		# Install custom start.sh script
