@@ -155,8 +155,8 @@ myynh_install_immich() {
 					--replace="github:ewilly/js-pdk" \
 					--file="$source_dir/plugins/mise.toml"
 			fi
-			ynh_hide_warnings mise trust --ignore ./mise.toml
-			ynh_hide_warnings mise trust ./plugins/mise.toml
+			mise trust --ignore ./mise.toml
+			mise trust ./plugins/mise.toml
 			cd "$source_dir/plugins"
 			ynh_hide_warnings mise install
 			PATH="/root/.local/share/mise/shims:$PATH"
