@@ -123,8 +123,9 @@ myynh_install_immich() {
 		# Replace /build
 			grep -RlE "\"/build\"|'/build'" \
 				| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
-		# Definie pnpm options
+		# Definie pnpm & mise options
 			export PNPM_HOME="$source_dir/pnpm"
+			export MISE_DATA_DIR="$source_dir/mise"
 		# Build server
 			cd "$source_dir/server"
    			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
@@ -139,10 +140,31 @@ myynh_install_immich() {
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
 			cp -a web/build "$install_dir/app/www"
 		# Build cli
+			cd "$source_dir"
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli build
 			ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$install_dir/app/cli"
 			ln -s "$install_dir/app/cli/bin/immich" "$install_dir/app/bin/immich"
+		# Build plugins
+		## only on trixie because mise install extism/js-pdk wich currently require glibc > 2.39 and bookworm is 2.36
+			cd "$source_dir"
+			mkdir -p "$install_dir/app/corePlugin"
+			if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+			then
+				ynh_replace \
+					--match="github:extism/js-pdk" \
+					--replace="github:ewilly/js-pdk" \
+					--file="$source_dir/plugins/mise.toml"
+			fi
+			ynh_hide_warnings mise trust --ignore ./mise.toml
+			ynh_hide_warnings mise trust ./plugins/mise.toml
+			cd "$source_dir/plugins"
+			ynh_hide_warnings mise install
+			PATH="$MISE_DATA_DIR/shims:$PATH"
+			ynh_hide_warnings mise run build
+			mkdir -p "$install_dir/app/corePlugin"
+			cp -r dist "$install_dir/app/corePlugin/dist"
+			cp manifest.json "$install_dir/app/corePlugin"
 		# Copy remaining assets
 			cp -a LICENSE "$install_dir/app/"
 		# Install custom start.sh script
@@ -151,7 +173,9 @@ myynh_install_immich() {
 		# Cleanup
 			ynh_hide_warnings pnpm prune
 			ynh_hide_warnings pnpm store prune
+			#ynh_hide_warnings mise implode
 			unset PNPM_HOME
+			unset MISE_DATA_DIR
  			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning

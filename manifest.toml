@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.2.3~ynh2"
+version = "2.3.1~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -34,91 +34,98 @@ ram.build = "4G"
 ram.runtime = "2G"
 
 [install]
-    [install.domain]
-    type = "domain"
+	[install.domain]
+	type = "domain"
 
-    [install.init_main_permission]
-    type = "group"
-    default = "visitors"
+	[install.init_main_permission]
+	type = "group"
+	default = "visitors"
 
 [resources]
-    [resources.sources]
+	[resources.sources]
 
-    [resources.sources.main]
-    url = "https://github.com/immich-app/immich/archive/refs/tags/v2.2.3.tar.gz"
-    sha256 = "aa7fe92d8ff38a97de8d1252c1e73d2c1cbd32cac5796dade2c4648bbca7557c"
+	[resources.sources.main]
+	url = "https://github.com/immich-app/immich/archive/refs/tags/v2.3.1.tar.gz"
+	sha256 = "20bd60862447e7e369189f9390f8e013b50101cf2fb7561ed47793bcb63c6cc8"
 
-    autoupdate.strategy = "latest_github_release"
+	autoupdate.strategy = "latest_github_release"
 
-    [resources.system_user]
+	[resources.system_user]
 
-    [resources.install_dir]
+	[resources.install_dir]
 
-    [resources.data_dir]
+	[resources.data_dir]
 
-    [resources.permissions]
-    main.url = "/"
-    api.url = "/api"
-    api.allowed = "visitors"
-    api.show_tile = false
-    api.protected = true
+	[resources.permissions]
+	main.url = "/"
+	api.url = "/api"
+	api.allowed = "visitors"
+	api.show_tile = false
+	api.protected = true
 
-    [resources.ports]
-    main.default = 2283
-    machinelearning.default = 3003
+	[resources.ports]
+	main.default = 2283
+	machinelearning.default = 3003
 
-    [resources.apt]
-    packages = [
-        "pipx",
-        "curl",
-        "postgresql",
-        "redis-server",
-        "python3",
-        "python3-dev",
-        "libssl-dev",
-        "libffi-dev",
-        "uuid-runtime",
-        "autoconf",
-        "build-essential",
-        "unzip",
-        "jq",
-        "perl",
-        "libnet-ssleay-perl",
-        "libio-socket-ssl-perl",
-        "libcapture-tiny-perl",
-        "libfile-which-perl",
-        "libfile-chdir-perl",
-        "libpkgconfig-perl",
-        "libffi-checklib-perl",
-        "libtest-warnings-perl",
-        "libtest-fatal-perl",
-        "libtest-needs-perl",
-        "libtest2-suite-perl",
-        "libsort-versions-perl",
-        "libpath-tiny-perl",
-        "libtry-tiny-perl",
-        "libterm-table-perl",
-        "libany-uri-escape-perl",
-        "libmojolicious-perl",
-        "libfile-slurper-perl",
-        "liblcms2-2",
-        "wget",
-        "yq",
-        "ccache",
-        "libgl1"
-    ]
-    packages_from_raw_bash = """
-    if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
-        echo "postgresql-17-pgvector"; 
+	[resources.apt]
+	packages = [
+		"pipx",
+		"curl",
+		"postgresql",
+		"redis-server",
+		"python3",
+		"python3-dev",
+		"libssl-dev",
+		"libffi-dev",
+		"uuid-runtime",
+		"autoconf",
+		"build-essential",
+		"unzip",
+		"jq",
+		"perl",
+		"libnet-ssleay-perl",
+		"libio-socket-ssl-perl",
+		"libcapture-tiny-perl",
+		"libfile-which-perl",
+		"libfile-chdir-perl",
+		"libpkgconfig-perl",
+		"libffi-checklib-perl",
+		"libtest-warnings-perl",
+		"libtest-fatal-perl",
+		"libtest-needs-perl",
+		"libtest2-suite-perl",
+		"libsort-versions-perl",
+		"libpath-tiny-perl",
+		"libtry-tiny-perl",
+		"libterm-table-perl",
+		"libany-uri-escape-perl",
+		"libmojolicious-perl",
+		"libfile-slurper-perl",
+		"liblcms2-2",
+		"wget",
+		"yq",
+		"ccache",
+		"libgl1"
+	]
+	packages_from_raw_bash = """
+	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
+		echo "postgresql-17-pgvector";
 	fi
-    """
+	"""
 
-    [resources.apt.extras.jellyfin-ffmpeg]
-    repo = "deb https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"
-    key = "https://repo.jellyfin.org/jellyfin_team.gpg.key"
-    packages = [
-        "jellyfin-ffmpeg7"
-    ]
+	[resources.apt.extras.jellyfin-ffmpeg]
+	repo = "deb https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"
+	key = "https://repo.jellyfin.org/jellyfin_team.gpg.key"
+	packages = [
+		"jellyfin-ffmpeg7"
+	]
 
-    [resources.database]
-    type = "postgresql"
+	[resources.apt.extras.mise]
+	repo = "deb https://mise.jdx.dev/deb stable main"
+	key = "https://mise.jdx.dev/gpg-key.pub"
+	packages = [
+		"mise"
+	]
+
+	[resources.database]
+	type = "postgresql"
