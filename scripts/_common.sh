@@ -123,8 +123,9 @@ myynh_install_immich() {
 		# Replace /build
 			grep -RlE "\"/build\"|'/build'" \
 				| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/app\"@g" -e "s@'/build'@'$install_dir/app'@g"
-		# Definie pnpm options
+		# Definie pnpm & mise options
 			export PNPM_HOME="$source_dir/pnpm"
+			export MISE_DATA_DIR="$source_dir/mise"
 		# Build server
 			cd "$source_dir/server"
    			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
@@ -155,11 +156,11 @@ myynh_install_immich() {
 					--replace="github:ewilly/js-pdk" \
 					--file="$source_dir/plugins/mise.toml"
 			fi
-			mise trust --ignore ./mise.toml
-			mise trust ./plugins/mise.toml
+			ynh_hide_warnings mise trust --ignore ./mise.toml
+			ynh_hide_warnings mise trust ./plugins/mise.toml
 			cd "$source_dir/plugins"
 			ynh_hide_warnings mise install
-			PATH="/root/.local/share/mise/shims:$PATH"
+			PATH="$MISE_DATA_DIR/shims:$PATH"
 			ynh_hide_warnings mise run build
 			mkdir -p "$install_dir/app/corePlugin"
 			cp -r dist "$install_dir/app/corePlugin/dist"
@@ -172,8 +173,9 @@ myynh_install_immich() {
 		# Cleanup
 			ynh_hide_warnings pnpm prune
 			ynh_hide_warnings pnpm store prune
-			ynh_hide_warnings mise implode
+			#ynh_hide_warnings mise implode
 			unset PNPM_HOME
+			unset MISE_DATA_DIR
  			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning
