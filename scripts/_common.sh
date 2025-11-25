@@ -316,6 +316,9 @@ myynh_update_psql_db() {
 	# Tune immich db
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
 	ynh_hide_warnings myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
+
+	# Retrive and save the postgresql port of the cluster and save it in settings
+	myynh_retrieve_psql_port
 }
 
 # Remove the database

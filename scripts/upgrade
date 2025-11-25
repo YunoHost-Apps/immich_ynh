@@ -91,22 +91,17 @@ then
 	myynh_set_default_psql_cluster_to_debian_default
 elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
 then
-	# Check if the db is still on cluster 16 and if yes dumb and restore the db to 17 + delete the db on 16
-	old_cluster="$psql_bookworm/main"
-	new_cluster="$psql_trixie/main"
-	if [[ $(myynh_execute_psql_as_root \
-		--cluster="$old_cluster" \
-		--sql="SELECT datname FROM pg_database WHERE datname = '$app';" \
-		--options="--tuples-only --no-align") == "immich" ]]
+	# Check if the db is not yet on trixie cluster and if no migrate it (aka dumb and restore the db to 17 + delete the db on 16)
+	if [[ $(ynh_app_setting_get --key=db_cluster) != "$psql_trixie/main" ]]
 	then
 		# Dump db on old cluster
-		myynh_dump_psql_db --cluster="$old_cluster"
+		myynh_dump_psql_db --cluster="$psql_bookworm/main"
 		# Drop empty db on new cluster
-		myynh_drop_psql_db --cluster="$new_cluster"
+		myynh_drop_psql_db --cluster="$psql_trixie/main"
 		# Restore db on new cluster
-		myynh_restore_psql_db --cluster="$new_cluster"
+		myynh_restore_psql_db --cluster="$psql_trixie/main"
 		# Drop db on old cluster
-		myynh_drop_psql_db --cluster="$old_cluster"
+		myynh_drop_psql_db --cluster="$psql_bookworm/main"
 	fi
 fi
 
