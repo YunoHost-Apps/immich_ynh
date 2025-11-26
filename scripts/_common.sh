@@ -126,6 +126,7 @@ myynh_install_immich() {
 		# Definie pnpm & mise options
 			export PNPM_HOME="$source_dir/pnpm"
 			export MISE_DATA_DIR="$source_dir/mise"
+			export MISE_CACHE_DIR="$MISE_DATA_DIR/cache"
 		# Build server
 			cd "$source_dir/server"
    			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
@@ -176,6 +177,7 @@ myynh_install_immich() {
 			#ynh_hide_warnings mise implode
 			unset PNPM_HOME
 			unset MISE_DATA_DIR
+			unset MISE_CACHE_DIR
  			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning
@@ -316,6 +318,9 @@ myynh_update_psql_db() {
 	# Tune immich db
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
 	ynh_hide_warnings myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
+
+	# Retrive and save the postgresql port of the cluster and save it in settings
+	myynh_retrieve_psql_port
 }
 
 # Remove the database
