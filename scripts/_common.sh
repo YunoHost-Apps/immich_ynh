@@ -156,6 +156,7 @@ myynh_install_immich() {
 					--replace="github:ewilly/js-pdk" \
 					--file="$source_dir/plugins/mise.toml"
 			fi
+			ynh_hide_warnings mise cache clear
 			ynh_hide_warnings mise trust --ignore ./mise.toml
 			ynh_hide_warnings mise trust ./plugins/mise.toml
 			cd "$source_dir/plugins"
@@ -173,6 +174,7 @@ myynh_install_immich() {
 		# Cleanup
 			ynh_hide_warnings pnpm prune
 			ynh_hide_warnings pnpm store prune
+			ynh_hide_warnings mise cache clear
 			#ynh_hide_warnings mise implode
 			unset PNPM_HOME
 			unset MISE_DATA_DIR
