@@ -104,7 +104,22 @@ ram.runtime = "2G"
 		"wget",
 		"yq",
 		"ccache",
-		"libgl1"
+		"libgl1",
+		"cmake",
+		"meson",
+		"ninja-build",
+		"pkg-config",
+		"libdav1d-dev",
+		"libwebp-dev",
+		"libaom-dev",
+		"libde265-dev",
+		"libexpat1-dev",
+		"libglib2.0-dev",
+		"libjpeg-dev",
+		"libpng-dev",
+		"libgif-dev",
+		"libimagequant-dev",
+		"libcgif-dev"
 	]
 	packages_from_raw_bash = """
 	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then

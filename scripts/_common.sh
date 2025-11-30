@@ -86,6 +86,74 @@ myynh_add_swap() {
 		fi
 }
 
+# Install libheif and libvips from source for HEIC support
+# Based on https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh
+# and https://github.com/immich-app/base-images/blob/main/server/Dockerfile
+myynh_install_libvips() {
+	local build_dir="$source_dir/vips-build"
+	local libs_dir="$install_dir/vips"
+
+	# https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
+	local libheif_version="1.20.2"
+	# https://github.com/immich-app/base-images/blob/main/server/sources/libvips.json
+	local libvips_version="8.17.3"
+
+	mkdir -p "$build_dir" "$libs_dir"
+	pushd "$build_dir"
+
+	# Build libheif
+	ynh_print_info "Building libheif $libheif_version for HEIC support..."
+	git clone --depth 1 --branch "v$libheif_version" https://github.com/strukturag/libheif.git
+	pushd libheif
+
+	mkdir -p build
+	cd build
+	cmake --preset=release-noplugins \
+		-DCMAKE_INSTALL_PREFIX="$libs_dir" \
+		-DWITH_DAV1D=ON \
+		-DENABLE_PARALLEL_TILE_DECODING=ON \
+		-DWITH_LIBSHARPYUV=ON \
+		-DWITH_LIBDE265=ON \
+		-DWITH_AOM_DECODER=OFF \
+		-DWITH_AOM_ENCODER=ON \
+		-DWITH_X265=OFF \
+		-DWITH_EXAMPLES=OFF \
+		..
+	make -j "$(nproc)"
+	make install
+	popd
+
+	# Build libvips
+	ynh_print_info "Building libvips $libvips_version with HEIC support..."
+	export PKG_CONFIG_PATH="$libs_dir/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+	export LD_LIBRARY_PATH="$libs_dir/lib:${LD_LIBRARY_PATH:-}"
+	git clone --depth 1 --branch "v$libvips_version" https://github.com/libvips/libvips.git
+	pushd libvips
+
+	meson setup build --buildtype=release \
+		--prefix="$libs_dir" \
+		--libdir=lib \
+		-Dintrospection=disabled \
+		-Dtiff=disabled
+	cd build
+	ninja install
+	popd
+
+	# Return to original directory
+	popd
+
+	# Cleanup
+	ynh_print_info "Cleaning up libvips build directory..."
+	rm -rf "$build_dir"
+
+	# Verify installation
+	if "$libs_dir/bin/vips" --version | grep -q "$libvips_version"; then
+		ynh_print_info "libvips $libvips_version successfully installed with HEIC support"
+	else
+		ynh_print_warn "libvips installation may have issues, please verify"
+	fi
+}
+
 # Install immich
 myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native, https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh, https://github.com/loeeeee/immich-in-lxc/blob/main/install.sh
@@ -93,6 +161,10 @@ myynh_install_immich() {
 
 	# Add jellyfin-ffmpeg direcotry to $PATH
 		PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
+
+	# Build libvips with HEIC support
+		myynh_install_libvips
+		export LD_LIBRARY_PATH="$install_dir/vips/lib:${LD_LIBRARY_PATH:-}"
 
 	# Define nodejs options
 		ram_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
@@ -129,9 +201,8 @@ myynh_install_immich() {
 			export MISE_CACHE_DIR="$MISE_DATA_DIR/cache"
 		# Build server
 			cd "$source_dir/server"
-   			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
- 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$install_dir/app/"
+			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$install_dir/app/"
 
 			cp "$install_dir/app/package.json" "$install_dir/app/bin"
 			ynh_replace --match="^start" --replace="./start" --file="$install_dir/app/bin/immich-admin"
