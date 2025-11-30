@@ -103,12 +103,12 @@ myynh_install_libvips() {
 
 	# Build libheif
 	ynh_print_info "Building libheif $libheif_version for HEIC support..."
-	git clone --depth 1 --branch "v$libheif_version" https://github.com/strukturag/libheif.git
+	ynh_hide_warnings git clone --depth 1 --branch "v$libheif_version" https://github.com/strukturag/libheif.git
 	pushd libheif
 
 	mkdir -p build
 	cd build
-	cmake --preset=release-noplugins \
+	ynh_hide_warnings cmake --preset=release-noplugins \
 		-DCMAKE_INSTALL_PREFIX="$libs_dir" \
 		-DWITH_DAV1D=ON \
 		-DENABLE_PARALLEL_TILE_DECODING=ON \
@@ -119,24 +119,24 @@ myynh_install_libvips() {
 		-DWITH_X265=OFF \
 		-DWITH_EXAMPLES=OFF \
 		..
-	make -j "$(nproc)"
-	make install
+	ynh_hide_warnings make -j "$(nproc)"
+	ynh_hide_warnings make install
 	popd
 
 	# Build libvips
 	ynh_print_info "Building libvips $libvips_version with HEIC support..."
 	export PKG_CONFIG_PATH="$libs_dir/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
 	export LD_LIBRARY_PATH="$libs_dir/lib:${LD_LIBRARY_PATH:-}"
-	git clone --depth 1 --branch "v$libvips_version" https://github.com/libvips/libvips.git
+	ynh_hide_warnings git clone --depth 1 --branch "v$libvips_version" https://github.com/libvips/libvips.git
 	pushd libvips
 
-	meson setup build --buildtype=release \
+	ynh_hide_warnings meson setup build --buildtype=release \
 		--prefix="$libs_dir" \
 		--libdir=lib \
 		-Dintrospection=disabled \
 		-Dtiff=disabled
 	cd build
-	ninja install
+	ynh_hide_warnings ninja install
 	popd
 
 	# Return to original directory
@@ -144,7 +144,7 @@ myynh_install_libvips() {
 
 	# Cleanup
 	ynh_print_info "Cleaning up libvips build directory..."
-	rm -rf "$build_dir"
+	ynh_secure_remove "$build_dir"
 
 	# Verify installation
 	if "$libs_dir/bin/vips" --version | grep -q "$libvips_version"; then
