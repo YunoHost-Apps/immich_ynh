@@ -49,6 +49,16 @@ ram.runtime = "2G"
 
 	autoupdate.strategy = "latest_github_release"
 
+	[resources.sources.libheif]
+	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
+	url = "https://github.com/strukturag/libheif/releases/download/v1.20.2/libheif-1.20.2.tar.gz"
+	sha256 = "68ac9084243004e0ef3633f184eeae85d615fe7e4444373a0a21cebccae9d12a"
+
+	[resources.sources.libvips]
+	# Version from https://github.com/immich-app/base-images/blob/main/server/sources/libvips.json
+	url = "https://github.com/libvips/libvips/releases/download/v8.17.3/vips-8.17.3.tar.xz"
+	sha256 = "41e9a1439cd57dcc6d4435a085e2cfe181d9da1962fa84a484f09e8b536e4b77"
+
 	[resources.system_user]
 
 	[resources.install_dir]

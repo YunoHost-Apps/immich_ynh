@@ -93,17 +93,13 @@ myynh_install_libvips() {
 	local build_dir="$source_dir/vips-build"
 	local libs_dir="$install_dir/vips"
 
-	# https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	local libheif_version="1.20.2"
-	# https://github.com/immich-app/base-images/blob/main/server/sources/libvips.json
-	local libvips_version="8.17.3"
-
-	mkdir -p "$build_dir" "$libs_dir"
+	mkdir -p "$build_dir" "$libs_dir" "$build_dir/libheif"
 	pushd "$build_dir"
 
 	# Build libheif
-	ynh_print_info "Building libheif $libheif_version for HEIC support..."
-	ynh_hide_warnings git clone --depth 1 --branch "v$libheif_version" https://github.com/strukturag/libheif.git
+	ynh_print_info "Building libheif for HEIC support..."
+	ynh_setup_source --source_id="libheif" --dest_dir="$build_dir/libheif"
+
 	pushd libheif
 
 	mkdir -p build
@@ -124,10 +120,10 @@ myynh_install_libvips() {
 	popd
 
 	# Build libvips
-	ynh_print_info "Building libvips $libvips_version with HEIC support..."
+	ynh_print_info "Building libvips with HEIC support..."
 	export PKG_CONFIG_PATH="$libs_dir/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
 	export LD_LIBRARY_PATH="$libs_dir/lib:${LD_LIBRARY_PATH:-}"
-	ynh_hide_warnings git clone --depth 1 --branch "v$libvips_version" https://github.com/libvips/libvips.git
+	ynh_setup_source --source_id="libvips" --dest_dir="$build_dir/libvips"
 	pushd libvips
 
 	ynh_hide_warnings meson setup build --buildtype=release \
@@ -145,13 +141,6 @@ myynh_install_libvips() {
 	# Cleanup
 	ynh_print_info "Cleaning up libvips build directory..."
 	ynh_secure_remove "$build_dir"
-
-	# Verify installation
-	if "$libs_dir/bin/vips" --version | grep -q "$libvips_version"; then
-		ynh_print_info "libvips $libvips_version successfully installed with HEIC support"
-	else
-		ynh_print_warn "libvips installation may have issues, please verify"
-	fi
 }
 
 # Install immich
