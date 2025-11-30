@@ -144,7 +144,7 @@ myynh_install_libvips() {
 
 	# Cleanup
 	ynh_print_info "Cleaning up libvips build directory..."
-	ynh_secure_remove "$build_dir"
+	ynh_safe_rm "$build_dir"
 
 	# Verify installation
 	if "$libs_dir/bin/vips" --version | grep -q "$libvips_version"; then
