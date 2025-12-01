@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.3.1~ynh2"
+version = "2.3.1~ynh3"
 
 maintainers = ["ewilly"]
 
@@ -48,6 +48,16 @@ ram.runtime = "2G"
 	sha256 = "20bd60862447e7e369189f9390f8e013b50101cf2fb7561ed47793bcb63c6cc8"
 
 	autoupdate.strategy = "latest_github_release"
+
+	[resources.sources.libheif]
+	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
+	url = "https://github.com/strukturag/libheif/releases/download/v1.20.2/libheif-1.20.2.tar.gz"
+	sha256 = "68ac9084243004e0ef3633f184eeae85d615fe7e4444373a0a21cebccae9d12a"
+
+	[resources.sources.libvips]
+	# Version from https://github.com/immich-app/base-images/blob/main/server/sources/libvips.json
+	url = "https://github.com/libvips/libvips/releases/download/v8.17.3/vips-8.17.3.tar.xz"
+	sha256 = "41e9a1439cd57dcc6d4435a085e2cfe181d9da1962fa84a484f09e8b536e4b77"
 
 	[resources.system_user]
 
@@ -104,7 +114,22 @@ ram.runtime = "2G"
 		"wget",
 		"yq",
 		"ccache",
-		"libgl1"
+		"libgl1",
+		"cmake",
+		"meson",
+		"ninja-build",
+		"pkg-config",
+		"libdav1d-dev",
+		"libwebp-dev",
+		"libaom-dev",
+		"libde265-dev",
+		"libexpat1-dev",
+		"libglib2.0-dev",
+		"libjpeg-dev",
+		"libpng-dev",
+		"libgif-dev",
+		"libimagequant-dev",
+		"libcgif-dev"
 	]
 	packages_from_raw_bash = """
 	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then

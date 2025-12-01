@@ -86,6 +86,59 @@ myynh_add_swap() {
 		fi
 }
 
+# Install libheif and libvips from source for HEIC support
+# Based on https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh
+# and https://github.com/immich-app/base-images/blob/main/server/Dockerfile
+myynh_install_libvips() {
+	local build_dir="$source_dir/vips-build"
+	local libs_dir="$install_dir/vips"
+	mkdir -p "$build_dir" "$libs_dir" "$build_dir/libheif"
+	pushd "$build_dir"
+
+	# Build libheif
+		ynh_print_info "Building libheif for HEIC support..."
+		ynh_setup_source --source_id="libheif" --dest_dir="$build_dir/libheif"
+		pushd libheif
+		mkdir -p build
+		cd build
+		ynh_hide_warnings cmake --preset=release-noplugins \
+			-DCMAKE_INSTALL_PREFIX="$libs_dir" \
+			-DWITH_DAV1D=ON \
+			-DENABLE_PARALLEL_TILE_DECODING=ON \
+			-DWITH_LIBSHARPYUV=ON \
+			-DWITH_LIBDE265=ON \
+			-DWITH_AOM_DECODER=OFF \
+			-DWITH_AOM_ENCODER=ON \
+			-DWITH_X265=OFF \
+			-DWITH_EXAMPLES=OFF \
+			..
+		ynh_hide_warnings make -j "$(nproc)"
+		ynh_hide_warnings make install
+		popd
+
+	# Build libvips
+		ynh_print_info "Building libvips with HEIC support..."
+		export PKG_CONFIG_PATH="$libs_dir/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+		export LD_LIBRARY_PATH="$libs_dir/lib:${LD_LIBRARY_PATH:-}"
+		ynh_setup_source --source_id="libvips" --dest_dir="$build_dir/libvips"
+		pushd libvips
+		ynh_hide_warnings meson setup build --buildtype=release \
+			--prefix="$libs_dir" \
+			--libdir=lib \
+			-Dintrospection=disabled \
+			-Dtiff=disabled
+		cd build
+		ynh_hide_warnings ninja install
+		popd
+
+	# Return to original directory
+		popd
+
+	# Cleanup
+		ynh_print_info "Cleaning up libvips build directory..."
+		ynh_safe_rm "$build_dir"
+}
+
 # Install immich
 myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native, https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh, https://github.com/loeeeee/immich-in-lxc/blob/main/install.sh
@@ -93,6 +146,10 @@ myynh_install_immich() {
 
 	# Add jellyfin-ffmpeg direcotry to $PATH
 		PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
+
+	# Build libvips with HEIC support
+		myynh_install_libvips
+		export LD_LIBRARY_PATH="$install_dir/vips/lib:${LD_LIBRARY_PATH:-}"
 
 	# Define nodejs options
 		ram_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
@@ -128,26 +185,28 @@ myynh_install_immich() {
 			export MISE_DATA_DIR="$source_dir/mise"
 			export MISE_CACHE_DIR="$MISE_DATA_DIR/cache"
 		# Build server
+			ynh_print_info "Building immich server..."
 			cd "$source_dir/server"
-   			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
- 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$install_dir/app/"
+			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$install_dir/app/"
 
 			cp "$install_dir/app/package.json" "$install_dir/app/bin"
 			ynh_replace --match="^start" --replace="./start" --file="$install_dir/app/bin/immich-admin"
 		# Build openapi & web
+			ynh_print_info "Building immich openapi & web interface..."
 			cd "$source_dir"
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
 			cp -a web/build "$install_dir/app/www"
 		# Build cli
+			ynh_print_info "Building immich cli..."
 			cd "$source_dir"
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli build
 			ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$install_dir/app/cli"
 			ln -s "$install_dir/app/cli/bin/immich" "$install_dir/app/bin/immich"
 		# Build plugins
-		## only on trixie because mise install extism/js-pdk wich currently require glibc > 2.39 and bookworm is 2.36
+			ynh_print_info "Building immich plugins..."
 			cd "$source_dir"
 			mkdir -p "$install_dir/app/corePlugin"
 			if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
@@ -181,6 +240,7 @@ myynh_install_immich() {
  			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning
+		ynh_print_info "Building immich machine learning..."
 		cd "$source_dir/machine-learning"
 		mkdir -p "$install_dir/app/machine-learning"
 		# Install uv
@@ -223,6 +283,7 @@ myynh_install_immich() {
 			mkdir -p "$install_dir/.cache_ml"
 
 	# Install geonames
+		ynh_print_info "Adding geonames capabilities..."
 		mkdir -p "$source_dir/geonames"
 		cd "$source_dir/geonames"
 		# Download files
@@ -241,6 +302,7 @@ myynh_install_immich() {
 			date --iso-8601=seconds | tr -d "\n" > "$install_dir/app/geodata/geodata-date.txt"
 
 	# Cleanup
+		ynh_print_info "Cleaning up immich source directory..."
 		ynh_safe_rm "$source_dir"
 }
 
@@ -540,4 +602,3 @@ ynh_del_swap_fixed() {
 		rm "/swap_$app"
 	fi
 }
-
