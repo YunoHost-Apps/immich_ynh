@@ -157,7 +157,7 @@ myynh_install_immich() {
 		then
 			myynh_install_libvips
 		else
-			ynh_print_info "Current libheif and libvips are up-to-date for HEIC support, no need to rebuild tehm..."
+			ynh_print_info "Current libheif and libvips are up-to-date for HEIC support, no need to rebuild them..."
 		fi
 		export LD_LIBRARY_PATH="$install_dir/vips/lib:${LD_LIBRARY_PATH:-}"
 
