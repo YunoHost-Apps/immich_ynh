@@ -1,10 +1,10 @@
 #!/bin/bash
 
 set -a
-source "__INSTALL_DIR__/env"
+source "__INSTALL_DIR__/immich/env"
 set +a
 
-cd "__INSTALL_DIR__/app/machine-learning"
+cd "__INSTALL_DIR__/immich/app/machine-learning"
 source venv/bin/activate
 
 : "${IMMICH_HOST:=127.0.0.1}"
@@ -12,8 +12,8 @@ source venv/bin/activate
 : "${MACHINE_LEARNING_WORKERS:=1}"
 : "${MACHINE_LEARNING_HTTP_KEEPALIVE_TIMEOUT_S:=2}"
 : "${MACHINE_LEARNING_WORKER_TIMEOUT:=300}"
-: "${MACHINE_LEARNING_CACHE_FOLDER:=__INSTALL_DIR__/.cache_ml}"
-: "${TRANSFORMERS_CACHE:=__INSTALL_DIR__/.cache_ml}"
+: "${MACHINE_LEARNING_CACHE_FOLDER:=__INSTALL_DIR__/immich/.cache_ml}"
+: "${TRANSFORMERS_CACHE:=__INSTALL_DIR__/immich/.cache_ml}"
 
 exec gunicorn immich_ml.main:app \
 	--worker-class immich_ml.config.CustomUvicornWorker \
