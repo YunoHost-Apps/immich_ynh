@@ -57,7 +57,7 @@ then
 fi
 if ynh_app_upgrading_from_version_before 2.3.1~ynh4
 then
-	ynh_safe_rm "$install_dir/
+	ynh_safe_rm "$install_dir"
 fi
 
 #=================================================
