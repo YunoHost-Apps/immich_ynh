@@ -92,6 +92,7 @@ myynh_add_swap() {
 myynh_install_libvips() {
 	local build_dir="$source_dir/vips-build"
 	local libs_dir="$install_dir/vips"
+	ynh_safe_rm "$libs_dir"
 	mkdir -p "$build_dir" "$libs_dir" "$build_dir/libheif"
 	pushd "$build_dir"
 
