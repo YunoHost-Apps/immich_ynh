@@ -55,7 +55,7 @@ myynh_add_swap() {
 	# Retrieve RAM needed in G
 		local ram_needed_full=$(ynh_read_manifest "integration.ram.build")
 		local ram_needed_value=${ram_needed_full::-1}
-		local ram_needed_unit=${ram_needed_full:1}
+		local ram_needed_unit=${ram_needed_full: -1}
 		if [ $ram_needed_unit = "M" ]
 		then
 			ram_needed_G=$(($ram_needed_value/1024))
