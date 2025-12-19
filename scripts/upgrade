@@ -55,13 +55,17 @@ then
 	ynh_app_setting_set --key=db_pwd --value="$(ynh_app_setting_get --key=psql_pwd)"
 	ynh_app_setting_delete --key=psql_pwd
 fi
+if ynh_app_upgrading_from_version_before 2.3.1~ynh4
+then
+	ynh_safe_rm "$install_dir"
+fi
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression "Upgrading source files..."
 
-ynh_safe_rm "$install_dir"
+ynh_safe_rm "$install_dir/immich"
 
 source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace
@@ -135,7 +139,7 @@ ynh_script_progression "Updating $app's configuration files..."
 
 db_pwd=$(ynh_app_setting_get --key=db_pwd)
 db_port=$(ynh_app_setting_get --key=db_port)
-ynh_config_add --template="env" --destination="$install_dir/env"
+ynh_config_add --template="env" --destination="$install_dir/immich/env"
 mkdir --parents "$data_dir/backups"
 ynh_config_add --template="restore_immich_db_backup.sh" --destination="$data_dir/backups/restore_immich_db_backup.sh"
 

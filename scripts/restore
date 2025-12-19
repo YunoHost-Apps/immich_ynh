@@ -98,7 +98,7 @@ ynh_restore "/var/log/$app/"
 ynh_script_progression "Updating $app's configuration files..."
 
 # In case the psql port is not the same between old system vs new system, apply the new port in env file
-ynh_replace --match="DB_PORT=.*" --replace="DB_PORT=$db_port" --file="$install_dir/env"
+ynh_replace --match="DB_PORT=.*" --replace="DB_PORT=$db_port" --file="$install_dir/immich/env"
 
 #=================================================
 # SET FILE OWNERSHIP / PERMISSIONS
