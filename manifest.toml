@@ -123,6 +123,7 @@ ram.runtime = "2G"
 		"libwebp-dev",
 		"libaom-dev",
 		"libde265-dev",
+		"libexif-dev",
 		"libexpat1-dev",
 		"libglib2.0-dev",
 		"libjpeg-dev",
