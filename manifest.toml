@@ -20,7 +20,7 @@ userdoc = "https://github.com/immich-app/immich#getting-started"
 code = "https://github.com/immich-app/immich"
 
 [integration]
-yunohost = ">= 12.1.23"
+yunohost = ">= 12.1.38"
 helpers_version = "2.1"
 architectures = ["arm64", "amd64"]
 multi_instance = false
