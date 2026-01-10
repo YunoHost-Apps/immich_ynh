@@ -30,14 +30,6 @@ ynh_script_progression "Restoring the data directory..."
 ynh_restore "$data_dir"
 
 #=================================================
-# INSTALL NODEJS
-#=================================================
-ynh_script_progression "Reinstalling nodejs..."
-
-nodejs_version=$(ynh_app_setting_get --key=nodejs_version)
-ynh_nodejs_install
-
-#=================================================
 # INSTALL PACKAGES
 #=================================================
 ynh_script_progression "Installing additionnal packages (if needed)..."

@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.4.1~ynh1"
+version = "2.4.1~ynh2"
 
 maintainers = ["ewilly"]
 
@@ -20,7 +20,7 @@ userdoc = "https://github.com/immich-app/immich#getting-started"
 code = "https://github.com/immich-app/immich"
 
 [integration]
-yunohost = ">= 12.1.23"
+yunohost = ">= 12.1.38"
 helpers_version = "2.1"
 architectures = ["arm64", "amd64"]
 multi_instance = false
@@ -123,6 +123,7 @@ ram.runtime = "2G"
 		"libwebp-dev",
 		"libaom-dev",
 		"libde265-dev",
+		"libexif-dev",
 		"libexpat1-dev",
 		"libglib2.0-dev",
 		"libjpeg-dev",
@@ -150,6 +151,9 @@ ram.runtime = "2G"
 	packages = [
 		"mise"
 	]
+
+	[resources.nodejs]
+	version = "24"
 
 	[resources.database]
 	type = "postgresql"

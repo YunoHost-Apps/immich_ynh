@@ -27,14 +27,6 @@ source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir"
 
 #=================================================
-# INSTALL NODEJS
-#=================================================
-ynh_script_progression "Installing nodejs..."
-
-nodejs_version=$(cat "$source_dir/server/.nvmrc" | cut -d '.' -f1) # 22
-ynh_nodejs_install
-
-#=================================================
 # INSTALL PACKAGES
 #=================================================
 ynh_script_progression "Installing additionnal packages (if needed)..."
