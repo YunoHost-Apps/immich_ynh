@@ -153,7 +153,8 @@ myynh_install_immich() {
 		PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
 
 	# Build libvips with HEIC support
-		if [[ $(ynh_read_manifest "resources.sources.libheif.url") != $(ynh_app_setting_get --key=libheif_version) \
+		if [[ ! -d "$install_dir/vips" \
+		|| $(ynh_read_manifest "resources.sources.libheif.url") != $(ynh_app_setting_get --key=libheif_version) \
 		|| $(ynh_read_manifest "resources.sources.libvips.url") != $(ynh_app_setting_get --key=libvips_version) ]]
 		then
 			myynh_install_libvips
