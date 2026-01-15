@@ -66,6 +66,8 @@ fi
 ynh_script_progression "Upgrading source files..."
 
 ynh_safe_rm "$install_dir/immich"
+ynh_safe_rm "$install_dir/.cache"
+ynh_safe_rm "$install_dir/.config"
 
 source_dir="$install_dir/source"
 ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace
