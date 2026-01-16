@@ -518,10 +518,15 @@ myynh_set_permissions() {
 		test -f "$file" && chmod +x "$file"
 	done
 
-	chown -R $app: "$data_dir"
-	chmod u=rwX,g=rX,o= "$data_dir"
-	chmod -R o-rwx "$data_dir"
-	chmod +x "$data_dir/backups/restore_immich_db_backup.sh"
+	if [[ -z ${YNH_APP_UPGRADE_TYPE:-} ]]
+	then
+		chown -R $app: "$data_dir"
+		chmod u=rwX,g=rX,o= "$data_dir"
+		chmod -R o-rwx "$data_dir"
+	fi
+
+	chown $app: "$data_dir/backups/restore_immich_db_backup.sh"
+	chmod u=rwX,g=rX,o=X "$data_dir/backups/restore_immich_db_backup.sh"
 
 	chown -R $app: "/var/log/$app"
 	chmod u=rw,g=r,o= "/var/log/$app"
