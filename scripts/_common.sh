@@ -518,7 +518,7 @@ myynh_set_permissions() {
 		test -f "$file" && chmod +x "$file"
 	done
 
-	if [[ -z "$YNH_APP_UPGRADE_TYPE" ]]
+	if [[ -z ${YNH_APP_UPGRADE_TYPE:-} ]]
 	then
 		chown -R $app: "$data_dir"
 		chmod u=rwX,g=rX,o= "$data_dir"
