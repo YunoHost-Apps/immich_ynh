@@ -94,8 +94,6 @@ then
 	then
 		# Dump db on old cluster
 		myynh_dump_psql_db --cluster="$psql_bookworm/main"
-		# Drop empty db on new cluster
-		myynh_drop_psql_db --cluster="$psql_trixie/main"
 		# Restore db on new cluster
 		myynh_restore_psql_db --cluster="$psql_trixie/main"
 		# Drop db on old cluster
