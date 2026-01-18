@@ -45,7 +45,6 @@ myynh_install_postgresql_packages() {
 		YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-$psql_version-pgvector"
 		db_cluster="$psql_version/main"
 	fi
-	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 }
 
 # Add swap if needed
@@ -395,6 +394,9 @@ myynh_update_psql_db() {
 
 	# Retrive and save the postgresql port of the cluster and save it in settings
 	myynh_retrieve_psql_port
+
+	# Save settings
+	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 }
 
 # Remove the database
