@@ -45,7 +45,6 @@ myynh_install_postgresql_packages() {
 		YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-$psql_version-pgvector"
 		db_cluster="$psql_version/main"
 	fi
-	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 }
 
 # Add swap if needed
@@ -365,11 +364,19 @@ myynh_create_psql_cluster() {
 
 # Install the database
 myynh_create_psql_db() {
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
 	db_pwd=$(ynh_app_setting_get --key=db_pwd)
 
-	myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
-	myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
-	myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="CREATE DATABASE $app;"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
 }
 
 # Update the database
@@ -395,6 +402,9 @@ myynh_update_psql_db() {
 
 	# Retrive and save the postgresql port of the cluster and save it in settings
 	myynh_retrieve_psql_port
+
+	# Save settings
+	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 }
 
 # Remove the database
