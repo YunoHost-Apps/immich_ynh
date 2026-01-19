@@ -364,11 +364,19 @@ myynh_create_psql_cluster() {
 
 # Install the database
 myynh_create_psql_db() {
+	# Declare an array to define the options of this helper.
+	local legacy_args=sod
+	local -A args_array=([c]=cluster=)
+	local cluster
+	# Manage arguments with getopts
+	ynh_handle_getopts_args "$@"
+	cluster="${cluster:-$db_cluster}"
+
 	db_pwd=$(ynh_app_setting_get --key=db_pwd)
 
-	myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
-	myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
-	myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="CREATE DATABASE $app;"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
+	myynh_execute_psql_as_root --cluster="$cluster" --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
 }
 
 # Update the database
