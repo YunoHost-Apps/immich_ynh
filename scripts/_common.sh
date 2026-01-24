@@ -255,7 +255,8 @@ myynh_install_immich() {
 				python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
 					| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
 				ynh_app_setting_set --key=python_version --value=$python_version
-				"$uv" venv --quiet "$install_dir/immich/app/machine-learning/venv" --python "$python_version" --python-preference only-managed
+				echo "$uv"
+				ynh_hide_warnings "$uv" venv --quiet "$install_dir/immich/app/machine-learning/venv" --python "$python_version" --python-preference only-managed
 			# Activate the virtual environment
 				set +o nounset
 				source "$install_dir/immich/app/machine-learning/venv/bin/activate"
