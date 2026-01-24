@@ -241,29 +241,16 @@ myynh_install_immich() {
 		# Install custom start.sh script
 			ynh_safe_rm "$install_dir/immich/app/bin/start.sh"
 			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/immich/app/bin/start.sh"
-		# Cleanup
-			ynh_hide_warnings pnpm prune
-			ynh_hide_warnings pnpm store prune
-			#ynh_hide_warnings mise implode
-			unset PNPM_HOME
-			unset MISE_DATA_DIR
-			unset MISE_CACHE_DIR
- 			unset SHARP_IGNORE_GLOBAL_LIBVIPS
 
 	# Install immich-machine-learning
 		ynh_print_info "Building immich machine learning..."
 		cd "$source_dir/machine-learning"
 		mkdir -p "$install_dir/immich/app/machine-learning"
 		# Install uv
-			PIPX_HOME="/opt/pipx" PIPX_BIN_DIR="/usr/local/bin" pipx install uv --force 2>&1
-			PIPX_HOME="/opt/pipx" PIPX_BIN_DIR="/usr/local/bin" pipx upgrade uv --force 2>&1
-			local uv="/usr/local/bin/uv"
+			mise use -g uv@latest
+			local uv="$MISE_DATA_DIR/shims/uv --no-cache "
 		# Execute in a subshell
 		(
-			# Define some options for uv
-				export UV_PYTHON_INSTALL_DIR="$install_dir/immich/app/machine-learning"
-				export UV_NO_CACHE=true
-				export UV_NO_MODIFY_PATH=true
 			# Create the virtual environment
 				python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
 					| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
@@ -273,17 +260,9 @@ myynh_install_immich() {
 				set +o nounset
 				source "$install_dir/immich/app/machine-learning/venv/bin/activate"
 				set -o nounset
-			# Add pip
-				"$uv" pip --quiet --no-cache-dir install --upgrade pip
-			# Add uv
-				ynh_hide_warnings "$install_dir/immich/app/machine-learning/venv/bin/pip" install --no-cache-dir --upgrade uv
 			# Install with uv
-				ynh_hide_warnings "$install_dir/immich/app/machine-learning/venv/bin/uv" sync \
-					--quiet --frozen --extra cpu --no-dev --no-editable --no-install-project --compile-bytecode --no-progress --active --link-mode copy
-			# Clear uv options
-				unset UV_PYTHON_INSTALL_DIR
-				unset UV_NO_CACHE
-				unset UV_NO_MODIFY_PATH
+				ynh_hide_warnings "$uv" sync --quiet --frozen --extra cpu --no-dev --no-editable --no-install-project \
+					--compile-bytecode --no-progress --active --link-mode copy
 		)
 		# Copy built files
 			cp -a "$source_dir/machine-learning/ann" "$install_dir/immich/app/machine-learning/"
@@ -313,6 +292,9 @@ myynh_install_immich() {
 			date --iso-8601=seconds | tr -d "\n" > "$install_dir/immich/app/geodata/geodata-date.txt"
 
 	# Cleanup
+		ynh_hide_warnings pnpm prune
+		ynh_hide_warnings pnpm store prune
+		ynh_hide_warnings mise implode --dry-run --config
 		ynh_print_info "Cleaning up immich source directory..."
 		ynh_safe_rm "$source_dir"
 }
