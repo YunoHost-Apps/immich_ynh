@@ -247,21 +247,18 @@ myynh_install_immich() {
 		ynh_print_info "Building immich machine learning..."
 		cd "$source_dir/machine-learning"
 		mkdir -p "$ml_dir"
-		chown -R $app: "$ml_dir"
-		# Install uv
-			mise use -g uv@latest
-		# Define some options for uv
-			export UV_PYTHON_INSTALL_DIR="$ml_dir"
 		# Retive python needed version
 			python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
 				| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
 			ynh_app_setting_set --key=python_version --value=$python_version
-		# Install with uv
-			export VIRTUAL_ENV="$ml_dir/venv"
-			ynh_exec_as_app --preserve-env=VIRTUAL_ENV uv sync \
-				--frozen --extra cpu --active --no-cache --python "$python_version" --managed-python \
-				--no-dev --no-editable --no-install-project --compile-bytecode --no-progress --link-mode copy \
-				--verbose #--quiet
+		# Install uv
+			mise use uv@latest
+		# Install with uv in a subshell
+			(
+				uv venv --quiet "$ml_dir/venv" --python "$python_version" --python-preference only-managed
+				source "$ml_dir/venv/bin/activate"
+				uv sync --quiet --frozen --extra cpu --active --no-cache --python "$python_version" --managed-python
+			)
 		# Copy built files
 			cp -a "$source_dir/machine-learning/ann" "$ml_dir/"
 			cp -a "$source_dir/machine-learning/immich_ml" "$ml_dir/"
