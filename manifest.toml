@@ -59,7 +59,7 @@ ram.runtime = "2G"
 	[resources.sources.libvips]
 	# Version from https://github.com/immich-app/base-images/blob/main/server/sources/libvips.json
 	url = "https://github.com/libvips/libvips/releases/download/v8.18.0/vips-8.18.0.tar.xz"
-	sha256 = "55ffc8b6e68dd8eabf29629c7905efa0c92433aacac427e816c51f50e68ca60d"
+	sha256 = "b85ab92280c30d22f5c8fe2f68b809cddb7eaac437d8c33474475dac84ddc574"
 
 	autoupdate.strategy = "latest_github_release"
 	autoupdate.asset = "^vips-.*\\.tar\\.xz$"
