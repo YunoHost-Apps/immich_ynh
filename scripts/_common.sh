@@ -290,7 +290,7 @@ myynh_install_immich() {
 
 	# Cleanup
 		ynh_print_info "Cleaning up immich source directory..."
-		ynh_safe_rm "$source_dir"
+		#ynh_safe_rm "$source_dir"
 }
 
 # Execute a psql command as root user
