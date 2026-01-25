@@ -259,7 +259,9 @@ myynh_install_immich() {
 		# Install with uv
 			export VIRTUAL_ENV="$ml_dir/venv"
 			ynh_exec_as_app --preserve-env=VIRTUAL_ENV uv sync \
-				--quiet --frozen --extra cpu --active --no-cache --python "$python_version" --managed-python
+				--frozen --extra cpu --active --no-cache --python "$python_version" --managed-python \
+				--no-dev --no-editable --no-install-project --compile-bytecode --no-progress --link-mode copy \
+				--verbose #--quiet
 		# Copy built files
 			cp -a "$source_dir/machine-learning/ann" "$ml_dir/"
 			cp -a "$source_dir/machine-learning/immich_ml" "$ml_dir/"
