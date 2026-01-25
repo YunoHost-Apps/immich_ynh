@@ -18,6 +18,10 @@ fi
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
+# Paths
+app_dir="$install_dir/immich/app"
+ml_dir="$app_dir/machine-learning"
+
 # Check hardware requirements
 myynh_check_hardware() {
 	# CPU: Prebuilt binaries for linux-x64 require v2 microarchitecture
@@ -91,7 +95,7 @@ myynh_add_swap() {
 myynh_install_libvips() {
 	local build_dir="$source_dir/vips-build"
 	local libs_dir="$install_dir/vips"
-	ynh_safe_rm "$libs_dir"
+	ynh_safe_rm "$libs_dir" 2>&1
 	mkdir -p "$build_dir" "$libs_dir" "$build_dir/libheif"
 	pushd "$build_dir"
 
@@ -154,9 +158,6 @@ myynh_install_immich() {
 		PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
 	# Add mise shims direcotry to $PATH
 		PATH="$HOME/.local/share/mise/shims:$PATH"
-	# Define var
-		local app_dir="$install_dir/immich/app"
-		local ml_dir="$app_dir/machine-learning"
 
 	# Build libvips with HEIC support
 		if [[ ! -d "$install_dir/vips" \
