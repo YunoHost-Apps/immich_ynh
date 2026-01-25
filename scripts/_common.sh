@@ -95,7 +95,7 @@ myynh_add_swap() {
 myynh_install_libvips() {
 	local build_dir="$source_dir/vips-build"
 	local libs_dir="$install_dir/vips"
-	ynh_safe_rm "$libs_dir" 2>&1
+	ynh_safe_rm "$libs_dir"
 	mkdir -p "$build_dir" "$libs_dir" "$build_dir/libheif"
 	pushd "$build_dir"
 
@@ -253,9 +253,10 @@ myynh_install_immich() {
 				| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
 			ynh_app_setting_set --key=python_version --value=$python_version
 		# Install uv
-			mise use uv@latest
+			mise use uv@latest --quiet
 		# Install with uv in a subshell
 			(
+				export UV_PYTHON_INSTALL_DIR="$ml_dir"
 				uv venv "$ml_dir/venv" --quiet --no-cache --python "$python_version" --managed-python
 				source "$ml_dir/venv/bin/activate"
 				uv sync --quiet --no-cache --frozen --extra cpu --active
