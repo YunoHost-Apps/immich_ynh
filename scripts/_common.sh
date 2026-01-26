@@ -18,6 +18,9 @@ fi
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
+# App path
+app_dir="$install_dir/immich/app"
+
 # Check hardware requirements
 myynh_check_hardware() {
 	# CPU: Prebuilt binaries for linux-x64 require v2 microarchitecture
@@ -148,8 +151,12 @@ myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native, https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh, https://github.com/loeeeee/immich-in-lxc/blob/main/install.sh
 	# Check https://github.com/immich-app/base-images/blob/main/server/Dockerfile for changes
 
+	# Set $home to $source_dir for pnpm and mise
+		export HOME="$source_dir"
 	# Add jellyfin-ffmpeg direcotry to $PATH
 		PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
+	# Add mise shims direcotry to $PATH
+		PATH="$HOME/.local/share/mise/shims:$PATH"
 
 	# Build libvips with HEIC support
 		if [[ ! -d "$install_dir/vips" \
@@ -190,36 +197,31 @@ myynh_install_immich() {
 			grep -Rl "/usr/src" | xargs -n1 sed -i -e "s@/usr/src@$install_dir/immich@g"
 		# Replace /build
 			grep -RlE "\"/build\"|'/build'" \
-				| xargs -n1 sed -i -e "s@\"/build\"@\"$install_dir/immich/app\"@g" -e "s@'/build'@'$install_dir/immich/app'@g"
-		# Definie pnpm & mise options
-			export PNPM_HOME="$source_dir/pnpm"
-			export MISE_DATA_DIR="$source_dir/mise"
-			export MISE_CACHE_DIR="$MISE_DATA_DIR/cache"
+				| xargs -n1 sed -i -e "s@\"/build\"@\"$app_dir\"@g" -e "s@'/build'@'$app_dir'@g"
 		# Build server
 			ynh_print_info "Building immich server..."
 			cd "$source_dir/server"
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
-			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$install_dir/immich/app/"
-
-			cp "$install_dir/immich/app/package.json" "$install_dir/immich/app/bin"
-			ynh_replace --match="^start" --replace="./start" --file="$install_dir/immich/app/bin/immich-admin"
+			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$app_dir/"
+			cp "$app_dir/package.json" "$app_dir/bin"
+			ynh_replace --match="^start" --replace="./start" --file="$app_dir/bin/immich-admin"
 		# Build openapi & web
 			ynh_print_info "Building immich openapi & web interface..."
 			cd "$source_dir"
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
-			cp -a web/build "$install_dir/immich/app/www"
+			cp -a web/build "$app_dir/www"
 		# Build cli
 			ynh_print_info "Building immich cli..."
 			cd "$source_dir"
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli build
-			ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$install_dir/immich/app/cli"
-			ln -s "$install_dir/immich/app/cli/bin/immich" "$install_dir/immich/app/bin/immich"
+			ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$app_dir/cli"
+			ln -s "$app_dir/cli/bin/immich" "$app_dir/bin/immich"
 		# Build plugins
 			ynh_print_info "Building immich plugins..."
 			cd "$source_dir"
-			mkdir -p "$install_dir/immich/app/corePlugin"
+			mkdir -p "$app_dir/corePlugin"
 			if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 			then
 				ynh_replace \
@@ -231,65 +233,39 @@ myynh_install_immich() {
 			ynh_hide_warnings mise trust ./plugins/mise.toml
 			cd "$source_dir/plugins"
 			ynh_hide_warnings mise install
-			PATH="$MISE_DATA_DIR/shims:$PATH"
 			ynh_hide_warnings mise run build
-			mkdir -p "$install_dir/immich/app/corePlugin"
-			cp -r dist "$install_dir/immich/app/corePlugin/dist"
-			cp manifest.json "$install_dir/immich/app/corePlugin"
+			mkdir -p "$app_dir/corePlugin"
+			cp -r dist "$app_dir/corePlugin/dist"
+			cp manifest.json "$app_dir/corePlugin"
 		# Copy remaining assets
-			cp -a LICENSE "$install_dir/immich/app/"
+			cp -a LICENSE "$app_dir/"
 		# Install custom start.sh script
-			ynh_safe_rm "$install_dir/immich/app/bin/start.sh"
-			ynh_config_add --template="$app-server-start.sh" --destination="$install_dir/immich/app/bin/start.sh"
-		# Cleanup
-			ynh_hide_warnings pnpm prune
-			ynh_hide_warnings pnpm store prune
-			#ynh_hide_warnings mise implode
-			unset PNPM_HOME
-			unset MISE_DATA_DIR
-			unset MISE_CACHE_DIR
- 			unset SHARP_IGNORE_GLOBAL_LIBVIPS
+			ynh_safe_rm "$app_dir/bin/start.sh"
+			ynh_config_add --template="$app-server-start.sh" --destination="$app_dir/bin/start.sh"
 
 	# Install immich-machine-learning
 		ynh_print_info "Building immich machine learning..."
 		cd "$source_dir/machine-learning"
-		mkdir -p "$install_dir/immich/app/machine-learning"
+		local ml_dir="$app_dir/machine-learning"
+		mkdir -p "$ml_dir"
+		# Retive python needed version
+			python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
+				| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
+			ynh_app_setting_set --key=python_version --value=$python_version
 		# Install uv
-			PIPX_HOME="/opt/pipx" PIPX_BIN_DIR="/usr/local/bin" pipx install uv --force 2>&1
-			PIPX_HOME="/opt/pipx" PIPX_BIN_DIR="/usr/local/bin" pipx upgrade uv --force 2>&1
-			local uv="/usr/local/bin/uv"
-		# Execute in a subshell
-		(
-			# Define some options for uv
-				export UV_PYTHON_INSTALL_DIR="$install_dir/immich/app/machine-learning"
-				export UV_NO_CACHE=true
-				export UV_NO_MODIFY_PATH=true
-			# Create the virtual environment
-				python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
-					| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
-				ynh_app_setting_set --key=python_version --value=$python_version
-				"$uv" venv --quiet "$install_dir/immich/app/machine-learning/venv" --python "$python_version" --python-preference only-managed
-			# Activate the virtual environment
-				set +o nounset
-				source "$install_dir/immich/app/machine-learning/venv/bin/activate"
-				set -o nounset
-			# Add pip
-				"$uv" pip --quiet --no-cache-dir install --upgrade pip
-			# Add uv
-				ynh_hide_warnings "$install_dir/immich/app/machine-learning/venv/bin/pip" install --no-cache-dir --upgrade uv
-			# Install with uv
-				ynh_hide_warnings "$install_dir/immich/app/machine-learning/venv/bin/uv" sync \
-					--quiet --frozen --extra cpu --no-dev --no-editable --no-install-project --compile-bytecode --no-progress --active --link-mode copy
-			# Clear uv options
-				unset UV_PYTHON_INSTALL_DIR
-				unset UV_NO_CACHE
-				unset UV_NO_MODIFY_PATH
-		)
+			mise use uv@latest --quiet
+		# Install with uv in a subshell
+			(
+				export UV_PYTHON_INSTALL_DIR="$ml_dir"
+				uv venv "$ml_dir/venv" --quiet --no-cache --python "$python_version" --managed-python
+				source "$ml_dir/venv/bin/activate"
+				uv sync --quiet --no-cache --frozen --extra cpu --active
+			)
 		# Copy built files
-			cp -a "$source_dir/machine-learning/ann" "$install_dir/immich/app/machine-learning/"
-			cp -a "$source_dir/machine-learning/immich_ml" "$install_dir/immich/app/machine-learning/"
+			cp -a "$source_dir/machine-learning/ann" "$ml_dir/"
+			cp -a "$source_dir/machine-learning/immich_ml" "$ml_dir/"
 		# Install custom start.sh script
-			ynh_config_add --template="$app-machine-learning-start.sh" --destination="$install_dir/immich/app/machine-learning/ml_start.sh"
+			ynh_config_add --template="$app-machine-learning-start.sh" --destination="$ml_dir/ml_start.sh"
 		# Create the cache direcotry
 			mkdir -p "$install_dir/immich/.cache_ml"
 
@@ -304,13 +280,13 @@ myynh_install_immich() {
 			curl -LO "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_countries.geojson" 2>&1
 			unzip "cities500.zip"
 		# Copy built files
-			mkdir -p "$install_dir/immich/app/geodata/"
-			cp -a "$source_dir/geonames/cities500.txt" "$install_dir/immich/app/geodata/"
-			cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$install_dir/immich/app/geodata/"
-			cp -a "$source_dir/geonames/admin2Codes.txt" "$install_dir/immich/app/geodata/"
-			cp -a "$source_dir/geonames/ne_10m_admin_0_countries.geojson" "$install_dir/immich/app/geodata/"
+			mkdir -p "$app_dir/geodata/"
+			cp -a "$source_dir/geonames/cities500.txt" "$app_dir/geodata/"
+			cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$app_dir/geodata/"
+			cp -a "$source_dir/geonames/admin2Codes.txt" "$app_dir/geodata/"
+			cp -a "$source_dir/geonames/ne_10m_admin_0_countries.geojson" "$app_dir/geodata/"
 		# Update geodata-date
-			date --iso-8601=seconds | tr -d "\n" > "$install_dir/immich/app/geodata/geodata-date.txt"
+			date --iso-8601=seconds | tr -d "\n" > "$app_dir/geodata/geodata-date.txt"
 
 	# Cleanup
 		ynh_print_info "Cleaning up immich source directory..."
@@ -519,10 +495,10 @@ myynh_set_permissions() {
 	chmod -R o-rwx "$install_dir"
 
 	FILE_LIST=(
-		"$install_dir/immich/app/start.sh"
-		"$install_dir/immich/app/bin/start.sh"
-		"$install_dir/immich/app/machine-learning/start.sh"
-		"$install_dir/immich/app/machine-learning/ml_start.sh"
+		"$app_dir/start.sh"
+		"$app_dir/bin/start.sh"
+		"$app_dir/machine-learning/start.sh"
+		"$app_dir/machine-learning/ml_start.sh"
 	)
 	for file in "${FILE_LIST[@]}"; do
 		test -f "$file" && chmod +x "$file"
