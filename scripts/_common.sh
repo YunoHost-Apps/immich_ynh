@@ -18,9 +18,8 @@ fi
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
 
-# Paths
+# App path
 app_dir="$install_dir/immich/app"
-ml_dir="$app_dir/machine-learning"
 
 # Check hardware requirements
 myynh_check_hardware() {
@@ -247,6 +246,7 @@ myynh_install_immich() {
 	# Install immich-machine-learning
 		ynh_print_info "Building immich machine learning..."
 		cd "$source_dir/machine-learning"
+		local ml_dir="$app_dir/machine-learning"
 		mkdir -p "$ml_dir"
 		# Retive python needed version
 			python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
