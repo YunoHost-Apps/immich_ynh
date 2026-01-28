@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.4.1~ynh3"
+version = "2.5.0~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -44,8 +44,8 @@ ram.runtime = "2G"
 	[resources.sources]
 
 	[resources.sources.main]
-	url = "https://github.com/immich-app/immich/archive/refs/tags/v2.4.1.tar.gz"
-	sha256 = "885cf36509f79fa1ed7541236b671d7eae900c80145920299be922a45a086fc5"
+	url = "https://github.com/immich-app/immich/archive/refs/tags/v2.5.0.tar.gz"
+	sha256 = "c02ef5c6c357e77932a12bbd39ac468c8e47751a3db55e8984b9b4e006200c25"
 
 	autoupdate.strategy = "latest_github_release"
 
@@ -55,6 +55,8 @@ ram.runtime = "2G"
 	sha256 = "75f530b7154bc93e7ecf846edfc0416bf5f490612de8c45983c36385aa742b42"
 
 	autoupdate.strategy = "latest_github_release"
+	autoupdate.asset = "^libheif-.*\\.tar\\.gz$"
+	autoupdate.upstream = "https://github.com/strukturag/libheif"
 
 	[resources.sources.libvips]
 	# Version from https://github.com/immich-app/base-images/blob/main/server/sources/libvips.json
@@ -63,6 +65,7 @@ ram.runtime = "2G"
 
 	autoupdate.strategy = "latest_github_release"
 	autoupdate.asset = "^vips-.*\\.tar\\.xz$"
+	autoupdate.upstream = "https://github.com/libvips/libvips"
 
 	[resources.system_user]
 
