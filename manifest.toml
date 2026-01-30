@@ -86,7 +86,6 @@ ram.runtime = "2G"
 
 	[resources.apt]
 	packages = [
-		"pipx",
 		"curl",
 		"postgresql",
 		"redis-server",
