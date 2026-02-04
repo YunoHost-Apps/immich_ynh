@@ -170,10 +170,10 @@ myynh_install_immich() {
 		export LD_LIBRARY_PATH="$install_dir/vips/lib:${LD_LIBRARY_PATH:-}"
 
 	# Define nodejs options
-		ram_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
-		ram_G=$(($ram_G > 1 ? $ram_G : 1))
-		ram_G=$(($ram_G > 8 ? 8 : $ram_G))
-		ram_G=$(($ram_G*1024))
+		local ram_free_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
+		ram_free_G=$((ram_free_G > 1 ? ram_free_G : $ram_needed_G))
+		ram_free_G=$((ram_free_G > 8 ? 8 : ram_free_G))
+		local ram_G=$((ram_free_G*1024))
 		export NODE_OPTIONS="${NODE_OPTIONS:-} --max_old_space_size=$ram_G"
 		export NODE_ENV=production
 
