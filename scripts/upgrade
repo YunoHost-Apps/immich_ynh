@@ -108,7 +108,7 @@ myynh_update_psql_db
 #=================================================
 # ADD SWAP IF NEEDED
 #=================================================
-ynh_script_progression "Temporary adding additional swap if needed..."
+ynh_script_progression "Temporary adding additional swap (if needed)..."
 
 myynh_add_swap
 
