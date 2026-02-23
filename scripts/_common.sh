@@ -168,6 +168,7 @@ myynh_install_immich() {
 			ynh_print_info "Current libheif and libvips are up-to-date for HEIC support, no need to rebuild them..."
 		fi
 		export LD_LIBRARY_PATH="$install_dir/vips/lib:${LD_LIBRARY_PATH:-}"
+		export PKG_CONFIG_PATH="$install_dir/vips/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
 
 	# Define nodejs options
 		local ram_free_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
