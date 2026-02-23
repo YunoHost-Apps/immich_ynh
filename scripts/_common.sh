@@ -201,14 +201,19 @@ myynh_install_immich() {
 		# Build server
 			ynh_print_info "Building immich server..."
 			cd "$source_dir/server"
+			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
-			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod deploy "$app_dir/"
+			unset SHARP_IGNORE_GLOBAL_LIBVIPS
+			export SHARP_FORCE_GLOBAL_LIBVIPS=true
+			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$app_dir/"
 			cp "$app_dir/package.json" "$app_dir/bin"
 			ynh_replace --match="^start" --replace="./start" --file="$app_dir/bin/immich-admin"
 		# Build openapi & web
 			ynh_print_info "Building immich openapi & web interface..."
 			cd "$source_dir"
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
+			unset SHARP_FORCE_GLOBAL_LIBVIPS
+			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
 			cp -a web/build "$app_dir/www"
 		# Build cli

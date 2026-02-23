@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.5.6~ynh1"
+version = "2.5.6~ynh2"
 
 maintainers = ["ewilly"]
 
@@ -51,21 +51,21 @@ ram.runtime = "2G"
 
 	[resources.sources.libheif]
 	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	url = "https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz"
-	sha256 = "75f530b7154bc93e7ecf846edfc0416bf5f490612de8c45983c36385aa742b42"
+	url = "https://github.com/strukturag/libheif/releases/download/v1.20.2/libheif-1.20.2.tar.gz"
+	sha256 = "68ac9084243004e0ef3633f184eeae85d615fe7e4444373a0a21cebccae9d12a"
 
-	autoupdate.strategy = "latest_github_release"
-	autoupdate.asset = "^libheif-.*\\.tar\\.gz$"
-	autoupdate.upstream = "https://github.com/strukturag/libheif"
+	# autoupdate.strategy = "latest_github_release"
+	# autoupdate.asset = "^libheif-.*\\.tar\\.gz$"
+	# autoupdate.upstream = "https://github.com/strukturag/libheif"
 
     [resources.sources.libvips]
-    # Version from https://github.com/immich-app/base-images/blob/main/server/sources/libvips.json
-    url = "https://github.com/libvips/libvips/releases/download/v8.18.0/vips-8.18.0.tar.xz"
-    sha256 = "b85ab92280c30d22f5c8fe2f68b809cddb7eaac437d8c33474475dac84ddc574"
+	# Version from https://github.com/immich-app/base-images/blob/main/server/sources/libvips.json
+	url = "https://github.com/libvips/libvips/releases/download/v8.17.3/vips-8.17.3.tar.xz"
+	sha256 = "41e9a1439cd57dcc6d4435a085e2cfe181d9da1962fa84a484f09e8b536e4b77"
 
-    autoupdate.strategy = "latest_github_release"
-    autoupdate.asset = "^vips-.*\\.tar\\.xz$"
-    autoupdate.upstream = "https://github.com/libvips/libvips"
+	# autoupdate.strategy = "latest_github_release"
+	# autoupdate.asset = "^vips-.*\\.tar\\.xz$"
+	# autoupdate.upstream = "https://github.com/libvips/libvips"
 
 	[resources.system_user]
 
