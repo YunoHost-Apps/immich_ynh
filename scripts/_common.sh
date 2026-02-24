@@ -274,7 +274,7 @@ myynh_install_immich() {
 
 		# Install custom start.sh script
 		ynh_safe_rm "$app_dir/bin/start.sh"
-		nh_config_add --template="$app-server-start.sh" --destination="$app_dir/bin/start.sh"
+		ynh_config_add --template="$app-server-start.sh" --destination="$app_dir/bin/start.sh"
 
 	# Install immich-machine-learning
 	ynh_print_info "Building immich machine learning..."
