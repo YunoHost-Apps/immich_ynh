@@ -20,7 +20,7 @@ myynh_check_hardware() {
 		local file_test="/lib64/ld-linux-x86-64.so.2"
 		if [ -f "$file_test" ]
 		then
-			if [ -z "$( $file_test --help | grep 'x86-64-v2 (supported' )" ]
+			if ! $file_test --help | grep -q "x86-64-v2 (supported"
 			then
 				ynh_die "Your CPU is too old and not supported. Installation of $app is not possible on your system."
 			fi
@@ -36,7 +36,7 @@ myynh_add_swap() {
 	local ram_needed_full=$(ynh_read_manifest "integration.ram.build")
 	local ram_needed_value=${ram_needed_full::-1}
 	local ram_needed_unit=${ram_needed_full: -1}
-	if [ $ram_needed_unit = "M" ]
+	if [[ "$ram_needed_unit" == "M" ]]
 	then
 		ram_needed_G=$(($ram_needed_value/1024))
 	else
@@ -398,8 +398,6 @@ myynh_update_psql_db() {
 		ynh_print_info "Migrating database to new cluster..."
 		# Dump db on old cluster
 		myynh_dump_psql_db --cluster=$current_db_cluster
-		# Create db on new cluster
-		myynh_create_psql_db --cluster="$psql_version/main"
 		# Restore db on new cluster
 		myynh_restore_psql_db --cluster="$psql_version/main"
 		# Drop db on old cluster
