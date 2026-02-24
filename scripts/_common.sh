@@ -27,56 +27,6 @@ myynh_check_hardware() {
 		fi
 }
 
-# Add postgresql packages from postgresql repo if needed
-myynh_install_postgresql_packages() {
-	# For bookworm, add postgresql packages from postgresql repo
-	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
-	then
-		ynh_apt_install_dependencies_from_extra_repository \
-			--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
-			--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
-			--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
-	fi
-
-	# On upgrade, check if the db is not yet on psql_version cluster and if no migrate it (aka dumb and restore the db to 17 + delete the db on 16)
-	local current_db_cluster=$(ynh_app_setting_get --key=db_cluster)
-	if [[ -z ${YNH_APP_UPGRADE_TYPE:-} ]] && [[ $current_db_cluster != "$psql_version/main" ]]
-	then
-		# Dump db on old cluster
-		myynh_dump_psql_db --cluster=$current_db_cluster
-		# Create db on new cluster
-		myynh_create_psql_db --cluster="$psql_version/main"
-		# Restore db on new cluster
-		myynh_restore_psql_db --cluster="$psql_version/main"
-		# Drop db on old cluster
-		myynh_drop_psql_db --cluster=$current_db_cluster
-	fi
-
-	# Add VectorChord package
-		# Create the temporary directory
-		tempdir="$(mktemp -d)"
-
-		# Download the deb files
-		ynh_setup_source --dest_dir="$tempdir" --source_id="vchord"
-
-		# Install the packages. Allow downgrades because apt decided bullseye > bookworm
-		_ynh_apt_install --allow-downgrades "$tempdir/postgresql-17-vchord.deb"
-
-		# The doc says it should be called only once, but the code says multiple calls are supported.
-		# Also, they're already installed so that should be quasi instantaneous.
-		ynh_apt_install_dependencies "postgresql-17-vchord"
-
-		# Mark packages as dependencies, to allow automatic removal
-		apt-mark auto "postgresql-17-vchord"
-
-		# Include the extension
-		myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
-		ynh_systemctl --service="postgresql" --action="restart"
-
-		# Ensure the extension is enabled
-		#myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vchord CASCADE;"
-}
-
 # Add swap if needed
 myynh_add_swap() {
 	# Remove existing SWAP
@@ -386,6 +336,14 @@ myynh_execute_psql_as_root() {
 		$tool "$cluster" $options "$database" "$sql"
 }
 
+# For bookworm, add postgresql packages from postgresql repo if needed
+myynh_install_postgresql_packages() {
+	ynh_apt_install_dependencies_from_extra_repository \
+		--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
+		--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
+		--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
+}
+
 # Create the cluster
 myynh_create_psql_cluster() {
 	if [[ -z `pg_lsclusters | grep "$db_cluster"` ]]
@@ -413,7 +371,45 @@ myynh_create_psql_db() {
 
 # Update the database
 myynh_update_psql_db() {
+	# On upgrade, check if the db is not yet on psql_version cluster and if no migrate it (aka dumb and restore the db to 17 + delete the db on 16)
+	local current_db_cluster=$(ynh_app_setting_get --key=db_cluster)
+	if [[ -z ${YNH_APP_UPGRADE_TYPE:-} ]] && [[ $current_db_cluster != "$psql_version/main" ]]
+	then
+		ynh_print_info "Migrating database to new cluster..."
+		# Dump db on old cluster
+		myynh_dump_psql_db --cluster=$current_db_cluster
+		# Create db on new cluster
+		myynh_create_psql_db --cluster="$psql_version/main"
+		# Restore db on new cluster
+		myynh_restore_psql_db --cluster="$psql_version/main"
+		# Drop db on old cluster
+		myynh_drop_psql_db --cluster=$current_db_cluster
+	fi
+
+	# Add VectorChord package
+	ynh_print_info "Adding VectorChord postgresql extension..."
+		# Create the temporary directory
+		tempdir="$(mktemp -d)"
+
+		# Download the deb files
+		ynh_setup_source --dest_dir="$tempdir" --source_id="vchord"
+
+		# Install the packages. Allow downgrades because apt decided bullseye > bookworm
+		_ynh_apt_install --allow-downgrades "$tempdir/postgresql-17-vchord.deb"
+
+		# The doc says it should be called only once, but the code says multiple calls are supported.
+		# Also, they're already installed so that should be quasi instantaneous.
+		ynh_apt_install_dependencies "postgresql-17-vchord"
+
+		# Mark packages as dependencies, to allow automatic removal
+		apt-mark auto "postgresql-17-vchord"
+
+		# Include the extension
+		myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
+		ynh_systemctl --service="postgresql" --action="restart"
+
 	# Fix collation version mismatch
+	ynh_print_info "Updating databse..."
 	databases=$(myynh_execute_psql_as_root \
 		--sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" \
 		--options="--tuples-only --no-align" --database="postgres")
@@ -431,10 +427,8 @@ myynh_update_psql_db() {
 	# Give superuser permissions to immich user in immich db
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
 
-	# Retrive and save the postgresql port of the cluster and save it in settings
+	# Retrieve and save the postgresql port of the cluster and save it in settings
 	myynh_retrieve_psql_port
-
-	# Save settings
 	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 }
 

@@ -30,13 +30,6 @@ ynh_script_progression "Restoring the data directory..."
 ynh_restore "$data_dir"
 
 #=================================================
-# INSTALL PACKAGES
-#=================================================
-ynh_script_progression "Installing additionnal packages (if needed)..."
-
-myynh_install_postgresql_packages
-
-#=================================================
 # RESTORE THE DATABASE
 #=================================================
 ynh_script_progression "Restoring the database..."
@@ -45,6 +38,7 @@ db_cluster=$(ynh_app_setting_get --key=db_cluster)
 
 if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 then
+	myynh_install_postgresql_packages
 	myynh_create_psql_cluster
 	myynh_create_psql_db
 	myynh_set_default_psql_cluster_to_debian_default
