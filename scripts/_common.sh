@@ -336,37 +336,57 @@ myynh_execute_psql_as_root() {
 		$tool "$cluster" $options "$database" "$sql"
 }
 
-# For bookworm, add postgresql packages from postgresql repo if needed
-myynh_install_postgresql_packages() {
+# For bookworm
+myynh_provision_postgresql() {
+	# Add postgresql packages from postgresql repo
+	ynh_print_info "Installing postgresql $psql_version..."
 	ynh_apt_install_dependencies_from_extra_repository \
 		--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
 		--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
 		--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
-}
 
-# Create the cluster
-myynh_create_psql_cluster() {
-	if [[ -z `pg_lsclusters | grep "$db_cluster"` ]]
+	# Create the cluster if not existing
+	if [[ -z $(pg_lsclusters | grep "$db_cluster") ]]
 	then
+		ynh_print_info "Creating the cluster..."
 		pg_createcluster ${db_cluster/\// } --start
 	fi
-}
 
-# Install the database
-myynh_create_psql_db() {
-	# Declare an array to define the options of this helper.
-	local legacy_args=sod
-	local -A args_array=([c]=cluster=)
-	local cluster
-	# Manage arguments with getopts
-	ynh_handle_getopts_args "$@"
-	cluster="${cluster:-$db_cluster}"
+	# Create the database if not existing
+	if [[ -z $(myynh_execute_psql_as_root --sql="\list $app" --options="--tuples-only --no-align" --database="postgres") ]]
+	then
+		ynh_print_info "Provisionning the database..."
+		local db_pwd=$(ynh_app_setting_get --key=db_pwd)
+		myynh_execute_psql_as_root --cluster="$db_cluster" --sql="CREATE DATABASE $app;"
+		myynh_execute_psql_as_root --cluster="$db_cluster" --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
+		myynh_execute_psql_as_root --cluster="$db_cluster" --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
+	fi
 
-	db_pwd=$(ynh_app_setting_get --key=db_pwd)
+	# Set default cluster back to debian and remove autoprovisionned database and user created on wrong cluster
+	ynh_print_info "Setting default postgresql cluster back to debian default..."
+	local default_port=5432
+	local config_file="/etc/postgresql-common/user_clusters"
 
-	myynh_execute_psql_as_root --cluster="$cluster" --sql="CREATE DATABASE $app;"
-	myynh_execute_psql_as_root --cluster="$cluster" --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
-	myynh_execute_psql_as_root --cluster="$cluster" --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
+		# Retrieve informations about default psql cluster
+		default_db_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
+		default_psql_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f2)
+		default_psql_database=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f5)
+
+		# Remove non commented lines
+		sed -i'.bak' -e '/^#/!d' "$config_file"
+
+		# Add new line USER  GROUP   VERSION CLUSTER DATABASE
+		echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
+
+		# Remove the autoprovisionned database and user created on wrong cluster
+		if ynh_psql_database_exists "$app"
+		then
+			ynh_psql_drop_db "$app"
+		fi
+		if ynh_psql_user_exists "$app"
+		then
+			ynh_psql_drop_user "$app"
+		fi
 }
 
 # Update the database
@@ -486,7 +506,7 @@ myynh_restore_psql_db() {
 	myynh_execute_psql_as_root --cluster="$cluster" --database="$app" < ./db.sql
 
 	# Restore the password
-	db_pwd="$(ynh_app_setting_get --key=db_pwd)"
+	local db_pwd="$(ynh_app_setting_get --key=db_pwd)"
 	myynh_execute_psql_as_root --cluster="$cluster" --sql="ALTER USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 }
 
@@ -504,37 +524,6 @@ myynh_retrieve_psql_port() {
 
 	db_port=$(myynh_execute_psql_as_root --cluster="$cluster" --sql="\echo :PORT")
 	ynh_app_setting_set --key=db_port --value=$db_port
-}
-
-# Set default cluster back to debian and remove autoprovisionned db if not on right cluster
-myynh_set_default_psql_cluster_to_debian_default() {
-	local default_port=5432
-	local config_file="/etc/postgresql-common/user_clusters"
-
-	# Retrieve informations about default psql cluster
-	default_db_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
-	default_psql_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f2)
-	default_psql_database=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f5)
-
-	# Remove non commented lines
-	sed -i'.bak' -e '/^#/!d' "$config_file"
-
-	# Add new line USER  GROUP   VERSION CLUSTER DATABASE
-	echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
-
-	# Remove the autoprovisionned db if not on right cluster
-	myynh_retrieve_psql_port
-	if [[ $db_port -ne $default_port ]]
-	then
-		if ynh_psql_database_exists "$app"
-		then
-			ynh_psql_drop_db "$app"
-		fi
-		if ynh_psql_user_exists "$app"
-		then
-			ynh_psql_drop_user "$app"
-		fi
-	fi
 }
 
 # Set permissions

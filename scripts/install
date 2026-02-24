@@ -33,10 +33,7 @@ ynh_script_progression "Creating a PostgreSQL database (if needed)..."
 
 if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 then
-	myynh_install_postgresql_packages
-	myynh_create_psql_cluster
-	myynh_create_psql_db
-	myynh_set_default_psql_cluster_to_debian_default
+	myynh_provision_postgresql
 fi
 
 myynh_update_psql_db
