@@ -56,11 +56,11 @@ myynh_install_postgresql_packages() {
 		apt-mark auto "postgresql-17-vchord"
 
 		# Include the extension
-		myynh_execute_psql_as_root --cluster="$cluster" --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
+		myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
 		ynh_systemctl --service="postgresql" --action="restart"
 
 		# Ensure the extension is enabled
-		#myynh_execute_psql_as_root --cluster="$cluster" --sql="CREATE EXTENSION IF NOT EXISTS vchord CASCADE;"
+		#myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vchord CASCADE;"
 }
 
 # Add swap if needed
