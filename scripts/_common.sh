@@ -393,7 +393,7 @@ myynh_provision_postgresql() {
 myynh_update_psql_db() {
 	# On upgrade, check if the db is not yet on psql_version cluster and if no migrate it (aka dumb and restore the db to 17 + delete the db on 16)
 	local current_db_cluster=$(ynh_app_setting_get --key=db_cluster)
-	if [[ -z ${YNH_APP_UPGRADE_TYPE:-} ]] && [[ $current_db_cluster != "$psql_version/main" ]]
+	if [[ -n ${YNH_APP_UPGRADE_TYPE:-} ]] && [[ $current_db_cluster != "$psql_version/main" ]]
 	then
 		ynh_print_info "Migrating database to new cluster..."
 		# Dump db on old cluster
