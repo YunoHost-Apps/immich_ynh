@@ -5,15 +5,8 @@
 #=================================================
 
 # Postgresql version
-psql_bookworm=16
-psql_trixie=17
-if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
-then
-	psql_version=$psql_bookworm
-elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
-then
-	psql_version=$psql_trixie
-fi
+psql_version=17
+db_cluster="$psql_version/main"
 
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
@@ -36,56 +29,81 @@ myynh_check_hardware() {
 
 # Add postgresql packages from postgresql repo if needed
 myynh_install_postgresql_packages() {
+	# For bookworm, add postgresql packages from postgresql repo
 	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 	then
 		ynh_apt_install_dependencies_from_extra_repository \
 			--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
-			 --key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
-			 --package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
-		db_cluster="$psql_version/main"
-	elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
-	then
-		YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-$psql_version-pgvector"
-		db_cluster="$psql_version/main"
+			--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
+			--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
 	fi
+
+	# Add VectorChord package
+		# Create the temporary directory
+		tempdir="$(mktemp -d)"
+
+		# Download the deb files
+		ynh_setup_source --dest_dir="$tempdir" --source_id="vchord_trixie"
+
+		# Install the packages. Allow downgrades because apt decided bullseye > bookworm
+		_ynh_apt_install --allow-downgrades "$tempdir/postgresql-17-vchord.deb"
+
+		# The doc says it should be called only once, but the code says multiple calls are supported.
+		# Also, they're already installed so that should be quasi instantaneous.
+		ynh_apt_install_dependencies "postgresql-17-vchord"
+
+		# Mark packages as dependencies, to allow automatic removal
+		apt-mark auto "postgresql-17-vchord"
+
+		# Include the extension
+		myynh_execute_psql_as_root --cluster="$cluster" --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
+		ynh_systemctl --service="postgresql" --action="restart"
+
+		# Ensure the extension is enabled
+		#myynh_execute_psql_as_root --cluster="$cluster" --sql="CREATE EXTENSION IF NOT EXISTS vchord CASCADE;"
 }
 
 # Add swap if needed
 myynh_add_swap() {
 	# Remove existing SWAP
-		ynh_del_swap_fixed
+	ynh_del_swap_fixed
+
 	# Retrieve RAM needed in G
-		local ram_needed_full=$(ynh_read_manifest "integration.ram.build")
-		local ram_needed_value=${ram_needed_full::-1}
-		local ram_needed_unit=${ram_needed_full: -1}
-		if [ $ram_needed_unit = "M" ]
-		then
-			ram_needed_G=$(($ram_needed_value/1024))
-		else
-			ram_needed_G=$(($ram_needed_value))
-		fi
+	local ram_needed_full=$(ynh_read_manifest "integration.ram.build")
+	local ram_needed_value=${ram_needed_full::-1}
+	local ram_needed_unit=${ram_needed_full: -1}
+	if [ $ram_needed_unit = "M" ]
+	then
+		ram_needed_G=$(($ram_needed_value/1024))
+	else
+		ram_needed_G=$(($ram_needed_value))
+	fi
+
 	# Retrieve free RAM in G
-		local ram_free_G=$(($(ynh_get_ram --free)/1024))
+	local ram_free_G=$(($(ynh_get_ram --free)/1024))
+
 	# Check and add right amount of SWAP if needed
-		local swap_needed_M=0
-		if [ $ram_free_G -lt $ram_needed_G ]
-		then
-			swap_needed_M=$((($ram_needed_G-$ram_free_G)*1024))
-		fi
-		if [ $swap_needed_M -gt 0 ]
-		then
-			ynh_print_info "Adding $swap_needed_M Mb to swap..."
-			ynh_add_swap_fixed --size=$swap_needed_M
-		fi
+	local swap_needed_M=0
+	if [ $ram_free_G -lt $ram_needed_G ]
+	then
+		swap_needed_M=$((($ram_needed_G-$ram_free_G)*1024))
+	fi
+	if [ $swap_needed_M -gt 0 ]
+	then
+		ynh_print_info "Adding $swap_needed_M Mb to swap..."
+		ynh_add_swap_fixed --size=$swap_needed_M
+	fi
+
 	# Recheck free RAM in G
-		local ram_free_G=$(($(ynh_get_ram --free)/1024))
-		if [ $ram_free_G -lt $ram_needed_G ]
-		then
-			# Remove existing SWAP
-				ynh_del_swap_fixed
-			# Terminate install/upgarde script
-				ynh_die "There is no enough free memory on your system ($ram_needed_G GB are needed to build successfully $app). You need to either add RAM or manually add swap to your system."
-		fi
+	local ram_free_G=$(($(ynh_get_ram --free)/1024))
+	if [ $ram_free_G -lt $ram_needed_G ]
+	then
+		# Remove existing SWAP
+		ynh_del_swap_fixed
+
+		# Terminate install/upgarde script
+		ynh_die "There is no enough free memory on your system ($ram_needed_G GB are needed to build successfully $app). You need to either add RAM or manually add swap to your system."
+	fi
 }
 
 # Install libheif and libvips from source for HEIC support
@@ -99,51 +117,51 @@ myynh_install_libvips() {
 	pushd "$build_dir"
 
 	# Build libheif
-		ynh_print_info "Building libheif for HEIC support..."
-		ynh_setup_source --source_id="libheif" --dest_dir="$build_dir/libheif"
-		pushd libheif
-		mkdir -p build
-		cd build
-		ynh_hide_warnings cmake --preset=release-noplugins \
-			-DCMAKE_INSTALL_PREFIX="$libs_dir" \
-			-DWITH_DAV1D=ON \
-			-DENABLE_PARALLEL_TILE_DECODING=ON \
-			-DWITH_LIBSHARPYUV=ON \
-			-DWITH_LIBDE265=ON \
-			-DWITH_AOM_DECODER=OFF \
-			-DWITH_AOM_ENCODER=ON \
-			-DWITH_X265=OFF \
-			-DWITH_EXAMPLES=OFF \
-			..
-		ynh_hide_warnings make -j "$(nproc)"
-		ynh_hide_warnings make install
-		popd
+	ynh_print_info "Building libheif for HEIC support..."
+	ynh_setup_source --source_id="libheif" --dest_dir="$build_dir/libheif"
+	pushd libheif
+	mkdir -p build
+	cd build
+	ynh_hide_warnings cmake --preset=release-noplugins \
+		-DCMAKE_INSTALL_PREFIX="$libs_dir" \
+		-DWITH_DAV1D=ON \
+		-DENABLE_PARALLEL_TILE_DECODING=ON \
+		-DWITH_LIBSHARPYUV=ON \
+		-DWITH_LIBDE265=ON \
+		-DWITH_AOM_DECODER=OFF \
+		-DWITH_AOM_ENCODER=ON \
+		-DWITH_X265=OFF \
+		-DWITH_EXAMPLES=OFF \
+		..
+	ynh_hide_warnings make -j "$(nproc)"
+	ynh_hide_warnings make install
+	popd
 
 	# Build libvips
-		ynh_print_info "Building libvips with HEIC support..."
-		export PKG_CONFIG_PATH="$libs_dir/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
-		export LD_LIBRARY_PATH="$libs_dir/lib:${LD_LIBRARY_PATH:-}"
-		ynh_setup_source --source_id="libvips" --dest_dir="$build_dir/libvips"
-		pushd libvips
-		ynh_hide_warnings meson setup build --buildtype=release \
-			--prefix="$libs_dir" \
-			--libdir=lib \
-			-Dintrospection=disabled \
-			-Dtiff=disabled
-		cd build
-		ynh_hide_warnings ninja install
-		popd
+	ynh_print_info "Building libvips with HEIC support..."
+	export PKG_CONFIG_PATH="$libs_dir/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+	export LD_LIBRARY_PATH="$libs_dir/lib:${LD_LIBRARY_PATH:-}"
+	ynh_setup_source --source_id="libvips" --dest_dir="$build_dir/libvips"
+	pushd libvips
+	ynh_hide_warnings meson setup build --buildtype=release \
+		--prefix="$libs_dir" \
+		--libdir=lib \
+		-Dintrospection=disabled \
+		-Dtiff=disabled
+	cd build
+	ynh_hide_warnings ninja install
+	popd
 
 	# Return to original directory
-		popd
+	popd
 
 	# Save versions in settings
-		ynh_app_setting_set --key=libheif_version --value=$(ynh_read_manifest "resources.sources.libheif.url")
-		ynh_app_setting_set --key=libvips_version --value=$(ynh_read_manifest "resources.sources.libvips.url")
+	ynh_app_setting_set --key=libheif_version --value=$(ynh_read_manifest "resources.sources.libheif.url")
+	ynh_app_setting_set --key=libvips_version --value=$(ynh_read_manifest "resources.sources.libvips.url")
 
 	# Cleanup
-		ynh_print_info "Cleaning up libvips build directory..."
-		ynh_safe_rm "$build_dir"
+	ynh_print_info "Cleaning up libvips build directory..."
+	ynh_safe_rm "$build_dir"
 }
 
 # Install immich
@@ -152,151 +170,169 @@ myynh_install_immich() {
 	# Check https://github.com/immich-app/base-images/blob/main/server/Dockerfile for changes
 
 	# Set $home to $source_dir for pnpm and mise
-		export HOME="$source_dir"
+	export HOME="$source_dir"
+
 	# Add jellyfin-ffmpeg direcotry to $PATH
-		PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
+	PATH="/usr/lib/jellyfin-ffmpeg/:$PATH"
+
 	# Add mise shims direcotry to $PATH
-		PATH="$HOME/.local/share/mise/shims:$PATH"
+	PATH="$HOME/.local/share/mise/shims:$PATH"
 
 	# Build libvips with HEIC support
-		if [[ ! -d "$install_dir/vips" \
-		|| $(ynh_read_manifest "resources.sources.libheif.url") != $(ynh_app_setting_get --key=libheif_version) \
-		|| $(ynh_read_manifest "resources.sources.libvips.url") != $(ynh_app_setting_get --key=libvips_version) ]]
-		then
-			myynh_install_libvips
-		else
-			ynh_print_info "Current libheif and libvips are up-to-date for HEIC support, no need to rebuild them..."
-		fi
-		export LD_LIBRARY_PATH="$install_dir/vips/lib:${LD_LIBRARY_PATH:-}"
-		export PKG_CONFIG_PATH="$install_dir/vips/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+	if [[ ! -d "$install_dir/vips" \
+	|| $(ynh_read_manifest "resources.sources.libheif.url") != $(ynh_app_setting_get --key=libheif_version) \
+	|| $(ynh_read_manifest "resources.sources.libvips.url") != $(ynh_app_setting_get --key=libvips_version) ]]
+	then
+		myynh_install_libvips
+	else
+		ynh_print_info "Current libheif and libvips are up-to-date for HEIC support, no need to rebuild them..."
+	fi
+	export LD_LIBRARY_PATH="$install_dir/vips/lib:${LD_LIBRARY_PATH:-}"
+	export PKG_CONFIG_PATH="$install_dir/vips/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
 
 	# Define nodejs options
-		local ram_free_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
-		ram_free_G=$((ram_free_G > 1 ? ram_free_G : $ram_needed_G))
-		ram_free_G=$((ram_free_G > 8 ? 8 : ram_free_G))
-		local ram_G=$((ram_free_G*1024))
-		export NODE_OPTIONS="${NODE_OPTIONS:-} --max_old_space_size=$ram_G"
-		export NODE_ENV=production
+	local ram_free_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
+	ram_free_G=$((ram_free_G > 1 ? ram_free_G : $ram_needed_G))
+	ram_free_G=$((ram_free_G > 8 ? 8 : ram_free_G))
+	local ram_G=$((ram_free_G*1024))
+	export NODE_OPTIONS="${NODE_OPTIONS:-} --max_old_space_size=$ram_G"
+	export NODE_ENV=production
 
 	# Install pnpm
-		ynh_hide_warnings npm install --global corepack@latest
-		export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-		export CI=1
-		pnpm_version=$(cat "$source_dir/package.json" \
-			| jq -r '.packageManager | split("@")[1] | split(".")[0]') #10
-		ynh_hide_warnings corepack enable pnpm
-		ynh_hide_warnings corepack use pnpm@latest-$pnpm_version
+	ynh_hide_warnings npm install --global corepack@latest
+	export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+	export CI=1
+	pnpm_version=$(cat "$source_dir/package.json" \
+		| jq -r '.packageManager | split("@")[1] | split(".")[0]') #10
+	ynh_hide_warnings corepack enable pnpm
+	ynh_hide_warnings corepack use pnpm@latest-$pnpm_version
 
 	# Print versions
-		echo "node version: $(node -v)"
-		echo "npm version: $(npm -v)"
-		echo "pnpm version: $(pnpm -v)"
+	echo "node version: $(node -v)"
+	echo "npm version: $(npm -v)"
+	echo "pnpm version: $(pnpm -v)"
 
 	# Install immich-server
 		# Replace /usr/src
-			cd "$source_dir"
-			grep -Rl "/usr/src" | xargs -n1 sed -i -e "s@/usr/src@$install_dir/immich@g"
+		cd "$source_dir"
+		grep -Rl "/usr/src" | xargs -n1 sed -i -e "s@/usr/src@$install_dir/immich@g"
+
 		# Replace /build
-			grep -RlE "\"/build\"|'/build'" \
-				| xargs -n1 sed -i -e "s@\"/build\"@\"$app_dir\"@g" -e "s@'/build'@'$app_dir'@g"
+		grep -RlE "\"/build\"|'/build'" \
+			| xargs -n1 sed -i -e "s@\"/build\"@\"$app_dir\"@g" -e "s@'/build'@'$app_dir'@g"
+
 		# Build server
-			ynh_print_info "Building immich server..."
-			cd "$source_dir/server"
-			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
-			ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
-			unset SHARP_IGNORE_GLOBAL_LIBVIPS
-			export SHARP_FORCE_GLOBAL_LIBVIPS=true
-			ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$app_dir/"
-			cp "$app_dir/package.json" "$app_dir/bin"
-			ynh_replace --match="^start" --replace="./start" --file="$app_dir/bin/immich-admin"
+		ynh_print_info "Building immich server..."
+		cd "$source_dir/server"
+		export SHARP_IGNORE_GLOBAL_LIBVIPS=true
+		ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
+		unset SHARP_IGNORE_GLOBAL_LIBVIPS
+		export SHARP_FORCE_GLOBAL_LIBVIPS=true
+		ynh_hide_warnings pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$app_dir/"
+		cp "$app_dir/package.json" "$app_dir/bin"
+		ynh_replace --match="^start" --replace="./start" --file="$app_dir/bin/immich-admin"
+
 		# Build openapi & web
-			ynh_print_info "Building immich openapi & web interface..."
-			cd "$source_dir"
-			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
-			unset SHARP_FORCE_GLOBAL_LIBVIPS
-			export SHARP_IGNORE_GLOBAL_LIBVIPS=true
-			ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
-			cp -a web/build "$app_dir/www"
+		ynh_print_info "Building immich openapi & web interface..."
+		cd "$source_dir"
+		ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
+		unset SHARP_FORCE_GLOBAL_LIBVIPS
+		export SHARP_IGNORE_GLOBAL_LIBVIPS=true
+		ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web build
+		cp -a web/build "$app_dir/www"
+
 		# Build cli
-			ynh_print_info "Building immich cli..."
-			cd "$source_dir"
-			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
-			ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli build
-			ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$app_dir/cli"
-			ln -s "$app_dir/cli/bin/immich" "$app_dir/bin/immich"
+		ynh_print_info "Building immich cli..."
+		cd "$source_dir"
+		ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
+		ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli build
+		ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$app_dir/cli"
+		ln -s "$app_dir/cli/bin/immich" "$app_dir/bin/immich"
+
 		# Build plugins
-			ynh_print_info "Building immich plugins..."
-			cd "$source_dir"
-			mkdir -p "$app_dir/corePlugin"
-			if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
-			then
-				ynh_replace \
-					--match="github:extism/js-pdk" \
-					--replace="github:ewilly/js-pdk" \
-					--file="$source_dir/plugins/mise.toml"
-			fi
-			ynh_hide_warnings mise trust --ignore ./mise.toml
-			ynh_hide_warnings mise trust ./plugins/mise.toml
-			cd "$source_dir/plugins"
-			ynh_hide_warnings mise install
-			ynh_hide_warnings mise run build
-			mkdir -p "$app_dir/corePlugin"
-			cp -r dist "$app_dir/corePlugin/dist"
-			cp manifest.json "$app_dir/corePlugin"
+		ynh_print_info "Building immich plugins..."
+		cd "$source_dir"
+		mkdir -p "$app_dir/corePlugin"
+		if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+		then
+			ynh_replace \
+				--match="github:extism/js-pdk" \
+				--replace="github:ewilly/js-pdk" \
+				--file="$source_dir/plugins/mise.toml"
+		fi
+		ynh_hide_warnings mise trust --ignore ./mise.toml
+		ynh_hide_warnings mise trust ./plugins/mise.toml
+		cd "$source_dir/plugins"
+		ynh_hide_warnings mise install
+		ynh_hide_warnings mise run build
+		mkdir -p "$app_dir/corePlugin"
+		cp -r dist "$app_dir/corePlugin/dist"
+		cp manifest.json "$app_dir/corePlugin"
+
 		# Copy remaining assets
-			cp -a LICENSE "$app_dir/"
+		cp -a LICENSE "$app_dir/"
+
 		# Install custom start.sh script
-			ynh_safe_rm "$app_dir/bin/start.sh"
-			ynh_config_add --template="$app-server-start.sh" --destination="$app_dir/bin/start.sh"
+		ynh_safe_rm "$app_dir/bin/start.sh"
+		nh_config_add --template="$app-server-start.sh" --destination="$app_dir/bin/start.sh"
 
 	# Install immich-machine-learning
-		ynh_print_info "Building immich machine learning..."
-		cd "$source_dir/machine-learning"
-		local ml_dir="$app_dir/machine-learning"
-		mkdir -p "$ml_dir"
-		# Retive python needed version
-			python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
-				| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
-			ynh_app_setting_set --key=python_version --value=$python_version
+	ynh_print_info "Building immich machine learning..."
+	cd "$source_dir/machine-learning"
+	local ml_dir="$app_dir/machine-learning"
+	mkdir -p "$ml_dir"
+
+		# Retrieve python needed version
+		python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
+			| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
+		ynh_app_setting_set --key=python_version --value=$python_version
+
 		# Install uv
-			mise use uv@latest --quiet
+		mise use uv@latest --quiet
+
 		# Install with uv in a subshell
-			(
-				export UV_PYTHON_INSTALL_DIR="$ml_dir"
-				uv venv "$ml_dir/venv" --quiet --no-cache --python "$python_version" --managed-python
-				source "$ml_dir/venv/bin/activate"
-				uv sync --quiet --no-cache --frozen --extra cpu --active
-			)
+		(
+			export UV_PYTHON_INSTALL_DIR="$ml_dir"
+			uv venv "$ml_dir/venv" --quiet --no-cache --python "$python_version" --managed-python
+			source "$ml_dir/venv/bin/activate"
+			uv sync --quiet --no-cache --frozen --extra cpu --active
+		)
+
 		# Copy built files
-			cp -a "$source_dir/machine-learning/ann" "$ml_dir/"
-			cp -a "$source_dir/machine-learning/immich_ml" "$ml_dir/"
+		cp -a "$source_dir/machine-learning/ann" "$ml_dir/"
+		cp -a "$source_dir/machine-learning/immich_ml" "$ml_dir/"
+
 		# Install custom start.sh script
-			ynh_config_add --template="$app-machine-learning-start.sh" --destination="$ml_dir/ml_start.sh"
+		ynh_config_add --template="$app-machine-learning-start.sh" --destination="$ml_dir/ml_start.sh"
+
 		# Create the cache direcotry
-			mkdir -p "$install_dir/immich/.cache_ml"
+		mkdir -p "$install_dir/immich/.cache_ml"
 
 	# Install geonames
-		ynh_print_info "Adding geonames capabilities..."
-		mkdir -p "$source_dir/geonames"
-		cd "$source_dir/geonames"
+	ynh_print_info "Adding geonames capabilities..."
+	mkdir -p "$source_dir/geonames"
+	cd "$source_dir/geonames"
+
 		# Download files
-			curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
-			curl -LO "https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
-			curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
-			curl -LO "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_countries.geojson" 2>&1
-			unzip "cities500.zip"
+		curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
+		curl -LO "https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
+		curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
+		curl -LO "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_countries.geojson" 2>&1
+		unzip "cities500.zip"
+
 		# Copy built files
-			mkdir -p "$app_dir/geodata/"
-			cp -a "$source_dir/geonames/cities500.txt" "$app_dir/geodata/"
-			cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$app_dir/geodata/"
-			cp -a "$source_dir/geonames/admin2Codes.txt" "$app_dir/geodata/"
-			cp -a "$source_dir/geonames/ne_10m_admin_0_countries.geojson" "$app_dir/geodata/"
+		mkdir -p "$app_dir/geodata/"
+		cp -a "$source_dir/geonames/cities500.txt" "$app_dir/geodata/"
+		cp -a "$source_dir/geonames/admin1CodesASCII.txt" "$app_dir/geodata/"
+		cp -a "$source_dir/geonames/admin2Codes.txt" "$app_dir/geodata/"
+		cp -a "$source_dir/geonames/ne_10m_admin_0_countries.geojson" "$app_dir/geodata/"
+
 		# Update geodata-date
-			date --iso-8601=seconds | tr -d "\n" > "$app_dir/geodata/geodata-date.txt"
+		date --iso-8601=seconds | tr -d "\n" > "$app_dir/geodata/geodata-date.txt"
 
 	# Cleanup
-		ynh_print_info "Cleaning up immich source directory..."
-		ynh_safe_rm "$source_dir"
+	ynh_print_info "Cleaning up immich source directory..."
+	ynh_safe_rm "$source_dir"
 }
 
 # Execute a psql command as root user
@@ -378,9 +414,8 @@ myynh_update_psql_db() {
 		fi
 	done
 
-	# Tune immich db
+	# Give superuser permissions to immich user in immich db
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
-	ynh_hide_warnings myynh_execute_psql_as_root --sql="CREATE EXTENSION IF NOT EXISTS vector;" --database="$app"
 
 	# Retrive and save the postgresql port of the cluster and save it in settings
 	myynh_retrieve_psql_port

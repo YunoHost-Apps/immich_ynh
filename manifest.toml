@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.5.6~ynh2"
+version = "2.5.6~ynh3"
 
 maintainers = ["ewilly"]
 
@@ -54,18 +54,22 @@ ram.runtime = "2G"
 	url = "https://github.com/strukturag/libheif/releases/download/v1.20.2/libheif-1.20.2.tar.gz"
 	sha256 = "68ac9084243004e0ef3633f184eeae85d615fe7e4444373a0a21cebccae9d12a"
 
-	# autoupdate.strategy = "latest_github_release"
-	# autoupdate.asset = "^libheif-.*\\.tar\\.gz$"
-	# autoupdate.upstream = "https://github.com/strukturag/libheif"
-
     [resources.sources.libvips]
 	# Version from https://github.com/immich-app/base-images/blob/main/server/sources/libvips.json
 	url = "https://github.com/libvips/libvips/releases/download/v8.17.3/vips-8.17.3.tar.xz"
 	sha256 = "41e9a1439cd57dcc6d4435a085e2cfe181d9da1962fa84a484f09e8b536e4b77"
 
-	# autoupdate.strategy = "latest_github_release"
-	# autoupdate.asset = "^vips-.*\\.tar\\.xz$"
-	# autoupdate.upstream = "https://github.com/libvips/libvips"
+    [resources.sources.vchord]
+	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
+	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_amd64.deb"
+	amd64.sha256 = "d27910baaf86de52af19e25a9d6198dfecf1dbe50864075b0a9386cdc7de2c9b"
+	arm64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_arm64.deb"
+	arm64.sha256 = "8ddf63b52526cc3cecb3336a379b290e865a9919b9379c55b412ade26ffd2c47"
+
+	format = "whatever"
+	extract = false
+	rename = "postgresql-17-vchord.deb"
+	prefetch = false
 
 	[resources.system_user]
 
