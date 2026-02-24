@@ -43,7 +43,7 @@ myynh_install_postgresql_packages() {
 		tempdir="$(mktemp -d)"
 
 		# Download the deb files
-		ynh_setup_source --dest_dir="$tempdir" --source_id="vchord_trixie"
+		ynh_setup_source --dest_dir="$tempdir" --source_id="vchord"
 
 		# Install the packages. Allow downgrades because apt decided bullseye > bookworm
 		_ynh_apt_install --allow-downgrades "$tempdir/postgresql-17-vchord.deb"
