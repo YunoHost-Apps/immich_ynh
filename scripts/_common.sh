@@ -38,6 +38,20 @@ myynh_install_postgresql_packages() {
 			--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
 	fi
 
+	# On upgrade, check if the db is not yet on psql_version cluster and if no migrate it (aka dumb and restore the db to 17 + delete the db on 16)
+	local current_db_cluster=$(ynh_app_setting_get --key=db_cluster)
+	if [[ -z ${YNH_APP_UPGRADE_TYPE:-} ]] && [[ $current_db_cluster != "$psql_version/main" ]]
+	then
+		# Dump db on old cluster
+		myynh_dump_psql_db --cluster=$current_db_cluster
+		# Create db on new cluster
+		myynh_create_psql_db --cluster="$psql_version/main"
+		# Restore db on new cluster
+		myynh_restore_psql_db --cluster="$psql_version/main"
+		# Drop db on old cluster
+		myynh_drop_psql_db --cluster=$current_db_cluster
+	fi
+
 	# Add VectorChord package
 		# Create the temporary directory
 		tempdir="$(mktemp -d)"
