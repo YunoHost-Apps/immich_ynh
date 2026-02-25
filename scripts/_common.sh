@@ -333,7 +333,7 @@ myynh_execute_psql_as_root() {
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat "$PSQL_ROOT_PWD_FILE")" \
-		"$tool" "$cluster" "$options" "$database" "$sql"
+		"$tool" "$cluster" $options "$database" "$sql"
 }
 
 # For bookworm
