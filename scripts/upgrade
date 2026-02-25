@@ -1,18 +1,18 @@
 #!/bin/bash
 
 #=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-source _common.sh
-source /usr/share/yunohost/helpers
-
-#=================================================
 # AVOID APP UPGRADE IN PARALLEL
 #=================================================
 if pgrep -f "yunohost app upgrade $app" > /dev/null
 then
 	ynh_die
 fi
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+source _common.sh
+source /usr/share/yunohost/helpers
 
 #=================================================
 # CHECK HARDWARE REQUIREMENTS
