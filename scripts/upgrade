@@ -1,14 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# AVOID APP UPGRADE IN PARALLEL
-#=================================================
-if pgrep -f "yunohost app upgrade $app" > /dev/null
-then
-	ynh_die
-fi
-
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 source _common.sh
