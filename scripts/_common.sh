@@ -38,9 +38,9 @@ myynh_add_swap() {
 	local ram_needed_unit=${ram_needed_full: -1}
 	if [[ "$ram_needed_unit" == "M" ]]
 	then
-		ram_needed_G=$(($ram_needed_value/1024))
+		ram_needed_G=$((ram_needed_value/1024))
 	else
-		ram_needed_G=$(($ram_needed_value))
+		ram_needed_G=$((ram_needed_value))
 	fi
 
 	# Retrieve free RAM in G
@@ -50,7 +50,7 @@ myynh_add_swap() {
 	local swap_needed_M=0
 	if [ $ram_free_G -lt $ram_needed_G ]
 	then
-		swap_needed_M=$((($ram_needed_G-$ram_free_G)*1024))
+		swap_needed_M=$(((ram_needed_G-ram_free_G)*1024))
 	fi
 	if [ $swap_needed_M -gt 0 ]
 	then
@@ -78,14 +78,14 @@ myynh_install_libvips() {
 	local libs_dir="$install_dir/vips"
 	ynh_safe_rm "$libs_dir"
 	mkdir -p "$build_dir" "$libs_dir" "$build_dir/libheif"
-	pushd "$build_dir"
+	pushd "$build_dir" || ynh_die
 
 	# Build libheif
 	ynh_print_info "Building libheif for HEIC support..."
 	ynh_setup_source --source_id="libheif" --dest_dir="$build_dir/libheif"
-	pushd libheif
+	pushd libheif || ynh_die
 	mkdir -p build
-	cd build
+	cd build || ynh_die
 	ynh_hide_warnings cmake --preset=release-noplugins \
 		-DCMAKE_INSTALL_PREFIX="$libs_dir" \
 		-DWITH_DAV1D=ON \
@@ -99,29 +99,29 @@ myynh_install_libvips() {
 		..
 	ynh_hide_warnings make -j "$(nproc)"
 	ynh_hide_warnings make install
-	popd
+	popd || ynh_die
 
 	# Build libvips
 	ynh_print_info "Building libvips with HEIC support..."
 	export PKG_CONFIG_PATH="$libs_dir/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
 	export LD_LIBRARY_PATH="$libs_dir/lib:${LD_LIBRARY_PATH:-}"
 	ynh_setup_source --source_id="libvips" --dest_dir="$build_dir/libvips"
-	pushd libvips
+	pushd libvips || ynh_die
 	ynh_hide_warnings meson setup build --buildtype=release \
 		--prefix="$libs_dir" \
 		--libdir=lib \
 		-Dintrospection=disabled \
 		-Dtiff=disabled
-	cd build
+	cd build || ynh_die
 	ynh_hide_warnings ninja install
-	popd
+	popd || ynh_die
 
 	# Return to original directory
-	popd
+	popd || ynh_die
 
 	# Save versions in settings
-	ynh_app_setting_set --key=libheif_version --value=$(ynh_read_manifest "resources.sources.libheif.url")
-	ynh_app_setting_set --key=libvips_version --value=$(ynh_read_manifest "resources.sources.libvips.url")
+	ynh_app_setting_set --key=libheif_version --value="$(ynh_read_manifest "resources.sources.libheif.url")"
+	ynh_app_setting_set --key=libvips_version --value="$(ynh_read_manifest "resources.sources.libvips.url")"
 
 	# Cleanup
 	ynh_print_info "Cleaning up libvips build directory..."
@@ -156,7 +156,7 @@ myynh_install_immich() {
 
 	# Define nodejs options
 	local ram_free_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
-	ram_free_G=$((ram_free_G > 1 ? ram_free_G : $ram_needed_G))
+	ram_free_G=$((ram_free_G > 1 ? ram_free_G : ram_needed_G))
 	ram_free_G=$((ram_free_G > 8 ? 8 : ram_free_G))
 	local ram_G=$((ram_free_G*1024))
 	export NODE_OPTIONS="${NODE_OPTIONS:-} --max_old_space_size=$ram_G"
@@ -169,7 +169,7 @@ myynh_install_immich() {
 	pnpm_version=$(cat "$source_dir/package.json" \
 		| jq -r '.packageManager | split("@")[1] | split(".")[0]') #10
 	ynh_hide_warnings corepack enable pnpm
-	ynh_hide_warnings corepack use pnpm@latest-$pnpm_version
+	ynh_hide_warnings corepack use pnpm@latest-"$pnpm_version"
 
 	# Print versions
 	echo "node version: $(node -v)"
@@ -178,7 +178,7 @@ myynh_install_immich() {
 
 	# Install immich-server
 		# Replace /usr/src
-		cd "$source_dir"
+		cd "$source_dir" || ynh_die
 		grep -Rl "/usr/src" | xargs -n1 sed -i -e "s@/usr/src@$install_dir/immich@g"
 
 		# Replace /build
@@ -187,7 +187,7 @@ myynh_install_immich() {
 
 		# Build server
 		ynh_print_info "Building immich server..."
-		cd "$source_dir/server"
+		cd "$source_dir/server" || ynh_die
 		export SHARP_IGNORE_GLOBAL_LIBVIPS=true
 		ynh_hide_warnings pnpm --filter immich --frozen-lockfile build
 		unset SHARP_IGNORE_GLOBAL_LIBVIPS
@@ -198,7 +198,7 @@ myynh_install_immich() {
 
 		# Build openapi & web
 		ynh_print_info "Building immich openapi & web interface..."
-		cd "$source_dir"
+		cd "$source_dir" || ynh_die
 		ynh_hide_warnings pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
 		unset SHARP_FORCE_GLOBAL_LIBVIPS
 		export SHARP_IGNORE_GLOBAL_LIBVIPS=true
@@ -207,7 +207,7 @@ myynh_install_immich() {
 
 		# Build cli
 		ynh_print_info "Building immich cli..."
-		cd "$source_dir"
+		cd "$source_dir" || ynh_die
 		ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
 		ynh_hide_warnings pnpm --filter @immich/sdk --filter @immich/cli build
 		ynh_hide_warnings pnpm --filter @immich/cli --prod --no-optional deploy "$app_dir/cli"
@@ -215,7 +215,7 @@ myynh_install_immich() {
 
 		# Build plugins
 		ynh_print_info "Building immich plugins..."
-		cd "$source_dir"
+		cd "$source_dir" || ynh_die
 		mkdir -p "$app_dir/corePlugin"
 		if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 		then
@@ -226,7 +226,7 @@ myynh_install_immich() {
 		fi
 		ynh_hide_warnings mise trust --ignore ./mise.toml
 		ynh_hide_warnings mise trust ./plugins/mise.toml
-		cd "$source_dir/plugins"
+		cd "$source_dir/plugins" || ynh_die
 		ynh_hide_warnings mise install
 		ynh_hide_warnings mise run build
 		mkdir -p "$app_dir/corePlugin"
@@ -242,14 +242,14 @@ myynh_install_immich() {
 
 	# Install immich-machine-learning
 	ynh_print_info "Building immich machine learning..."
-	cd "$source_dir/machine-learning"
+	cd "$source_dir/machine-learning" || ynh_die
 	local ml_dir="$app_dir/machine-learning"
 	mkdir -p "$ml_dir"
 
 		# Retrieve python needed version
 		python_version=$(cat "$source_dir/machine-learning/Dockerfile" \
 			| grep "FROM python:" | head -n1 | cut -d':' -f2 | cut -d'-' -f1) # 3.11
-		ynh_app_setting_set --key=python_version --value=$python_version
+		ynh_app_setting_set --key=python_version --value="$python_version"
 
 		# Install uv
 		mise use uv@latest --quiet
@@ -275,7 +275,7 @@ myynh_install_immich() {
 	# Install geonames
 	ynh_print_info "Adding geonames capabilities..."
 	mkdir -p "$source_dir/geonames"
-	cd "$source_dir/geonames"
+	cd "$source_dir/geonames" || ynh_die
 
 		# Download files
 		curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
@@ -332,8 +332,8 @@ myynh_execute_psql_as_root() {
 		database="--dbname=$database"
 	fi
 
-	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		$tool "$cluster" $options "$database" "$sql"
+	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat "$PSQL_ROOT_PWD_FILE")" \
+		"$tool" "$cluster" "$options" "$database" "$sql"
 }
 
 # For bookworm
@@ -346,7 +346,7 @@ myynh_provision_postgresql() {
 		--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
 
 	# Create the cluster if not existing
-	if [[ -z $(pg_lsclusters | grep "$db_cluster") ]]
+	if ! pg_lsclusters | grep -q "$db_cluster"
 	then
 		ynh_print_info "Creating the cluster..."
 		pg_createcluster ${db_cluster/\// } --start
@@ -397,11 +397,11 @@ myynh_update_psql_db() {
 	then
 		ynh_print_info "Migrating database to new cluster..."
 		# Dump db on old cluster
-		myynh_dump_psql_db --cluster=$current_db_cluster
+		myynh_dump_psql_db --cluster="$current_db_cluster"
 		# Restore db on new cluster
 		myynh_restore_psql_db --cluster="$psql_version/main"
 		# Drop db on old cluster
-		myynh_drop_psql_db --cluster=$current_db_cluster
+		myynh_drop_psql_db --cluster="$current_db_cluster"
 	fi
 
 	# Add VectorChord package
@@ -521,12 +521,12 @@ myynh_retrieve_psql_port() {
 	cluster="${cluster:-$db_cluster}"
 
 	db_port=$(myynh_execute_psql_as_root --cluster="$cluster" --sql="\echo :PORT")
-	ynh_app_setting_set --key=db_port --value=$db_port
+	ynh_app_setting_set --key=db_port --value="$db_port"
 }
 
 # Set permissions
 myynh_set_permissions() {
-	chown -R $app: "$install_dir"
+	chown -R "$app:" "$install_dir"
 	chmod u=rwX,g=rX,o= "$install_dir"
 	chmod -R o-rwx "$install_dir"
 
@@ -542,21 +542,20 @@ myynh_set_permissions() {
 
 	if [[ -z ${YNH_APP_UPGRADE_TYPE:-} ]]
 	then
-		chown -R $app: "$data_dir"
+		chown -R "$app:" "$data_dir"
 		chmod u=rwX,g=rX,o= "$data_dir"
 		chmod -R o-rwx "$data_dir"
 	fi
 
-	chown $app: "$data_dir/backups/restore_immich_db_backup.sh"
+	chown "$app:" "$data_dir/backups/restore_immich_db_backup.sh"
 	chmod u=rwX,g=rX,o=X "$data_dir/backups/restore_immich_db_backup.sh"
 
-	chown -R $app: "/var/log/$app"
+	chown -R "$app:" "/var/log/$app"
 	chmod u=rw,g=r,o= "/var/log/$app"
 
 	# Upgade user groups
-	local user_groups=""
-	[ -n $(getent group video) ] && adduser --quiet "$app" video 2>&1
-	[ -n $(getent group render) ] && adduser --quiet "$app" render 2>&1
+	[ -n "$(getent group video)" ] && adduser --quiet "$app" video 2>&1
+	[ -n "$(getent group render)" ] && adduser --quiet "$app" render 2>&1
 }
 
 # Add swap
@@ -577,7 +576,8 @@ ynh_add_swap_fixed() {
 
 	local swap_max_size=$((size * 1024))
 
-	local free_space=$(df --output=avail / | sed 1d)
+	local free_space
+	free_space=$(df --output=avail / | sed 1d)
 	# Because we don't want to fill the disk with a swap file, divide by 2 the available space.
 	local usable_space=$((free_space / 2))
 
