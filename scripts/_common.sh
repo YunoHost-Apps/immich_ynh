@@ -330,7 +330,7 @@ myynh_install_immich() {
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
 	local legacy_args=sod
-	local -A args_array=([t]=tool= [s]=sql= [o]=options= [d]=database=)
+	local -A args_array=([t]=tool= [s]=sql= [o]=options= [c]=cluster= [d]=database=)
 	local tool
 	local sql
 	local options
