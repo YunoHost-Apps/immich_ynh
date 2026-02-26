@@ -420,7 +420,7 @@ myynh_update_psql_db() {
 	# Definie local var
 	local current_db_cluster
 	local tempdir
-	local db_port
+	#local db_port -> should be global
 
 	# On upgrade, check if the db is not yet on psql_version cluster and if no migrate it (aka dumb and restore the db to 17 + delete the db on 16)
 	current_db_cluster=$(ynh_app_setting_get --key=db_cluster)
