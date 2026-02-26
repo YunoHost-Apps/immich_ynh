@@ -334,17 +334,20 @@ myynh_execute_psql_as_root() {
 	local tool
 	local sql
 	local options
+	local cluster
 	local database
 	# Manage arguments with getopts
 	ynh_handle_getopts_args "$@"
 	tool="${tool:-psql}"
 	sql="${sql:-}"
 	options="${options:-}"
+	cluster="${cluster:-$db_cluster}"
 	database="${database:-}"
 	if [ -n "$sql" ]
 	then
 		sql="--command=$sql"
 	fi
+	cluster="--cluster=$cluster"
 	if [ -n "$database" ]
 	then
 		database="--dbname=$database"
@@ -475,7 +478,7 @@ myynh_update_psql_db() {
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
 
 	# Retrieve and save the postgresql port of the cluster and save it in settings
-	db_port=$(myynh_execute_psql_as_root --cluster="$cluster" --sql="\echo :PORT")
+	db_port=$(myynh_execute_psql_as_root --sql="\echo :PORT")
 	ynh_app_setting_set --key=db_port --value="$db_port"
 
 	# Save the cluster in the settings
