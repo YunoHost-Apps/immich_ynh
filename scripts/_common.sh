@@ -354,7 +354,7 @@ myynh_execute_psql_as_root() {
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat "$PSQL_ROOT_PWD_FILE")" \
-		"$tool" --cluster="$db_cluster" $options "$database" "$sql"
+		"$tool" "$cluster" $options "$database" "$sql"
 }
 
 # For bookworm
@@ -378,7 +378,7 @@ myynh_provision_postgresql() {
 		pg_createcluster ${db_cluster/\// } --start
 	fi
 
-	# Create the database if not existing
+	# Create the database in the cluster if not existing
 	if [[ -z $(myynh_execute_psql_as_root --sql="\list $app" --options="--tuples-only --no-align" --database="postgres") ]]
 	then
 		ynh_print_info "Provisionning the database..."
