@@ -16,27 +16,38 @@ app_dir="$install_dir/immich/app"
 
 # Check hardware requirements
 myynh_check_hardware() {
+	# Definie local var
+	local file_test
+
 	# CPU: Prebuilt binaries for linux-x64 require v2 microarchitecture
-		local file_test="/lib64/ld-linux-x86-64.so.2"
-		if [ -f "$file_test" ]
+	file_test="/lib64/ld-linux-x86-64.so.2"
+	if [ -f "$file_test" ]
+	then
+		if ! $file_test --help | grep -q "x86-64-v2 (supported"
 		then
-			if ! $file_test --help | grep -q "x86-64-v2 (supported"
-			then
-				ynh_die "Your CPU is too old and not supported. Installation of $app is not possible on your system."
-			fi
+			ynh_die "Your CPU is too old and not supported. Installation of $app is not possible on your system."
 		fi
+	fi
 }
 
 # Add swap if needed
 myynh_add_swap() {
+	# Definie local var
+	local ram_needed_full
+	local ram_needed_value
+	local ram_needed_unit
+	local ram_needed_G
+	local ram_free_G
+	local swap_needed_M
+
 	# Remove existing SWAP
 	ynh_del_swap_fixed
 
 	# Retrieve RAM needed in G
-	local ram_needed_full=$(ynh_read_manifest "integration.ram.build")
-	local ram_needed_value=${ram_needed_full::-1}
-	local ram_needed_unit=${ram_needed_full: -1}
-	if [[ "$ram_needed_unit" == "M" ]]
+	ram_needed_full=$(ynh_read_manifest "integration.ram.build")
+	ram_needed_value=${ram_needed_full::-1}
+	ram_needed_unit=${ram_needed_full: -1}
+	if [ "$ram_needed_unit" == "M" ]
 	then
 		ram_needed_G=$((ram_needed_value/1024))
 	else
@@ -44,10 +55,10 @@ myynh_add_swap() {
 	fi
 
 	# Retrieve free RAM in G
-	local ram_free_G=$(($(ynh_get_ram --free)/1024))
+	ram_free_G=$(($(ynh_get_ram --free)/1024))
 
 	# Check and add right amount of SWAP if needed
-	local swap_needed_M=0
+	swap_needed_M=0
 	if [ $ram_free_G -lt $ram_needed_G ]
 	then
 		swap_needed_M=$(((ram_needed_G-ram_free_G)*1024))
@@ -59,7 +70,7 @@ myynh_add_swap() {
 	fi
 
 	# Recheck free RAM in G
-	local ram_free_G=$(($(ynh_get_ram --free)/1024))
+	ram_free_G=$(($(ynh_get_ram --free)/1024))
 	if [ $ram_free_G -lt $ram_needed_G ]
 	then
 		# Remove existing SWAP
@@ -74,8 +85,13 @@ myynh_add_swap() {
 # Based on https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh
 # and https://github.com/immich-app/base-images/blob/main/server/Dockerfile
 myynh_install_libvips() {
-	local build_dir="$source_dir/vips-build"
-	local libs_dir="$install_dir/vips"
+	# Definie local var
+	local build_dir
+	local libs_dir
+
+	# Prepare build dir
+	build_dir="$source_dir/vips-build"
+	libs_dir="$install_dir/vips"
 	ynh_safe_rm "$libs_dir"
 	mkdir -p "$build_dir" "$libs_dir" "$build_dir/libheif"
 	pushd "$build_dir" || ynh_die
@@ -133,6 +149,11 @@ myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native, https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh, https://github.com/loeeeee/immich-in-lxc/blob/main/install.sh
 	# Check https://github.com/immich-app/base-images/blob/main/server/Dockerfile for changes
 
+	# Definie local var
+	local ram_free_G
+	local ram_G
+	local ml_dir
+
 	# Set $home to $source_dir for pnpm and mise
 	export HOME="$source_dir"
 
@@ -155,10 +176,10 @@ myynh_install_immich() {
 	export PKG_CONFIG_PATH="$install_dir/vips/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
 
 	# Define nodejs options
-	local ram_free_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
+	ram_free_G=$((($(ynh_get_ram --free) - (1024/2))/1024))
 	ram_free_G=$((ram_free_G > 1 ? ram_free_G : ram_needed_G))
 	ram_free_G=$((ram_free_G > 8 ? 8 : ram_free_G))
-	local ram_G=$((ram_free_G*1024))
+	ram_G=$((ram_free_G*1024))
 	export NODE_OPTIONS="${NODE_OPTIONS:-} --max_old_space_size=$ram_G"
 	export NODE_ENV=production
 
@@ -217,7 +238,7 @@ myynh_install_immich() {
 		ynh_print_info "Building immich plugins..."
 		cd "$source_dir" || ynh_die
 		mkdir -p "$app_dir/corePlugin"
-		if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+		if [ $YNH_DEBIAN_VERSION == "bookworm" ]
 		then
 			ynh_replace \
 				--match="github:extism/js-pdk" \
@@ -243,7 +264,7 @@ myynh_install_immich() {
 	# Install immich-machine-learning
 	ynh_print_info "Building immich machine learning..."
 	cd "$source_dir/machine-learning" || ynh_die
-	local ml_dir="$app_dir/machine-learning"
+	ml_dir="$app_dir/machine-learning"
 	mkdir -p "$ml_dir"
 
 		# Retrieve python needed version
@@ -309,35 +330,37 @@ myynh_install_immich() {
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
 	local legacy_args=sod
-	local -A args_array=([t]=tool= [s]=sql= [o]=options= [c]=cluster= [d]=database=)
+	local -A args_array=([t]=tool= [s]=sql= [o]=options= [d]=database=)
 	local tool
 	local sql
 	local options
-	local cluster
 	local database
 	# Manage arguments with getopts
 	ynh_handle_getopts_args "$@"
 	tool="${tool:-psql}"
 	sql="${sql:-}"
 	options="${options:-}"
-	cluster="${cluster:-$db_cluster}"
 	database="${database:-}"
 	if [ -n "$sql" ]
 	then
 		sql="--command=$sql"
 	fi
-	cluster="--cluster=$cluster"
 	if [ -n "$database" ]
 	then
 		database="--dbname=$database"
 	fi
 
 	LC_ALL=C sudo --login --user=postgres PGUSER=postgres PGPASSWORD="$(cat "$PSQL_ROOT_PWD_FILE")" \
-		"$tool" "$cluster" $options "$database" "$sql"
+		"$tool" --cluster="$db_cluster" $options "$database" "$sql"
 }
 
 # For bookworm
 myynh_provision_postgresql() {
+	# Definie local var
+	local db_pwd
+	local default_port
+	local config_file
+
 	# Add postgresql packages from postgresql repo
 	ynh_print_info "Installing postgresql $psql_version..."
 	ynh_apt_install_dependencies_from_extra_repository \
@@ -356,16 +379,16 @@ myynh_provision_postgresql() {
 	if [[ -z $(myynh_execute_psql_as_root --sql="\list $app" --options="--tuples-only --no-align" --database="postgres") ]]
 	then
 		ynh_print_info "Provisionning the database..."
-		local db_pwd=$(ynh_app_setting_get --key=db_pwd)
-		myynh_execute_psql_as_root --cluster="$db_cluster" --sql="CREATE DATABASE $app;"
-		myynh_execute_psql_as_root --cluster="$db_cluster" --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
-		myynh_execute_psql_as_root --cluster="$db_cluster" --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
+		db_pwd=$(ynh_app_setting_get --key=db_pwd)
+		myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
+		myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
+		myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
 	fi
 
 	# Set default cluster back to debian and remove autoprovisionned database and user created on wrong cluster
 	ynh_print_info "Setting default postgresql cluster back to debian default..."
-	local default_port=5432
-	local config_file="/etc/postgresql-common/user_clusters"
+	default_port=5432
+	config_file="/etc/postgresql-common/user_clusters"
 
 		# Retrieve informations about default psql cluster
 		default_db_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
@@ -391,9 +414,15 @@ myynh_provision_postgresql() {
 
 # Update the database
 myynh_update_psql_db() {
+	# Definie local var
+	local current_db_cluster
+	local tempdir
+	local db_port
+
 	# On upgrade, check if the db is not yet on psql_version cluster and if no migrate it (aka dumb and restore the db to 17 + delete the db on 16)
-	local current_db_cluster=$(ynh_app_setting_get --key=db_cluster)
-	if [[ -n ${YNH_APP_UPGRADE_TYPE:-} ]] && [[ $current_db_cluster != "$psql_version/main" ]]
+	current_db_cluster=$(ynh_app_setting_get --key=db_cluster)
+	if [[ -n ${YNH_APP_UPGRADE_TYPE:-} \
+	&& $current_db_cluster != "$psql_version/main" ]]
 	then
 		ynh_print_info "Migrating database to new cluster..."
 		# Dump db on old cluster
@@ -446,7 +475,10 @@ myynh_update_psql_db() {
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
 
 	# Retrieve and save the postgresql port of the cluster and save it in settings
-	myynh_retrieve_psql_port
+	db_port=$(myynh_execute_psql_as_root --cluster="$cluster" --sql="\echo :PORT")
+	ynh_app_setting_set --key=db_port --value="$db_port"
+
+	# Save the cluster in the settings
 	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
 }
 
@@ -496,6 +528,9 @@ myynh_restore_psql_db() {
 	ynh_handle_getopts_args "$@"
 	cluster="${cluster:-$db_cluster}"
 
+	# Definie local var
+	local db_pwd
+
 	# Adjust the content cf. https://github.com/immich-app/immich/issues/5630#issuecomment-1866581570
 	ynh_replace --match="SELECT pg_catalog.set_config('search_path', '', false);" \
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
@@ -504,40 +539,31 @@ myynh_restore_psql_db() {
 	myynh_execute_psql_as_root --cluster="$cluster" --database="$app" < ./db.sql
 
 	# Restore the password
-	local db_pwd="$(ynh_app_setting_get --key=db_pwd)"
+	db_pwd="$(ynh_app_setting_get --key=db_pwd)"
 	myynh_execute_psql_as_root --cluster="$cluster" --sql="ALTER USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
-}
-
-# Retrieve the postgresql port of the cluster
-myynh_retrieve_psql_port() {
-# usage: myynh_dump_psql_db [--cluster=cluster]
-# | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
-	# Declare an array to define the options of this helper.
-	local legacy_args=sod
-	local -A args_array=([c]=cluster=)
-	local cluster
-	# Manage arguments with getopts
-	ynh_handle_getopts_args "$@"
-	cluster="${cluster:-$db_cluster}"
-
-	db_port=$(myynh_execute_psql_as_root --cluster="$cluster" --sql="\echo :PORT")
-	ynh_app_setting_set --key=db_port --value="$db_port"
 }
 
 # Set permissions
 myynh_set_permissions() {
+	# Definie local var
+	local files_list
+
+	# Update permissions
 	chown -R "$app:" "$install_dir"
 	chmod u=rwX,g=rX,o= "$install_dir"
 	chmod -R o-rwx "$install_dir"
 
-	FILE_LIST=(
+	files_list=(
 		"$app_dir/start.sh"
 		"$app_dir/bin/start.sh"
 		"$app_dir/machine-learning/start.sh"
 		"$app_dir/machine-learning/ml_start.sh"
 	)
-	for file in "${FILE_LIST[@]}"; do
-		test -f "$file" && chmod +x "$file"
+	for file in "${files_list[@]}"; do
+		if [ -f "$file" ]
+		then
+			chmod +x "$file"
+		fi
 	done
 
 	if [[ -z ${YNH_APP_UPGRADE_TYPE:-} ]]
@@ -554,8 +580,14 @@ myynh_set_permissions() {
 	chmod u=rw,g=r,o= "/var/log/$app"
 
 	# Upgade user groups
-	[ -n "$(getent group video)" ] && adduser --quiet "$app" video 2>&1
-	[ -n "$(getent group render)" ] && adduser --quiet "$app" render 2>&1
+	if [ -n "$(getent group video)" ]
+	then
+		adduser --quiet "$app" video 2>&1
+	fi
+	if [ -n "$(getent group render)" ]
+	then
+		adduser --quiet "$app" render 2>&1
+	fi
 }
 
 # Add swap
@@ -574,12 +606,16 @@ ynh_add_swap_fixed() {
 	# Manage arguments with getopts
 	ynh_handle_getopts_args "$@"
 
-	local swap_max_size=$((size * 1024))
-
+	# Definie local var
+	local swap_max_size
 	local free_space
+	local usable_space
+	local swap_size
+
+	swap_max_size=$((size * 1024))
 	free_space=$(df --output=avail / | sed 1d)
 	# Because we don't want to fill the disk with a swap file, divide by 2 the available space.
-	local usable_space=$((free_space / 2))
+	usable_space=$((free_space / 2))
 
 	SD_CARD_CAN_SWAP=${SD_CARD_CAN_SWAP:-0}
 
@@ -592,16 +628,16 @@ ynh_add_swap_fixed() {
 	# Compare the available space with the size of the swap.
 	# And set a acceptable size from the request
 	if [ $usable_space -ge $swap_max_size ]; then
-		local swap_size=$swap_max_size
+		swap_size=$swap_max_size
 	elif [ $usable_space -ge $((swap_max_size / 2)) ]; then
-		local swap_size=$((swap_max_size / 2))
+		swap_size=$((swap_max_size / 2))
 	elif [ $usable_space -ge $((swap_max_size / 3)) ]; then
-		local swap_size=$((swap_max_size / 3))
+		swap_size=$((swap_max_size / 3))
 	elif [ $usable_space -ge $((swap_max_size / 4)) ]; then
-		local swap_size=$((swap_max_size / 4))
+		swap_size=$((swap_max_size / 4))
 	else
 		echo "Not enough space left for a swap file" >&2
-		local swap_size=0
+		swap_size=0
 	fi
 
 	# If there's enough space for a swap, and no existing swap here
