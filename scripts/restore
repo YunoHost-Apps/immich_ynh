@@ -41,8 +41,8 @@ then
 	myynh_provision_postgresql
 fi
 
-myynh_restore_psql_db
 myynh_update_psql_db
+myynh_restore_psql_db
 
 #=================================================
 # RESTORE SYSTEM CONFIGURATION
