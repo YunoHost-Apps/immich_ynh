@@ -276,7 +276,7 @@ myynh_install_immich() {
 		mise use uv@latest --quiet
 
 		# Install with uv
-		export VIRTUAL_ENV="$ml_dir/venv"
+		export UV_PROJECT_ENVIRONMENT="$ml_dir/venv"
 		uv sync --quiet --extra cpu --no-dev --active --link-mode copy --no-cache \
 			--python "$python_version" --managed-python
 
