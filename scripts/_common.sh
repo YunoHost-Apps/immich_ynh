@@ -329,7 +329,7 @@ myynh_install_immich() {
 # | arg: -d, --database=    - the database to connect to
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
-	local legacy_args=sod
+	local legacy_args=tsocd
 	local -A args_array=([t]=tool= [s]=sql= [o]=options= [c]=cluster= [d]=database=)
 	local tool
 	local sql
