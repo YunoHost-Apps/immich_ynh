@@ -275,10 +275,13 @@ myynh_install_immich() {
 		# Install uv
 		mise use uv@latest --quiet
 
-		# Install with uv
-		export UV_PROJECT_ENVIRONMENT="$ml_dir/venv"
-		uv sync --quiet --extra cpu --no-dev --active --link-mode copy --no-cache \
-			--python "$python_version" --managed-python
+		# Install with uv in a subshell
+		(
+			export UV_PYTHON_INSTALL_DIR="$ml_dir"
+			uv venv "$ml_dir/venv" --quiet --no-cache --link-mode copy --python "$python_version" --managed-python
+			source "$ml_dir/venv/bin/activate"
+			uv sync --quiet --no-cache --extra cpu --no-dev --active --link-mode copy
+		)
 
 		# Copy built files
 		cp -a "$source_dir/machine-learning/ann" "$ml_dir/"
