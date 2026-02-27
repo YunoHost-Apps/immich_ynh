@@ -30,9 +30,9 @@ ynh_script_progression "Restoring the data directory..."
 ynh_restore "$data_dir"
 
 #=================================================
-# RESTORE THE DATABASE
+# PREPARE THE DATABASE RESTORATION
 #=================================================
-ynh_script_progression "Restoring the database..."
+ynh_script_progression "Preparing the database restoration..."
 
 db_cluster=$(ynh_app_setting_get --key=db_cluster)
 
@@ -42,6 +42,12 @@ then
 fi
 
 myynh_update_psql_db
+
+#=================================================
+# RESTORE THE DATABASE
+#=================================================
+ynh_script_progression "Restoring the database..."
+
 myynh_restore_psql_db
 
 #=================================================

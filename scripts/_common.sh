@@ -539,7 +539,7 @@ myynh_restore_psql_db() {
 		--replace="SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);" --file="db.sql"
 
 	# Restore the db
-	myynh_execute_psql_as_root --cluster="$cluster" --database="$app" < ./db.sql
+	ynh_hide_warnings myynh_execute_psql_as_root --cluster="$cluster" --database="$app" < ./db.sql
 
 	# Restore the password
 	db_pwd="$(ynh_app_setting_get --key=db_pwd)"
