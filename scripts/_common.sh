@@ -278,9 +278,11 @@ myynh_install_immich() {
 		# Install with uv in a subshell
 		(
 			export UV_PYTHON_INSTALL_DIR="$ml_dir"
-			uv venv "$ml_dir/venv" --quiet --no-cache --link-mode copy --python "$python_version" --managed-python
+			ynh_hide_warnings uv venv "$ml_dir/venv" \
+				--no-cache --link-mode copy --python "$python_version" --managed-python
 			source "$ml_dir/venv/bin/activate"
-			uv sync --quiet --no-cache --extra cpu --no-dev --active --link-mode copy
+			ynh_hide_warnings uv sync \
+				--no-cache --link-mode copy --active --extra cpu --no-dev
 		)
 
 		# Copy built files
