@@ -53,13 +53,13 @@ ram.runtime = "2G"
 	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
 	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
 	url = "https://github.com/ewilly/immich_ynh/releases/download/vips-8.17.3-heif-1.20.2/vips-8.17.3-heif-1.20.2-bookworm.tar.gz"
-	sha256 = "f0b5c049e0d9827c25f7a205a8d02202cd06b455db6af9c13b79e23924343275"
+	sha256 = "efc6110bca7ce73b388bd714ac7a59f20f2d95b110a176a8b535d87fe158a445"
 
 	[resources.sources.vips_prebuilt_trixie]
 	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
 	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
 	url = "https://github.com/ewilly/immich_ynh/releases/download/vips-8.17.3-heif-1.20.2/vips-8.17.3-heif-1.20.2-trixie.tar.gz"
-	sha256 = "d28ac721d7d89bb14faf819d678cc2306f18651fe9c14d46b382ef83642a8238"
+	sha256 = "6f93f44a87433122a759004e58936c380245f8bcc355445031b3e366eaf73bfa"
 
     [resources.sources.vchord]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml

@@ -138,6 +138,8 @@ jobs:
       - name: Download and build libvips
         run: |
           libs_dir="${{ github.event.inputs.libs_dir }}"
+          export PKG_CONFIG_PATH="$libs_dir/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+          export LD_LIBRARY_PATH="$libs_dir/lib:${LD_LIBRARY_PATH:-}"
           cd /tmp
           wget https://github.com/libvips/libvips/releases/download/v${{ needs.prepare.outputs.vips_version }}/vips-${{ needs.prepare.outputs.vips_version }}.tar.xz
           tar xf vips-${{ needs.prepare.outputs.vips_version }}.tar.xz
