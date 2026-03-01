@@ -1,0 +1,188 @@
+name: Build libvips with libheif
+
+on:
+  workflow_dispatch:
+    inputs:
+      libs_dir:
+        description: 'Libraries installation directory'
+        required: true
+        default: '/var/www/immich/vips'
+      debian_versions:
+        description: 'Debian versions to build (comma-separated: bookworm, trixie, or bookworm,trixie)'
+        required: true
+        default: 'bookworm,trixie'
+  schedule:
+    # Run daily at 2:00 AM UTC to check for version updates
+    - cron: '0 2 * * *'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      libheif_version: ${{ steps.get-versions.outputs.libheif_version }}
+      vips_version: ${{ steps.get-versions.outputs.vips_version }}
+      should_build: ${{ steps.check-version.outputs.should_build }}
+    steps:
+      - name: Get versions from immich-app/base-images
+        id: get-versions
+        run: |
+          # Get libheif version
+          LIBHEIF_JSON=$(curl -s https://raw.githubusercontent.com/immich-app/base-images/main/server/sources/libheif.json)
+          LIBHEIF_VERSION=$(echo "$LIBHEIF_JSON" | jq -r '.version')
+          echo "libheif_version=$LIBHEIF_VERSION" >> $GITHUB_OUTPUT
+          echo "libheif version: $LIBHEIF_VERSION"
+          
+          # Get libvips version
+          VIPS_JSON=$(curl -s https://raw.githubusercontent.com/immich-app/base-images/main/server/sources/libvips.json)
+          VIPS_VERSION=$(echo "$VIPS_JSON" | jq -r '.version')
+          echo "vips_version=$VIPS_VERSION" >> $GITHUB_OUTPUT
+          echo "vips version: $VIPS_VERSION"
+
+      - name: Check if build is needed
+        id: check-version
+        run: |
+          LIBHEIF_VERSION="${{ steps.get-versions.outputs.libheif_version }}"
+          VIPS_VERSION="${{ steps.get-versions.outputs.vips_version }}"
+          TAG_NAME="vips-${VIPS_VERSION}-heif-${LIBHEIF_VERSION}"
+          
+          # Check if tag already exists
+          if git ls-remote --tags origin | grep -q "refs/tags/${TAG_NAME}$"; then
+            echo "Tag ${TAG_NAME} already exists. Skipping build."
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          else
+            echo "Tag ${TAG_NAME} does not exist. Build needed."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set matrix
+        id: set-matrix
+        if: steps.check-version.outputs.should_build == 'true'
+        run: |
+          # Use input if manual trigger, otherwise use default
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSIONS="${{ github.event.inputs.debian_versions }}"
+          else
+            VERSIONS="bookworm,trixie"
+          fi
+          # Convert comma-separated string to JSON array
+          MATRIX=$(echo "$VERSIONS" | jq -R -s -c 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  build:
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    strategy:
+      matrix:
+        debian_version: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    container:
+      image: debian:${{ matrix.debian_version }}-slim
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            build-essential \
+            cmake \
+            meson \
+            ninja-build \
+            pkg-config \
+            wget \
+            tar \
+            xz-utils \
+            ccache \
+            libgl1 \
+            libdav1d-dev \
+            libwebp-dev \
+            libaom-dev \
+            libde265-dev \
+            libexif-dev \
+            libexpat1-dev \
+            libglib2.0-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libtiff-dev \
+            libgif-dev \
+            libcgif-dev \
+            libimagequant-dev \
+            libraw-dev \
+            jq
+
+      - name: Create build directory
+        run: mkdir -p ${{ github.event.inputs.libs_dir }}
+
+      - name: Download and build libheif
+        run: |
+          libs_dir="${{ github.event.inputs.libs_dir }}"
+          cd /tmp
+          wget https://github.com/strukturag/libheif/releases/download/v${{ needs.prepare.outputs.libheif_version }}/libheif-${{ needs.prepare.outputs.libheif_version }}.tar.gz
+          tar xzf libheif-${{ needs.prepare.outputs.libheif_version }}.tar.gz
+          cd libheif-${{ needs.prepare.outputs.libheif_version }}
+          mkdir build
+          cd build
+          cmake --preset=release-noplugins \
+            -DCMAKE_INSTALL_PREFIX="$libs_dir" \
+            -DWITH_DAV1D=ON \
+            -DENABLE_PARALLEL_TILE_DECODING=ON \
+            -DWITH_LIBSHARPYUV=ON \
+            -DWITH_LIBDE265=ON \
+            -DWITH_AOM_DECODER=OFF \
+            -DWITH_AOM_ENCODER=ON \
+            -DWITH_X265=OFF \
+            -DWITH_EXAMPLES=OFF \
+            ..
+          make -j "$(nproc)"
+          make install
+
+      - name: Download and build libvips
+        run: |
+          libs_dir="${{ github.event.inputs.libs_dir }}"
+          cd /tmp
+          wget https://github.com/libvips/libvips/releases/download/v${{ needs.prepare.outputs.vips_version }}/vips-${{ needs.prepare.outputs.vips_version }}.tar.xz
+          tar xf vips-${{ needs.prepare.outputs.vips_version }}.tar.xz
+          cd vips-${{ needs.prepare.outputs.vips_version }}
+          meson setup build --buildtype=release \
+            --prefix="$libs_dir" \
+            --libdir=lib \
+            -Dintrospection=disabled \
+            -Dtiff=disabled
+          cd build
+          ninja install
+
+      - name: Create tarball
+        run: |
+          cd "$(dirname ${{ github.event.inputs.libs_dir }})"
+          tar czf vips-${{ needs.prepare.outputs.vips_version }}-heif-${{ needs.prepare.outputs.libheif_version }}-${{ matrix.debian_version }}.tar.gz "$(basename ${{ github.event.inputs.libs_dir }})"
+          mv vips-${{ needs.prepare.outputs.vips_version }}-heif-${{ needs.prepare.outputs.libheif_version }}-${{ matrix.debian_version }}.tar.gz /tmp/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vips-${{ matrix.debian_version }}
+          path: /tmp/vips-${{ needs.prepare.outputs.vips_version }}-heif-${{ needs.prepare.outputs.libheif_version }}-${{ matrix.debian_version }}.tar.gz
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [prepare, build]
+    if: needs.prepare.outputs.should_build == 'true'
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: vips-${{ needs.prepare.outputs.vips_version }}-heif-${{ needs.prepare.outputs.libheif_version }}
+          name: vips ${{ needs.prepare.outputs.vips_version }} with libheif ${{ needs.prepare.outputs.libheif_version }}
+          body: |
+            Build tahnks `build_libvips_with_libheif.yml` github workflow with:
+            libheif : `${{ needs.prepare.outputs.libheif_version }}`
+            libvips : `${{ needs.prepare.outputs.vips_version }}`
+          files: artifacts/**/*
+          draft: false
+          prerelease: false
