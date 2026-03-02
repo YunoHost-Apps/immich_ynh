@@ -39,6 +39,11 @@ jobs:
           echo "vips_version=$VIPS_VERSION" >> $GITHUB_OUTPUT
           echo "vips version: $VIPS_VERSION"
 
+      - name: Checkout to fetch the complete git history (needed for 'Check if build is needed')
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - name: Check if build is needed
         id: check-version
         run: |
@@ -47,7 +52,7 @@ jobs:
           TAG_NAME="vips-${VIPS_VERSION}-heif-${LIBHEIF_VERSION}"
           
           # Check if tag already exists
-          if git ls-remote --tags origin | grep -q "refs/tags/${TAG_NAME}$"; then
+          if git show-ref --tags --verify --quiet "refs/tags/${TAG_NAME}"; then
             echo "Tag ${TAG_NAME} already exists. Skipping build."
             echo "should_build=false" >> $GITHUB_OUTPUT
           else
