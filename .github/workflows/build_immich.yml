@@ -6,7 +6,7 @@ on:
       debian_versions:
         description: 'Debian versions to build (comma-separated: bookworm, trixie, or bookworm,trixie)'
         required: true
-        default: 'trixie'
+        default: 'bookworm,trixie'
   schedule:
     # Run daily at 2:00 AM UTC to check for version updates
     - cron: '0 2 * * *'
