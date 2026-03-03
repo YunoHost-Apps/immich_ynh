@@ -51,19 +51,19 @@ ram.runtime = "2G"
 
 	[resources.sources.immich_prebuilt_versions_bookworm]
 	url = "https://github.com/ewilly/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm.json"
-	sha256 = "sha256:5e2c793d0b507487941ea9200d14ceaeab692105258094ef9dd8ad37ff5c8288"
+	sha256 = "5e2c793d0b507487941ea9200d14ceaeab692105258094ef9dd8ad37ff5c8288"
 
 	[resources.sources.immich_prebuilt_bookworm]
 	url = "https://github.com/ewilly/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm.tar.gz"
-	sha256 = "sha256:534846c0ea17db09fca18514c21f065f88a95b14b485fb7ab9c83bf6f765bdef"
+	sha256 = "534846c0ea17db09fca18514c21f065f88a95b14b485fb7ab9c83bf6f765bdef"
 
 	[resources.sources.immich_prebuilt_versions_trixie]
 	url = "https://github.com/ewilly/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-trixie.json"
-	sha256 = "sha256:5e2c793d0b507487941ea9200d14ceaeab692105258094ef9dd8ad37ff5c8288"
+	sha256 = "5e2c793d0b507487941ea9200d14ceaeab692105258094ef9dd8ad37ff5c8288"
 
 	[resources.sources.immich_prebuilt_trixie]
 	url = "https://github.com/ewilly/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-trixie.tar.gz"
-	sha256 = "sha256:2d365ebbeee37ba31220d121bf96ee1b0bc5bfd5382ec7b1ceb560de7f9f28d3"
+	sha256 = "2d365ebbeee37ba31220d121bf96ee1b0bc5bfd5382ec7b1ceb560de7f9f28d3"
 
     [resources.sources.vchord]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
