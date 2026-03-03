@@ -1,0 +1,515 @@
+name: Build immich with libvips
+
+on:
+  workflow_dispatch:
+    inputs:
+      debian_versions:
+        description: 'Debian versions to build (comma-separated: bookworm, trixie, or bookworm,trixie)'
+        required: true
+        default: 'trixie'
+  schedule:
+    # Run daily at 2:00 AM UTC to check for version updates
+    - cron: '0 2 * * *'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      immich_version: ${{ steps.get-versions.outputs.immich_version }}
+      node_version: ${{ steps.get-versions.outputs.node_version }}
+      pnpm_version: ${{ steps.get-versions.outputs.pnpm_version }}
+      python_version: ${{ steps.get-versions.outputs.python_version }}
+      libheif_version: ${{ steps.get-versions.outputs.libheif_version }}
+      vips_version: ${{ steps.get-versions.outputs.vips_version }}
+      should_build: ${{ steps.check-version.outputs.should_build }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      install_dir: ${{ steps.declare-var.outputs.install_dir }}
+      source_dir: ${{ steps.declare-var.outputs.source_dir }}
+      vips_dir: ${{ steps.declare-var.outputs.vips_dir }}
+      app_dir: ${{ steps.declare-var.outputs.app_dir }}
+      plugin_dir: ${{ steps.declare-var.outputs.plugin_dir }}
+      ml_dir: ${{ steps.declare-var.outputs.ml_dir }}
+      ml_cache_dir: ${{ steps.declare-var.outputs.ml_cache_dir }}
+
+    steps:
+      - name: Declare var
+        id: declare-var
+        run: |
+          INSTALL_DIR="/var/www/immich"
+          SOURCE_DIR="$INSTALL_DIR/source"
+          VIPS_DIR="$INSTALL_DIR/vips"
+          APP_DIR="$INSTALL_DIR/immich/app"
+          PLUGIN_DIR="$APP_DIR/corePlugin"
+          ML_DIR="$APP_DIR/machine-learning"
+          ML_CACHE_DIR="$INSTALL_DIR/immich/.cache_ml"
+
+          echo "install_dir=$INSTALL_DIR" >> $GITHUB_OUTPUT
+          echo "source_dir=$SOURCE_DIR" >> $GITHUB_OUTPUT
+          echo "vips_dir=$VIPS_DIR" >> $GITHUB_OUTPUT
+          echo "app_dir=$APP_DIR" >> $GITHUB_OUTPUT
+          echo "plugin_dir=$PLUGIN_DIR" >> $GITHUB_OUTPUT
+          echo "ml_dir=$ML_DIR" >> $GITHUB_OUTPUT
+          echo "ml_cache_dir=$ML_CACHE_DIR" >> $GITHUB_OUTPUT
+
+      - name: Get versions from immich-app
+        id: get-versions
+        run: |
+          set -euo pipefail
+
+          IMMICH_VERSION=$(curl -sIL https://github.com/immich-app/immich/releases/latest \
+            | grep -i location | sed -n 's@.*/tag/v\([^"]*\).*@\1@p' | tr -d '\r[:space:]')
+          echo "immich_version=$IMMICH_VERSION" >> $GITHUB_OUTPUT
+
+          NODE_VERSION=$(curl -s https://raw.githubusercontent.com/immich-app/base-images/refs/heads/main/server/Dockerfile \
+            | sed -nE 's@.*FROM[[:space:]]+node:([0-9]+\.[0-9]+\.[0-9]+).*@\1@p' \
+            | head -n1)
+          echo "node_version=$NODE_VERSION" >> $GITHUB_OUTPUT
+
+          PNPM_VERSION=$(curl -s https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$IMMICH_VERSION/package.json \
+            | jq -r '.packageManager | split("@")[1] | split(".")[0]' )
+          echo "pnpm_version=$PNPM_VERSION" >> $GITHUB_OUTPUT
+
+          PYTHON_VERSION=$(curl -s https://raw.githubusercontent.com/immich-app/immich/refs/heads/main/machine-learning/.python-version)
+          #PYTHON_VERSION=$(curl -s https://raw.githubusercontent.com/immich-app/immich/refs/tags/v$IMMICH_VERSION/machine-learning/.python-version)
+          echo "python_version=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
+          LIBHEIF_VERSION=$(curl -s https://raw.githubusercontent.com/immich-app/base-images/main/server/sources/libheif.json \
+            | jq -r '.version')
+          echo "libheif_version=$LIBHEIF_VERSION" >> $GITHUB_OUTPUT
+
+          VIPS_VERSION=$(curl -s https://raw.githubusercontent.com/immich-app/base-images/main/server/sources/libvips.json \
+            | jq -r '.version')
+          echo "vips_version=$VIPS_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      - name: Check if build is needed
+        id: check-version
+        run: |
+          TAG="immich-v${{ steps.get-versions.outputs.immich_version }}"
+          if git ls-remote --exit-code --tags origin "$TAG"; then
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set matrix
+        id: set-matrix
+        if: steps.check-version.outputs.should_build == 'true'
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSIONS="${{ github.event.inputs.debian_versions }}"
+          else
+            VERSIONS="bookworm,trixie"
+          fi
+
+          MATRIX=$(echo "$VERSIONS" | jq -R -s -c 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  build:
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    outputs:
+      exec_time: ${{ steps.build-immich.outputs.exec_time }}
+      peak_ram: ${{ steps.build-immich.outputs.peak_ram }}
+      disk_used: ${{ steps.build-immich.outputs.disk_used }}
+
+    strategy:
+      matrix:
+        debian_version: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    container:
+      image: debian:${{ matrix.debian_version }}-slim
+    env:
+      NODE_OPTIONS: "--max_old_space_size=4096"
+      NODE_ENV: production
+      CURL_OPTS: "--fail --location --retry 3 --retry-delay 2"
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+      CI: 1
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ needs.prepare.outputs.node_version }}
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            bash \
+            curl \
+            libssl-dev \
+            libffi-dev \
+            uuid-runtime \
+            autoconf \
+            tar \
+            unzip \
+            perl \
+            libnet-ssleay-perl \
+            libio-socket-ssl-perl \
+            libcapture-tiny-perl \
+            libfile-which-perl \
+            libfile-chdir-perl \
+            libpkgconfig-perl \
+            libffi-checklib-perl \
+            libtest-warnings-perl \
+            libtest-fatal-perl \
+            libtest-needs-perl \
+            libtest2-suite-perl \
+            libsort-versions-perl \
+            libpath-tiny-perl \
+            libtry-tiny-perl \
+            libterm-table-perl \
+            libany-uri-escape-perl \
+            libmojolicious-perl \
+            libfile-slurper-perl \
+            liblcms2-2 \
+            build-essential \
+            cmake \
+            meson \
+            ninja-build \
+            pkg-config \
+            xz-utils \
+            ccache \
+            libgl1 \
+            libdav1d-dev \
+            libwebp-dev \
+            libaom-dev \
+            libde265-dev \
+            libexif-dev \
+            libexpat1-dev \
+            libglib2.0-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libtiff-dev \
+            libgif-dev \
+            libcgif-dev \
+            libimagequant-dev \
+            libraw-dev \
+            jq
+
+      - name: Install pnpm
+        run: |
+          corepack enable --install-directory=/usr/local/bin
+          corepack use pnpm@${{ needs.prepare.outputs.pnpm_version }}
+
+      - name: Install mise
+        run: |
+          curl https://mise.jdx.dev/mise-latest-linux-x64 > /usr/local/bin/mise
+          chmod 755 /usr/local/bin/mise
+
+      - name: Build immich
+        id: build-immich
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          # Start statistics
+          echo "::group::⏱️ Starting statistics recording..."
+          date_before=$(date +%s)
+          disk_before=$(df -k / | tail -1 | awk '{print $3}')
+          echo "::endgroup::"
+
+          # Retrieve usefull var
+          install_dir=${{ needs.prepare.outputs.install_dir }}
+          vips_dir=${{ needs.prepare.outputs.vips_dir }}
+          source_dir=${{ needs.prepare.outputs.source_dir }}
+          app_dir=${{ needs.prepare.outputs.app_dir }}
+          plugin_dir=${{ needs.prepare.outputs.plugin_dir }}
+          ml_dir=${{ needs.prepare.outputs.ml_dir }}
+          ml_cache_dir=${{ needs.prepare.outputs.ml_cache_dir }}
+          python_version=${{ needs.prepare.outputs.python_version }}
+
+          # Print tools versions
+          echo "::group::📜 Built with:"
+          echo "  node: $(node -v)"
+          echo "  pnpm: $(pnpm -v)"
+          echo "  mise: $(mise version --json | jq -r .version)"
+          echo "  python: $python_version"
+          echo "::endgroup::"
+
+          # Create dir structure
+          echo "::group::📁 Creating dir structure..."
+          mkdir -p \
+            $install_dir \
+            $source_dir \
+            $vips_dir \
+            $plugin_dir \
+            $ml_dir \
+            $ml_cache_dir
+          echo "::endgroup::"
+
+          # Build libheif
+          echo "::group::🧩 Building libheif..."
+          cd /tmp
+          curl $CURL_OPTS -o h.tgz https://github.com/strukturag/libheif/releases/download/v${{ needs.prepare.outputs.libheif_version }}/libheif-${{ needs.prepare.outputs.libheif_version }}.tar.gz
+          tar xzf h.tgz
+          cd libheif-*
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$vips_dir \
+            -DWITH_DAV1D=ON \
+            -DWITH_LIBDE265=ON \
+            -DWITH_AOM_ENCODER=ON \
+            -DWITH_EXAMPLES=OFF
+          make -j"$(nproc)"
+          make install
+          echo "::endgroup::"
+
+          # Build vips
+          echo "::group::🌈 Building libvips with HEIC support..."
+          export PKG_CONFIG_PATH="$vips_dir/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+          export LD_LIBRARY_PATH="$vips_dir/lib:${LD_LIBRARY_PATH:-}"
+          cd /tmp
+          curl $CURL_OPTS -o v.xz https://github.com/libvips/libvips/releases/download/v${{ needs.prepare.outputs.vips_version }}/vips-${{ needs.prepare.outputs.vips_version }}.tar.xz
+          tar xf v.xz
+          cd vips-*
+          meson setup build \
+            --prefix=$vips_dir \
+            --libdir=lib \
+            -Dintrospection=disabled \
+            -Dtiff=disabled
+          ninja -C build install
+          echo "::endgroup::"
+
+          # Download immich archive and extract it in source_dir
+          echo "::group::📥 Downloading immich archive and extract it in source_dir..."
+          cd "$source_dir"
+          curl $CURL_OPTS -o src.tgz https://github.com/immich-app/immich/archive/refs/tags/v${{ needs.prepare.outputs.immich_version }}.tar.gz
+          tar xzf src.tgz --strip-components=1
+          rm src.tgz
+          echo "::endgroup::"
+
+          # Patch source
+          echo "::group::🩹 Patching source..."
+          cd "$source_dir"
+
+            # Replace /usr/src
+            ( grep -Rl "/usr/src" || true ) \
+              | xargs -r -n1 sed -i -e "s@/usr/src@$install_dir/immich@g"
+
+            # Replace /build
+            ( grep -RlE "\"/build\"|'/build'" || true ) \
+              | xargs -r -n1 sed -i \
+                  -e "s@\"/build\"@\"$app_dir\"@g" \
+                  -e "s@'/build'@'$app_dir'@g"
+
+            # Fix extism/js-pdk for bookworm
+            if [ ${{ matrix.debian_version }} = "bookworm" ]; then
+                sed -i "s@github:extism/js-pdk@github:ewilly/js-pdk@g" "$source_dir/plugins/mise.toml"
+            fi
+          echo "::endgroup::"
+
+          # Build server
+          echo "::group::🛠️ Building immich server..."
+          cd "$source_dir/server"
+          export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+          export CI=1
+          export SHARP_IGNORE_GLOBAL_LIBVIPS=true
+          pnpm --filter immich --frozen-lockfile build
+          unset SHARP_IGNORE_GLOBAL_LIBVIPS
+          export SHARP_FORCE_GLOBAL_LIBVIPS=true
+          pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$app_dir" --force
+          cp "$app_dir/package.json" "$app_dir/bin/"
+          sed -i "s@^start@./start@g" "$app_dir/bin/immich-admin"
+          echo "::endgroup::"
+
+          # Build openapi & web
+          echo "::group::🌐 Building immich openapi & web interface..."
+          cd "$source_dir"
+          pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
+          unset SHARP_FORCE_GLOBAL_LIBVIPS
+          export SHARP_IGNORE_GLOBAL_LIBVIPS=true
+          pnpm --filter @immich/sdk --filter immich-web build
+          cp -a web/build "$app_dir/www/"
+          echo "::endgroup::"
+
+          # Build cli
+          echo "::group::🔧 Building immich cli..."
+          cd "$source_dir"
+          pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
+          pnpm --filter @immich/sdk --filter @immich/cli build
+          pnpm --filter @immich/cli --prod --no-optional deploy "$app_dir/cli"
+          ln -s "$app_dir/cli/bin/immich" "$app_dir/bin/immich"
+          echo "::endgroup::"
+
+          # Build plugins
+          echo "::group::🔌 Building immich plugins..."
+          cd "$source_dir/plugins"
+          mise trust --ignore ../mise.toml
+          mise trust ./mise.toml
+          mise install
+          mise run build
+          cp -r dist "$plugin_dir/"
+          cp manifest.json "$plugin_dir/"
+          echo "::endgroup::"
+
+          # Update remaining assets
+          echo "::group::➡️ Updating remaining assets..."
+          cp -a LICENSE "$app_dir/"
+          rm "$app_dir/bin/start.sh"
+          echo "::endgroup::"
+
+          # Install immich-machine-learning
+          echo "::group::🧠 Building immich machine learning..."
+          cd "$source_dir/machine-learning"
+            
+            # Install uv via mise
+            mise use uv@latest --quiet
+
+            # Set directory for managed Python
+            export UV_PYTHON_INSTALL_DIR="$ml_dir"
+
+            # Create venv using uv via mise
+            mise exec -- uv venv "$ml_dir/venv" \
+              --link-mode copy --python "$python_version" --managed-python
+
+            # Activate the venv
+            source "$ml_dir/venv/bin/activate"
+
+            # Sync dependencies using uv via mise (Try fast offline first, then fallback for network installs)
+            mise exec -- uv sync --offline --locked --active --extra cpu --no-dev || \
+              mise exec -- uv sync --locked --active --extra cpu --no-dev
+
+            # Copy built files
+            cp -a "$source_dir/machine-learning/ann" "$ml_dir/"
+            cp -a "$source_dir/machine-learning/immich_ml" "$ml_dir/"
+          echo "::endgroup::"
+          
+          # End statistics
+          echo "::group::⏱️ Ending statistics recording..."
+          date_after=$(date +%s)
+          disk_after=$(df -k / | tail -1 | awk '{print $3}')
+          duration=$((date_after - date_before))
+                    if [ -f /sys/fs/cgroup/memory.peak ]; then
+            ram_after=$(cat /sys/fs/cgroup/memory.peak)
+          elif [ -f /sys/fs/cgroup/memory.max_usage_in_bytes ]; then
+            ram_after=$(cat /sys/fs/cgroup/memory.max_usage_in_bytes)
+          else
+            ram_after=0
+          fi
+
+            # Convert
+            duration_HMS=$(printf '%02d:%02d:%02d\n' $(($duration/3600)) $(($duration%3600/60)) $(($duration%60)))
+            disk_GB=$(awk -v a="$disk_after" -v b="$disk_before" 'BEGIN { printf "%.2fGB", (a-b)/1024/1024 }')
+            ram_GB=$(awk -v v="$ram_after" 'BEGIN { printf "%.2fGB", v/1024/1024/1024 }')
+
+            # Export values to output
+            {
+              echo "exec_time=$duration_HMS"
+              echo "disk_used=$disk_GB"
+              echo "peak_ram=$ram_GB"
+            } >> "$GITHUB_OUTPUT"
+          echo "::endgroup::"
+
+      - name: Clean some space
+        run: |
+          echo "::group::🧹 Cleaning up"
+          rm -rf "${{ needs.prepare.outputs.source_dir }}"
+          apt-get clean
+          rm -rf /var/lib/apt/lists/*
+          echo "::endgroup::"
+
+      - name: Create immich tarball
+        run: |
+          echo "::group::📦 Creating final artifact"
+          cd "$(dirname ${{ needs.prepare.outputs.install_dir }})"
+          tar czf immich-v${{ needs.prepare.outputs.immich_version }}-${{ matrix.debian_version }}.tar.gz "$(basename ${{ needs.prepare.outputs.install_dir }})"
+          mv immich-*.tar.gz /tmp/
+          echo "::endgroup::"
+
+      - name: Create versions JSON
+        run: |
+          echo "::group::📝 Creating the json file"
+          JSON_FILE="/tmp/immich-v${{ needs.prepare.outputs.immich_version }}-${{ matrix.debian_version }}.json"
+          echo "{"                                                                   >  "$JSON_FILE"
+          echo "  \"immich\": \"${{ needs.prepare.outputs.immich_version }}\","      >> "$JSON_FILE"
+          echo "  \"node\": \"${{ needs.prepare.outputs.node_version }}\","          >> "$JSON_FILE"
+          echo "  \"pnpm\": \"${{ needs.prepare.outputs.pnpm_version }}\","          >> "$JSON_FILE"
+          echo "  \"python\": \"${{ needs.prepare.outputs.python_version }}\","      >> "$JSON_FILE"
+          echo "  \"mise\": \"$(mise version --json | jq -r .version)\""             >> "$JSON_FILE"
+          echo "}"                                                                   >> "$JSON_FILE"
+          echo "::endgroup::"
+
+      - name: Upload immich
+        uses: actions/upload-artifact@v4
+        with:
+          name: immich-${{ matrix.debian_version }}
+          path: /tmp/*.tar.gz
+          compression-level: 6
+          retention-days: 7
+
+      - name: Upload versions JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: versions-${{ matrix.debian_version }}
+          path: /tmp/immich-v${{ needs.prepare.outputs.immich_version }}-${{ matrix.debian_version }}.json
+          retention-days: 7
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [prepare, build]
+    if: needs.prepare.outputs.should_build == 'true'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          tag_name: immich-v${{ needs.prepare.outputs.immich_version }}
+          name: immich v${{ needs.prepare.outputs.immich_version }}
+          files: artifacts/**/*
+          body: |
+            ## 🚀 immich v${{ needs.prepare.outputs.immich_version }} for **YunoHost**
+
+            This release was automatically built using the `build_immich.yml` GitHub workflow.
+
+            ---
+
+            ## 📦 Component Versions
+
+            **Source Components**
+            - immich: `${{ needs.prepare.outputs.immich_version }}`
+            - libheif: `${{ needs.prepare.outputs.libheif_version }}`
+            - libvips: `${{ needs.prepare.outputs.vips_version }}`
+
+            **Build Environment**
+            - Node.js: `${{ needs.prepare.outputs.node_version }}`
+            - pnpm: `${{ needs.prepare.outputs.pnpm_version }}`
+            - Python: `${{ needs.prepare.outputs.python_version }}`
+
+            ---
+
+            ## 📊 Build Statistics (from step *Build immich*)
+
+            - ⏱️ Execution time: `${{ needs.build.outputs.exec_time }}`
+            - 🧠 Peak RAM usage: `${{ needs.build.outputs.peak_ram }}`
+            - 💾 Disk space used: `${{ needs.build.outputs.disk_used }}`
+
+            ---
+
+            ## 📁 Artifacts
+
+            All compiled artifacts are available in the *Assets* section below.
+
+      - name: Delete workflow artifacts (official API)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          artifact_ids=$(gh api repos/${{ github.repository }}/actions/artifacts --paginate -q '.artifacts[].id')
+          if [ -n "$artifact_ids" ]; then
+            for id in $artifact_ids; do
+              gh api repos/${{ github.repository }}/actions/artifacts/$id -X DELETE
+            done
+            echo "✅ Deleted $(echo "$artifact_ids" | wc -w) artifacts."
+          else
+            echo "ℹ️ No artifacts to delete."
+          fi
