@@ -23,8 +23,8 @@ myynh_check_hardware
 #=================================================
 ynh_script_progression "Setting up source files..."
 
-source_dir="$install_dir/source"
-ynh_setup_source --source_id="main" --dest_dir="$source_dir"
+ynh_setup_source --source_id="immich_prebuilt_versions_$YNH_DEBIAN_VERSION" --dest_dir="$install_dir"
+ynh_setup_source --source_id="immich_prebuilt_$YNH_DEBIAN_VERSION" --dest_dir="$install_dir"
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
@@ -39,32 +39,14 @@ fi
 myynh_update_psql_db
 
 #=================================================
-# ADD SWAP IF NEEDED
-#=================================================
-ynh_script_progression "Temporary adding additional swap (if needed)..."
-
-myynh_add_swap
-
-#=================================================
-# MAKE INSTALL
-#=================================================
-ynh_script_progression "Making install..."
-
-myynh_install_immich
-
-#=================================================
-# REMOVE TEMPORARY SWAP IF ADDED
-#=================================================
-ynh_script_progression "Remove temporary swap if added..."
-
-ynh_del_swap_fixed
-
-#=================================================
 # APP INITIAL CONFIGURATION
 #=================================================
 ynh_script_progression "Adding $app's configuration files..."
 
+ynh_config_add --template="immich-server-start.sh" --destination="$install_dir/immich/app/bin/start.sh"
+ynh_config_add --template="immich-machine-learning-start.sh" --destination="$install_dir/immich/app/machine-learning/ml_start.sh"
 ynh_config_add --template="env" --destination="$install_dir/immich/env"
+mynh_install_geodata
 mkdir --parents "$data_dir/backups"
 ynh_config_add --template="restore_immich_db_backup.sh" --destination="$data_dir/backups/restore_immich_db_backup.sh"
 

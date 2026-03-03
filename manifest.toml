@@ -49,17 +49,21 @@ ram.runtime = "2G"
 
 	autoupdate.strategy = "latest_github_release"
 
-	[resources.sources.vips_prebuilt_bookworm]
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/vips-8.17.3-heif-1.20.2/vips-8.17.3-heif-1.20.2-bookworm.tar.gz"
-	sha256 = "607546cd0f862260a881500d0c9d2a6656e6e0e238760377022f3c339c1a3c47"
+	[resources.sources.immich_prebuilt_versions_bookworm]
+	url = "https://github.com/ewilly/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm.json"
+	sha256 = "sha256:5e2c793d0b507487941ea9200d14ceaeab692105258094ef9dd8ad37ff5c8288"
 
-	[resources.sources.vips_prebuilt_trixie]
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/vips-8.17.3-heif-1.20.2/vips-8.17.3-heif-1.20.2-trixie.tar.gz"
-	sha256 = "2f6a73997012426822cc1923638d9706762e9d023beaeab4adb64f916b45acbb"
+	[resources.sources.immich_prebuilt_bookworm]
+	url = "https://github.com/ewilly/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm.tar.gz"
+	sha256 = "sha256:534846c0ea17db09fca18514c21f065f88a95b14b485fb7ab9c83bf6f765bdef"
+
+	[resources.sources.immich_prebuilt_versions_trixie]
+	url = "https://github.com/ewilly/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-trixie.json"
+	sha256 = "sha256:5e2c793d0b507487941ea9200d14ceaeab692105258094ef9dd8ad37ff5c8288"
+
+	[resources.sources.immich_prebuilt_trixie]
+	url = "https://github.com/ewilly/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-trixie.tar.gz"
+	sha256 = "sha256:2d365ebbeee37ba31220d121bf96ee1b0bc5bfd5382ec7b1ceb560de7f9f28d3"
 
     [resources.sources.vchord]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
@@ -163,9 +167,6 @@ ram.runtime = "2G"
 	packages = [
 		"mise"
 	]
-
-	[resources.nodejs]
-	version = "24"
 
 	[resources.database]
 	type = "postgresql"

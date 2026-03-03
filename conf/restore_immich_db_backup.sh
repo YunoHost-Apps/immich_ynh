@@ -46,7 +46,7 @@ then
 	myynh_drop_psql_db 1>/dev/null
 
 	ynh_print_info "[##+.................] Creating an empty immich db..."
-	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+	if [[ $(lsb_release --codename --short) = "bookworm" ]]
 	then
 		myynh_provision_postgresql 1>/dev/null
 	fi

@@ -81,6 +81,36 @@ myynh_add_swap() {
 	fi
 }
 
+# Install geonames
+mynh_install_geodata() {
+	# Definie local var
+	local tempdir
+
+	# Create the temporary directory
+	tempdir="$(mktemp -d)"
+	cd "$tempdir"
+
+	# Download files
+	curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
+	curl -LO "https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
+	curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
+	curl -LO "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_countries.geojson" 2>&1
+	unzip "cities500.zip"
+
+	# Copy built files
+	mkdir -p "$app_dir/geodata/"
+	cp -a "cities500.txt" "$app_dir/geodata/"
+	cp -a "admin1CodesASCII.txt" "$app_dir/geodata/"
+	cp -a "admin2Codes.txt" "$app_dir/geodata/"
+	cp -a "ne_10m_admin_0_countries.geojson" "$app_dir/geodata/"
+
+	# Update geodata-date
+	date --iso-8601=seconds | tr -d "\n" > "$app_dir/geodata/geodata-date.txt"
+
+	# Cleanup
+	ynh_safe_rm "$tempdir"
+}
+
 # Install immich
 myynh_install_immich() {
 	# Thanks to https://github.com/arter97/immich-native, https://github.com/community-scripts/ProxmoxVE/blob/main/install/immich-install.sh, https://github.com/loeeeee/immich-in-lxc/blob/main/install.sh
@@ -416,6 +446,9 @@ myynh_update_psql_db() {
 
 	# Save the cluster in the settings
 	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
+
+	# Cleanup
+	ynh_safe_rm "$tempdir"
 }
 
 # Remove the database

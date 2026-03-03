@@ -64,12 +64,9 @@ fi
 #=================================================
 ynh_script_progression "Upgrading source files..."
 
-ynh_safe_rm "$install_dir/immich"
-ynh_safe_rm "$install_dir/.cache"
-ynh_safe_rm "$install_dir/.config"
-
-source_dir="$install_dir/source"
-ynh_setup_source --source_id="main" --dest_dir="$source_dir" --full_replace
+ynh_safe_rm "$install_dir"
+ynh_setup_source --source_id="immich_prebuilt_versions_$YNH_DEBIAN_VERSION" --dest_dir="$install_dir"
+ynh_setup_source --source_id="immich_prebuilt_$YNH_DEBIAN_VERSION" --dest_dir="$install_dir"
 
 
 #=================================================
@@ -85,33 +82,14 @@ fi
 myynh_update_psql_db
 
 #=================================================
-# ADD SWAP IF NEEDED
-#=================================================
-ynh_script_progression "Temporary adding additional swap (if needed)..."
-
-myynh_add_swap
-
-#=================================================
-# MAKE INSTALL
-#=================================================
-ynh_script_progression "Making install..."
-
-myynh_install_immich
-
-#=================================================
-# REMOVE TEMPORARY SWAP IF ADDED
-#=================================================
-ynh_script_progression "Remove temporary swap if added..."
-
-ynh_del_swap_fixed
-
-#=================================================
 # UPDATE A CONFIG FILE
 #=================================================
 ynh_script_progression "Updating $app's configuration files..."
 
 db_pwd=$(ynh_app_setting_get --key=db_pwd)
 db_port=$(ynh_app_setting_get --key=db_port)
+ynh_config_add --template="immich-server-start.sh" --destination="$install_dir/immich/app/bin/start.sh"
+ynh_config_add --template="immich-machine-learning-start.sh" --destination="$install_dir/immich/app/machine-learning/ml_start.sh"
 ynh_config_add --template="env" --destination="$install_dir/immich/env"
 mkdir --parents "$data_dir/backups"
 ynh_config_add --template="restore_immich_db_backup.sh" --destination="$data_dir/backups/restore_immich_db_backup.sh"
