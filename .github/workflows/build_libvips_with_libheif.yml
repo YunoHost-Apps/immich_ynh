@@ -187,7 +187,7 @@ jobs:
           tag_name: vips-${{ needs.prepare.outputs.vips_version }}-heif-${{ needs.prepare.outputs.libheif_version }}
           name: vips ${{ needs.prepare.outputs.vips_version }} with libheif ${{ needs.prepare.outputs.libheif_version }}
           body: |
-            Build tahnks `build_libvips_with_libheif.yml` github workflow with:
+            Build thanks to `build_libvips_with_libheif.yml` github workflow with:
             libheif : `${{ needs.prepare.outputs.libheif_version }}`
             libvips : `${{ needs.prepare.outputs.vips_version }}`
           files: artifacts/**/*

@@ -51,12 +51,10 @@ ram.runtime = "2G"
 
 	[resources.sources.vips_prebuilt_bookworm]
 	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
 	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/vips-8.17.3-heif-1.20.2/vips-8.17.3-heif-1.20.2-bookworm.tar.gz"
 	sha256 = "607546cd0f862260a881500d0c9d2a6656e6e0e238760377022f3c339c1a3c47"
 
 	[resources.sources.vips_prebuilt_trixie]
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
 	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
 	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/vips-8.17.3-heif-1.20.2/vips-8.17.3-heif-1.20.2-trixie.tar.gz"
 	sha256 = "2f6a73997012426822cc1923638d9706762e9d023beaeab4adb64f916b45acbb"
