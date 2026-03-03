@@ -46,7 +46,10 @@ then
 	myynh_drop_psql_db 1>/dev/null
 
 	ynh_print_info "[##+.................] Creating an empty immich db..."
-	myynh_create_psql_db 1>/dev/null
+	if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+	then
+		myynh_provision_postgresql 1>/dev/null
+	fi
 	myynh_update_psql_db 1>/dev/null
 
 	ynh_print_info "[###++++++++++++++++.] Restoring immich db backup... (Depending on your database size, this may take a long while)"
