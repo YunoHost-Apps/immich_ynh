@@ -499,17 +499,8 @@ jobs:
 
             All compiled artifacts are available in the *Assets* section below.
 
-      - name: Delete workflow artifacts (official API)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          artifact_ids=$(gh api repos/${{ github.repository }}/actions/artifacts --paginate -q '.artifacts[].id')
-          if [ -n "$artifact_ids" ]; then
-            for id in $artifact_ids; do
-              gh api repos/${{ github.repository }}/actions/artifacts/$id -X DELETE
-            done
-            echo "✅ Deleted $(echo "$artifact_ids" | wc -w) artifacts."
-          else
-            echo "ℹ️ No artifacts to delete."
-          fi
+      - uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            immich-*
+            versions-*
