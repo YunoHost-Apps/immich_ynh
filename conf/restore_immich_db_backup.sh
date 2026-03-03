@@ -11,12 +11,13 @@ select backup_file in "${backup_files[@]}"
 do
 	if [[ $REPLY == "0" ]]
 	then
-			ynh_print_info "[####################] Bye!"
-			exit
-	elif [[ -z $backup_file ]]; then
-				ynh_print_info "[....................] Invalid choice, try again"
+		ynh_print_info "[####################] Bye!"
+		exit
+	elif [[ -z $backup_file ]]
+	then
+		ynh_print_info "[....................] Invalid choice, try again"
 	else
-			break
+		break
 	fi
 done
 

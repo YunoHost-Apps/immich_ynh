@@ -28,8 +28,8 @@ multi_instance = false
 ldap = false
 sso = false
 
-disk = "2G"
-ram.build = "5G"
+disk = "3G"
+ram.build = "2G"
 ram.runtime = "2G"
 
 [install]

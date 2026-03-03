@@ -67,7 +67,7 @@ ynh_script_progression "Upgrading source files..."
 ynh_safe_rm "$install_dir"
 ynh_setup_source --source_id="immich_prebuilt_versions_$YNH_DEBIAN_VERSION" --dest_dir="$install_dir"
 ynh_setup_source --source_id="immich_prebuilt_$YNH_DEBIAN_VERSION" --dest_dir="$install_dir"
-
+mynh_install_geodata
 
 #=================================================
 # UPDATE A POSTGRESQL DATABASE
