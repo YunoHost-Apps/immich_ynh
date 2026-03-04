@@ -203,7 +203,7 @@ jobs:
             curl -s https://mise.jdx.dev/mise-latest-linux-arm64 > /usr/local/bin/mise
           else
             exit 1
-          end
+          fi
           chmod 755 /usr/local/bin/mise
 
 
