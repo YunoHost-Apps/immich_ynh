@@ -21,6 +21,7 @@ jobs:
         run: |
           echo "::group::🔍 Fetching release metadata (assets list)"
           set -euo pipefail
+
           owner_repo="${{ github.repository }}"
           tag="${{ github.event.release.tag_name }}"
 
@@ -41,11 +42,13 @@ jobs:
         run: |
           echo "::group::📥 Downloading metadata JSON files"
           set -euo pipefail
+
           mkdir -p meta
           while read -r url; do
             echo "→ $url"
             curl -fsSL -o "meta/$(basename "$url")" "$url"
           done < meta_urls.txt
+
           echo "::endgroup::"
 
       - name: 📂 Checkout testing branch
@@ -60,9 +63,12 @@ jobs:
         run: |
           echo "::group::🌿 Creating update branch"
           set -euo pipefail
+
           tag="${{ github.event.release.tag_name }}"
           new_branch="update-manifest-${tag}"
+
           git switch -c "$new_branch"
+
           echo "branch=$new_branch" >> "$GITHUB_OUTPUT"
           echo "::endgroup::"
 
@@ -80,11 +86,9 @@ jobs:
           echo "::group::✏️ Updating manifest.toml"
           set -euo pipefail
 
-          # Extract Immich version from release tag "immich-vX.Y.Z"
           raw="${{ github.event.release.tag_name }}"
           IMMICH_VERSION="${raw#immich-v}"
 
-          # Extract node version from metadata (same for all distros)
           NODE_VERSION=$(jq -r '.node_version' meta/meta-*.json | head -n1)
 
           export IMMICH_VERSION
@@ -112,7 +116,7 @@ doc["version"] = f"{immich_version}~ynh1"
 doc["resources"]["nodejs"]["version"] = node_version
 
 # ------------------------------------
-# 3) Update prebuilt assets (tar + json) for each distro
+# 3) Update prebuilt assets (tar + json)
 # ------------------------------------
 meta_dir = Path("meta")
 
@@ -121,19 +125,20 @@ for meta_file in sorted(meta_dir.glob("meta-*.json")):
     tar = meta["tar"]
     jsn = meta["json"]
 
-    # Extract distro from filename: immich-vX.Y.Z-<distro>.tar.gz
+    # Extract distro from filename "immich-vX.Y.Z-<distro>-amd64.tar.gz"
     m = re.search(r"-([a-z0-9]+)-amd64\.tar\.gz$", tar["file"])
     if not m:
         continue
+
     distro = m.group(1)
 
-    # JSON metadata block
+    # Update JSON metadata block
     key_json = f"immich_prebuilt_versions_{distro}"
     doc["resources"]["sources"].setdefault(key_json, {})
     doc["resources"]["sources"][key_json]["url"]    = jsn["url"]
     doc["resources"]["sources"][key_json]["sha256"] = jsn["sha256"]
 
-    # TAR metadata block
+    # Update TAR metadata block
     key_tar = f"immich_prebuilt_{distro}"
     doc["resources"]["sources"].setdefault(key_tar, {})
     doc["resources"]["sources"][key_tar]["url"]    = tar["url"]
@@ -142,6 +147,7 @@ for meta_file in sorted(meta_dir.glob("meta-*.json")):
 manifest_path.write_text(tomlkit.dumps(doc), encoding="utf-8")
 print("✔ manifest.toml updated successfully")
 PY
+
           echo "::endgroup::"
 
       - name: 💾 Commit changes
@@ -149,10 +155,13 @@ PY
         run: |
           echo "::group::💾 Committing changes"
           set -euo pipefail
+
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add manifest.toml
-          git diff --cached --quiet || git commit -m "chore(manifest): update to immich v${{ env.IMMICH_VERSION }}"
+          git diff --cached --quiet || git commit -m "chore(manifest): update to immich v${IMMICH_VERSION}"
+
           echo "::endgroup::"
 
       - name: 🔀 Create Pull Request to testing
