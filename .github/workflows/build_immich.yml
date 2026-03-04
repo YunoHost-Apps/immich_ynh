@@ -197,9 +197,9 @@ jobs:
 
       - name: Install mise
         run: |
-          if [ "${{ matrix.debian }}" = "amd64" ]; then
+          if [ "${{ matrix.arch }}" = "amd64" ]; then
             curl -s https://mise.jdx.dev/mise-latest-linux-x64 > /usr/local/bin/mise
-          elif [ "${{ matrix.debian }}" = "arm64" ]; then
+          elif [ "${{ matrix.arch }}" = "arm64" ]; then
             curl -s https://mise.jdx.dev/mise-latest-linux-arm64 > /usr/local/bin/mise
           else
             exit 1
