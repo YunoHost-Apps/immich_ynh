@@ -122,7 +122,7 @@ for meta_file in sorted(meta_dir.glob("meta-*.json")):
     jsn = meta["json"]
 
     # Extract distro from filename: immich-vX.Y.Z-<distro>.tar.gz
-    m = re.search(r"-([a-z0-9]+)\.tar\.gz$", tar["file"])
+    m = re.search(r"-([a-z0-9]+)-amd64\.tar\.gz$", tar["file"])
     if not m:
         continue
     distro = m.group(1)
