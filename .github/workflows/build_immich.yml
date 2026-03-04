@@ -129,16 +129,66 @@ jobs:
 
       - uses: actions/checkout@v6
 
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ needs.prepare.outputs.node_version }}
+
       - name: Install build deps
         run: |
           apt-get update
           apt-get install -y \
-            bash curl jq xz-utils build-essential pkg-config \
-            cmake meson ninja-build ccache uuid-runtime unzip perl \
-            liblcms2-2 libjpeg-dev libpng-dev libtiff-dev libgif-dev \
-            libwebp-dev libaom-dev libde265-dev libdav1d-dev \
-            libexif-dev libexpat1-dev libglib2.0-dev libraw-dev \
-            libimagequant-dev libcgif-dev
+            bash \
+            curl \
+            libssl-dev \
+            libffi-dev \
+            uuid-runtime \
+            autoconf \
+            tar \
+            unzip \
+            perl \
+            libnet-ssleay-perl \
+            libio-socket-ssl-perl \
+            libcapture-tiny-perl \
+            libfile-which-perl \
+            libfile-chdir-perl \
+            libpkgconfig-perl \
+            libffi-checklib-perl \
+            libtest-warnings-perl \
+            libtest-fatal-perl \
+            libtest-needs-perl \
+            libtest2-suite-perl \
+            libsort-versions-perl \
+            libpath-tiny-perl \
+            libtry-tiny-perl \
+            libterm-table-perl \
+            libany-uri-escape-perl \
+            libmojolicious-perl \
+            libfile-slurper-perl \
+            liblcms2-2 \
+            build-essential \
+            cmake \
+            meson \
+            ninja-build \
+            pkg-config \
+            xz-utils \
+            ccache \
+            libgl1 \
+            libdav1d-dev \
+            libwebp-dev \
+            libaom-dev \
+            libde265-dev \
+            libexif-dev \
+            libexpat1-dev \
+            libglib2.0-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libtiff-dev \
+            libgif-dev \
+            libcgif-dev \
+            libimagequant-dev \
+            libraw-dev \
+            jq
 
       - name: Install pnpm
         run: |
@@ -161,6 +211,9 @@ jobs:
         run: |
           set -euxo pipefail
 
+          ######################################################################
+          # DIR STRUCTURE
+          ######################################################################
           echo "::group::📁 Creating folder structure"
           install_dir="${{ needs.prepare.outputs.install_dir }}"
           source_dir="${{ needs.prepare.outputs.source_dir }}"
