@@ -4,87 +4,139 @@ on:
   release:
     types: [published]
 
+  workflow_dispatch:
+    inputs:
+      use_latest_release:
+        description: "Update manifest using the latest published release"
+        required: false
+        default: "true"
+
 jobs:
   update-manifest:
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
       pull-requests: write
+
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
 
-      - name: 🔍 Fetch release metadata
+      ######################################################################
+      # FETCH RELEASE META (AUTO OR MANUAL)
+      ######################################################################
+      - name: 🔍 Determine which release to fetch
+        id: select-release
         shell: bash
         run: |
-          echo "::group::🔍 Fetching release metadata (assets)"
-          set -euo pipefail
+          echo "::group::🔍 Selecting release"
 
-          owner_repo="${{ github.repository }}"
-          tag="${{ github.event.release.tag_name }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              # Manual run: fetch last release
+              echo "Manual trigger → Using latest published release"
+              curl -fsSL \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${{ github.repository }}/releases/latest" \
+                > release.json
+          else
+              # Auto-triggered by release event
+              tag="${{ github.event.release.tag_name }}"
+              echo "Auto trigger → Using release: $tag"
+              curl -fsSL \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${{ github.repository }}/releases/tags/${tag}" \
+                > release.json
+          fi
 
-          curl -fsSL \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${owner_repo}/releases/tags/${tag}" \
-            > release.json
-
-          jq -r '.assets[] | select(.name|test("^meta-.*\\.json$")) | .browser_download_url' release.json \
-            > meta_urls.txt
+          jq -r '.assets[] | select(.name|test("-manifest.json$")) | .browser_download_url' release.json \
+            > manifest_url.txt
 
           echo "::endgroup::"
 
-      - name: 📥 Download metadata
+
+      ######################################################################
+      # DOWNLOAD GLOBAL MANIFEST.JSON
+      ######################################################################
+      - name: 📥 Download global manifest JSON
         shell: bash
         run: |
-          echo "::group::📥 Downloading metadata"
+          echo "::group::📥 Downloading global JSON"
           mkdir -p meta
-
-          while read -r url; do
-            echo "→ $url"
-            curl -fsSL -o "meta/$(basename "$url")" "$url"
-          done < meta_urls.txt
-
+          url=$(cat manifest_url.txt)
+          echo "→ $url"
+          curl -fsSL -o meta/global.json "$url"
           echo "::endgroup::"
 
+
+      ######################################################################
+      # CHECKOUT TESTING BRANCH
+      ######################################################################
       - name: 📂 Checkout testing branch
         uses: actions/checkout@v6
         with:
           ref: testing
           fetch-depth: 0
 
+
+      ######################################################################
+      # CREATE UPDATE BRANCH
+      ######################################################################
       - name: 🌿 Create update branch
         id: create-branch
         shell: bash
         run: |
-          echo "::group::🌿 Creating new branch"
-          tag="${{ github.event.release.tag_name }}"
-          new_branch="update-manifest-${tag}"
+          echo "::group::🌿 Creating update branch"
+          VERSION=$(jq -r '.tag_name // .name' release.json)
+          new_branch="update-manifest-${VERSION}"
           git switch -c "$new_branch"
-          echo "branch=$new_branch" >> "$GITHUB_OUTPUT"
+          echo "branch=$new_branch" >> $GITHUB_OUTPUT
           echo "::endgroup::"
 
+
+      ######################################################################
+      # PYTHON DEPS
+      ######################################################################
       - name: 📦 Install tomlkit
+        run: pip3 install tomlkit
+
+
+      ######################################################################
+      # EXTRACT ENV VARS FROM JSON
+      ######################################################################
+      - name: ✏️ Extract values from global manifest
+        id: extract
         shell: bash
         run: |
-          pip3 install tomlkit
+          echo "::group::✏️ Extract env vars"
 
+          IMMICH_VERSION=$(jq -r '.immich_version' meta/global.json)
+          NODE_VERSION=$(jq -r '.node_version'   meta/global.json)
+
+          echo "IMMICH_VERSION=$IMMICH_VERSION" >> $GITHUB_ENV
+          echo "NODE_VERSION=$NODE_VERSION"     >> $GITHUB_ENV
+
+          echo "::endgroup::"
+
+
+      ######################################################################
+      # UPDATE manifest.toml
+      ######################################################################
       - name: ✏️ Update manifest.toml
         shell: bash
         run: |
           echo "::group::✏️ Updating manifest.toml"
-
-          raw="${{ github.event.release.tag_name }}"
-          IMMICH_VERSION="${raw#immich-v}"
-          NODE_VERSION=$(jq -r '.node_version' meta/meta-*.json | head -n1)
-
           export IMMICH_VERSION NODE_VERSION
-
           python3 .github/scripts/update_manifest.py
-
           echo "::endgroup::"
 
+
+      ######################################################################
+      # COMMIT
+      ######################################################################
       - name: 💾 Commit changes
         shell: bash
         run: |
@@ -95,15 +147,21 @@ jobs:
           git diff --cached --quiet || git commit -m "chore(manifest): update to immich v${IMMICH_VERSION}"
           echo "::endgroup::"
 
-      - name: 🔀 Create Pull Request to testing
+
+      ######################################################################
+      # CREATE PULL REQUEST
+      ######################################################################
+      - name: 🔀 Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           title: "Update manifest for Immich v${{ env.IMMICH_VERSION }}"
           body: |
-            This PR updates `manifest.toml` following the latest Immich release.
-            - version → `{{ env.IMMICH_VERSION }}~ynh1`
-            - nodejs → `{{ env.NODE_VERSION }}`
-            - updated prebuilt metadata for each distro
+            Manifest automatically updated from the latest Immich release.
+
+            - immich → `${{ env.IMMICH_VERSION }}~ynh1`
+            - nodejs → `${{ env.NODE_VERSION }}`
+            - multi‑arch tarballs imported correctly
+
           base: testing
           branch: ${{ steps.create-branch.outputs.branch }}
           labels: automated, manifest, release
