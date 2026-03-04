@@ -22,7 +22,7 @@ code = "https://github.com/immich-app/immich"
 [integration]
 yunohost = ">= 12.1.39"
 helpers_version = "2.1"
-architectures = ["arm64", "amd64"]
+architectures = ["amd64"]
 multi_instance = false
 
 ldap = false
@@ -42,12 +42,6 @@ ram.runtime = "2G"
 
 [resources]
 	[resources.sources]
-
-	[resources.sources.main]
-	url = "https://github.com/immich-app/immich/archive/refs/tags/v2.5.6.tar.gz"
-	sha256 = "01072d3125873ca1455ce0153f453017402308734fea9da45eb7ccd387d757ed"
-
-	autoupdate.strategy = "latest_github_release"
 
 	[resources.sources.immich_prebuilt_versions_bookworm]
 	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm.json"
