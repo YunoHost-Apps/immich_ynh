@@ -20,22 +20,22 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      immich_version: ${{ steps.get-versions.outputs.immich_version }}
-      node_version:   ${{ steps.get-versions.outputs.node_version }}
-      pnpm_version:   ${{ steps.get-versions.outputs.pnpm_version }}
-      python_version: ${{ steps.get-versions.outputs.python_version }}
-      libheif_version:${{ steps.get-versions.outputs.libheif_version }}
-      vips_version:   ${{ steps.get-versions.outputs.vips_version }}
-      should_build:   ${{ steps.check-version.outputs.should_build }}
-      matrix:         ${{ steps.set-matrix.outputs.matrix }}
+      immich_version:  ${{ steps.get-versions.outputs.immich_version }}
+      node_version:    ${{ steps.get-versions.outputs.node_version }}
+      pnpm_version:    ${{ steps.get-versions.outputs.pnpm_version }}
+      python_version:  ${{ steps.get-versions.outputs.python_version }}
+      libheif_version: ${{ steps.get-versions.outputs.libheif_version }}
+      vips_version:    ${{ steps.get-versions.outputs.vips_version }}
+      should_build:    ${{ steps.check-version.outputs.should_build }}
+      matrix:          ${{ steps.set-matrix.outputs.matrix }}
 
-      install_dir:    /var/www/immich
-      source_dir:     /var/www/immich/source
-      vips_dir:       /var/www/immich/vips
-      app_dir:        /var/www/immich/immich/app
-      plugin_dir:     /var/www/immich/immich/app/corePlugin
-      ml_dir:         /var/www/immich/immich/app/machine-learning
-      ml_cache_dir:   /var/www/immich/immich/.cache_ml
+      install_dir:     /var/www/immich
+      source_dir:      /var/www/immich/source
+      vips_dir:        /var/www/immich/vips
+      app_dir:         /var/www/immich/immich/app
+      plugin_dir:      /var/www/immich/immich/app/corePlugin
+      ml_dir:          /var/www/immich/immich/app/machine-learning
+      ml_cache_dir:    /var/www/immich/immich/.cache_ml
 
     steps:
 
