@@ -422,33 +422,73 @@ jobs:
           mv immich-*.tar.gz /tmp/
           echo "::endgroup::"
 
-      - name: Create versions JSON
+      - name: Export asset metadata to JSON (per distro)
+        id: asset-meta
+        shell: bash
         run: |
-          echo "::group::📝 Creating the json file"
-          JSON_FILE="/tmp/immich-v${{ needs.prepare.outputs.immich_version }}-${{ matrix.debian_version }}.json"
-          echo "{"                                                                   >  "$JSON_FILE"
-          echo "  \"immich\": \"${{ needs.prepare.outputs.immich_version }}\","      >> "$JSON_FILE"
-          echo "  \"node\": \"${{ needs.prepare.outputs.node_version }}\","          >> "$JSON_FILE"
-          echo "  \"pnpm\": \"${{ needs.prepare.outputs.pnpm_version }}\","          >> "$JSON_FILE"
-          echo "  \"python\": \"${{ needs.prepare.outputs.python_version }}\","      >> "$JSON_FILE"
-          echo "  \"mise\": \"$(mise version --json | jq -r .version)\""             >> "$JSON_FILE"
-          echo "}"                                                                   >> "$JSON_FILE"
+          echo "::group::📝 Creating manifest metadata JSON"
+          set -euo pipefail
+
+          immich_version="${{ needs.prepare.outputs.immich_version }}"
+          node_version="${{ needs.prepare.outputs.node_version }}"
+          pnpm_version="${{ needs.prepare.outputs.pnpm_version }}"
+          python_version="${{ needs.prepare.outputs.python_version }}"
+          mise_version="$(mise version --json | jq -r .version)"
+          distro="${{ matrix.debian_version }}"
+          repo="${{ github.repository }}"
+          tag="immich-v${immich_version}"
+
+          tarfile="immich-v${immich_version}-${distro}.tar.gz"
+          jsonfile="immich-v${immich_version}-${distro}.json"
+
+          sha_tar=$(sha256sum "/tmp/${tarfile}" | awk '{print $1}')
+          sha_json=$(sha256sum "/tmp/${jsonfile}" | awk '{print $1}')
+
+          url_tar="https://github.com/$repo/releases/download/$tag/$tarfile"
+          url_json="https://github.com/$repo/releases/download/$tag/$jsonfile"
+
+          mkdir -p /tmp/manifest_meta
+          jq -n \
+            --arg immich_version "$immich_version" \
+            --arg node_version "$node_version" \
+            --arg pnpm_version "$pnpm_version" \
+            --arg python_version "$python_version" \
+            --arg mise_version "$mise_version" \
+            --arg distro "$distro" \
+            --arg tarfile "$tarfile" \
+            --arg tarurl "$url_tar" \
+            --arg tarsha "$sha_tar" \
+            --arg jsfile "$jsonfile" \
+            --arg jsurl "$url_json" \
+            --arg jssha "$sha_json" \
+            '{
+              immich_version: $immich_version,
+              node_version:   $node_version,
+              pnpm_version:   $pnpm_version,
+              python_version: $python_version,
+              mise_version:   $mise_version,
+              distro:         $distro,
+              tar:  { file: $tarfile,  url: $tarurl,  sha256: $tarsha },
+              json: { file: $jsfile,   url: $jsurl,   sha256: $jssha  }
+            }' \
+            > "/tmp/meta-${distro}.json"
+
           echo "::endgroup::"
 
       - name: Upload immich
         uses: actions/upload-artifact@v4
         with:
           name: immich-${{ matrix.debian_version }}
-          path: /tmp/*.tar.gz
+          path: /tmp/immich-*.tar.gz
           compression-level: 6
-          retention-days: 7
+          retention-days: 1
 
-      - name: Upload versions JSON
+      - name: Upload manifest metadata
         uses: actions/upload-artifact@v4
         with:
-          name: versions-${{ matrix.debian_version }}
-          path: /tmp/immich-v${{ needs.prepare.outputs.immich_version }}-${{ matrix.debian_version }}.json
-          retention-days: 7
+          name: manifest-meta
+          path: /tmp/meta-*.json
+          retention-days: 1
 
   release:
     runs-on: ubuntu-latest
@@ -503,4 +543,4 @@ jobs:
         with:
           name: |
             immich-*
-            versions-*
+            manifest-meta*
