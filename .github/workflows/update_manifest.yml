@@ -16,10 +16,9 @@ jobs:
     steps:
 
       - name: 🔍 Fetch release metadata
-        id: release-info
         shell: bash
         run: |
-          echo "::group::🔍 Fetching release metadata (assets list)"
+          echo "::group::🔍 Fetching release metadata (assets)"
           set -euo pipefail
 
           owner_repo="${{ github.repository }}"
@@ -34,16 +33,14 @@ jobs:
           jq -r '.assets[] | select(.name|test("^meta-.*\\.json$")) | .browser_download_url' release.json \
             > meta_urls.txt
 
-          echo "Found $(wc -l < meta_urls.txt) metadata file(s)."
           echo "::endgroup::"
 
       - name: 📥 Download metadata
         shell: bash
         run: |
-          echo "::group::📥 Downloading metadata JSON files"
-          set -euo pipefail
-
+          echo "::group::📥 Downloading metadata"
           mkdir -p meta
+
           while read -r url; do
             echo "→ $url"
             curl -fsSL -o "meta/$(basename "$url")" "$url"
@@ -61,92 +58,30 @@ jobs:
         id: create-branch
         shell: bash
         run: |
-          echo "::group::🌿 Creating update branch"
-          set -euo pipefail
-
+          echo "::group::🌿 Creating new branch"
           tag="${{ github.event.release.tag_name }}"
           new_branch="update-manifest-${tag}"
-
           git switch -c "$new_branch"
-
           echo "branch=$new_branch" >> "$GITHUB_OUTPUT"
           echo "::endgroup::"
 
       - name: 📦 Install tomlkit
         shell: bash
         run: |
-          echo "::group::📦 Installing tomlkit (Python TOML editor)"
-          pip3 install --quiet tomlkit
-          echo "::endgroup::"
+          pip3 install tomlkit
 
       - name: ✏️ Update manifest.toml
-        id: update-manifest
         shell: bash
         run: |
           echo "::group::✏️ Updating manifest.toml"
-          set -euo pipefail
 
           raw="${{ github.event.release.tag_name }}"
           IMMICH_VERSION="${raw#immich-v}"
-
           NODE_VERSION=$(jq -r '.node_version' meta/meta-*.json | head -n1)
 
-          export IMMICH_VERSION
-          export NODE_VERSION
+          export IMMICH_VERSION NODE_VERSION
 
-          python3 <<'PY'
-import json, re, os
-from pathlib import Path
-import tomlkit
-
-manifest_path = Path("manifest.toml")
-doc = tomlkit.parse(manifest_path.read_text(encoding="utf-8"))
-
-immich_version = os.environ["IMMICH_VERSION"]
-node_version   = os.environ["NODE_VERSION"]
-
-# ------------------------------------
-# 1) Update global version
-# ------------------------------------
-doc["version"] = f"{immich_version}~ynh1"
-
-# ------------------------------------
-# 2) Update Node.js version
-# ------------------------------------
-doc["resources"]["nodejs"]["version"] = node_version
-
-# ------------------------------------
-# 3) Update prebuilt assets (tar + json)
-# ------------------------------------
-meta_dir = Path("meta")
-
-for meta_file in sorted(meta_dir.glob("meta-*.json")):
-    meta = json.loads(meta_file.read_text())
-    tar = meta["tar"]
-    jsn = meta["json"]
-
-    # Extract distro from filename "immich-vX.Y.Z-<distro>-amd64.tar.gz"
-    m = re.search(r"-([a-z0-9]+)-amd64\.tar\.gz$", tar["file"])
-    if not m:
-        continue
-
-    distro = m.group(1)
-
-    # Update JSON metadata block
-    key_json = f"immich_prebuilt_versions_{distro}"
-    doc["resources"]["sources"].setdefault(key_json, {})
-    doc["resources"]["sources"][key_json]["url"]    = jsn["url"]
-    doc["resources"]["sources"][key_json]["sha256"] = jsn["sha256"]
-
-    # Update TAR metadata block
-    key_tar = f"immich_prebuilt_{distro}"
-    doc["resources"]["sources"].setdefault(key_tar, {})
-    doc["resources"]["sources"][key_tar]["url"]    = tar["url"]
-    doc["resources"]["sources"][key_tar]["sha256"] = tar["sha256"]
-
-manifest_path.write_text(tomlkit.dumps(doc), encoding="utf-8")
-print("✔ manifest.toml updated successfully")
-PY
+          python3 .github/scripts/update_manifest.py
 
           echo "::endgroup::"
 
@@ -154,31 +89,21 @@ PY
         shell: bash
         run: |
           echo "::group::💾 Committing changes"
-          set -euo pipefail
-
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add manifest.toml
           git diff --cached --quiet || git commit -m "chore(manifest): update to immich v${IMMICH_VERSION}"
-
           echo "::endgroup::"
 
       - name: 🔀 Create Pull Request to testing
         uses: peter-evans/create-pull-request@v6
         with:
-          title: "Update to immich v${{ env.IMMICH_VERSION }}"
+          title: "Update manifest for Immich v${{ env.IMMICH_VERSION }}"
           body: |
-            This PR updates `manifest.toml` after the latest Immich release.
-
-            Updated fields:
-            - package version: `"${{ env.IMMICH_VERSION }}~ynh1"`
-            - nodejs version in [resources.nodejs] with `"${{ env.NODE_VERSION }}"`
-            - url and sha256 in [resources.sources.immich_prebuilt_*]
-
+            This PR updates `manifest.toml` following the latest Immich release.
+            - version → `{{ env.IMMICH_VERSION }}~ynh1`
+            - nodejs → `{{ env.NODE_VERSION }}`
+            - updated prebuilt metadata for each distro
           base: testing
           branch: ${{ steps.create-branch.outputs.branch }}
-          labels: |
-            automated
-            manifest
-            release
+          labels: automated, manifest, release
