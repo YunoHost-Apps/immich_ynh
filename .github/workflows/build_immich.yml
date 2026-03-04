@@ -89,7 +89,8 @@ jobs:
             versions="bookworm,trixie"
           fi
 
-          echo "matrix=$(echo "$versions" | jq -R -s -c 'split(",")')" >> $GITHUB_OUTPUT
+          MATRIX=$(echo "$versions" | jq -R -s -c 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
 
 
 
