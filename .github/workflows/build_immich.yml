@@ -111,7 +111,6 @@ jobs:
 
     container:
       image: debian:${{ matrix.debian }}-slim
-      platform: linux/${{ matrix.arch }}
 
     env:
       NODE_ENV: production
