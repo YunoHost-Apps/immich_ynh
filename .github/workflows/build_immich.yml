@@ -1,4 +1,4 @@
-name: Build immich with libvips
+name: Build immich with libvips on amd64
 
 on:
   workflow_dispatch:
@@ -418,7 +418,8 @@ jobs:
         run: |
           echo "::group::📦 Creating final artifact"
           cd "$(dirname ${{ needs.prepare.outputs.install_dir }})"
-          tar czf immich-v${{ needs.prepare.outputs.immich_version }}-${{ matrix.debian_version }}.tar.gz "$(basename ${{ needs.prepare.outputs.install_dir }})"
+          tar czf immich-v${{ needs.prepare.outputs.immich_version }}-${{ matrix.debian_version }}-amd64.tar.gz \
+            "$(basename ${{ needs.prepare.outputs.install_dir }})"
           mv immich-*.tar.gz /tmp/
           echo "::endgroup::"
 
@@ -438,8 +439,8 @@ jobs:
           repo="${{ github.repository }}"
           tag="immich-v${immich_version}"
 
-          tarfile="immich-v${immich_version}-${distro}.tar.gz"
-          jsonfile="immich-v${immich_version}-${distro}.json"
+          tarfile="immich-v${immich_version}-${distro}-amd64.tar.gz"
+          jsonfile="immich-v${immich_version}-${distro}-amd64.json"
 
           sha_tar=$(sha256sum "/tmp/${tarfile}" | awk '{print $1}')
           sha_json=$(sha256sum "/tmp/${jsonfile}" | awk '{print $1}')
@@ -447,7 +448,6 @@ jobs:
           url_tar="https://github.com/$repo/releases/download/$tag/$tarfile"
           url_json="https://github.com/$repo/releases/download/$tag/$jsonfile"
 
-          mkdir -p /tmp/manifest_meta
           jq -n \
             --arg immich_version "$immich_version" \
             --arg node_version "$node_version" \
@@ -471,7 +471,7 @@ jobs:
               tar:  { file: $tarfile,  url: $tarurl,  sha256: $tarsha },
               json: { file: $jsfile,   url: $jsurl,   sha256: $jssha  }
             }' \
-            > "/tmp/meta-${distro}.json"
+            > "/tmp/meta-${distro}-amd64.json"
 
           echo "::endgroup::"
 
