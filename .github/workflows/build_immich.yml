@@ -309,8 +309,12 @@ jobs:
           ######################################################################
           echo "::group::🛠️ Building immich server"
           cd "$source_dir/server"
-          export SHARP_FORCE_GLOBAL_LIBVIPS=true
+          export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+          export CI=1
+          export SHARP_IGNORE_GLOBAL_LIBVIPS=true
           pnpm --filter immich --frozen-lockfile build
+          unset SHARP_IGNORE_GLOBAL_LIBVIPS
+          export SHARP_FORCE_GLOBAL_LIBVIPS=true
           pnpm --filter immich --frozen-lockfile --prod --no-optional deploy "$app_dir" --force
           cp "$app_dir/package.json" "$app_dir/bin/"
           sed -i "s@^start@./start@g" "$app_dir/bin/immich-admin"
@@ -321,11 +325,10 @@ jobs:
           # WEB
           ######################################################################
           echo "::group::🌐 Building immich web + sdk"
-          cd "$source_dir"
-          pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile install
+          pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
+          unset SHARP_FORCE_GLOBAL_LIBVIPS
           export SHARP_IGNORE_GLOBAL_LIBVIPS=true
           pnpm --filter @immich/sdk --filter immich-web build
-          mkdir -p "$app_dir/www"
           cp -a web/build "$app_dir/www/"
           echo "::endgroup::"
 
@@ -335,7 +338,7 @@ jobs:
           ######################################################################
           echo "::group::🔧 Building immich CLI"
           cd "$source_dir"
-          pnpm --filter @immich/sdk --filter @immich/cli install
+          pnpm --filter @immich/sdk --filter @immich/cli --frozen-lockfile install
           pnpm --filter @immich/sdk --filter @immich/cli build
           pnpm --filter @immich/cli --prod --no-optional deploy "$app_dir/cli"
           ln -s "$app_dir/cli/bin/immich" "$app_dir/bin/immich"
@@ -370,19 +373,15 @@ jobs:
           ######################################################################
           echo "::group::🧠 Building ML stack"
           cd "$source_dir/machine-learning"
-
           mise use uv@latest --quiet
-
           export UV_PYTHON_INSTALL_DIR="$ml_dir"
           mise exec -- uv venv "$ml_dir/venv" \
+            --link-mode copy \
             --python "${{ needs.prepare.outputs.python_version }}" \
-            --managed-python --link-mode copy
-
+            --managed-python
           source "$ml_dir/venv/bin/activate"
-
-          mise exec -- uv sync --locked --active --extra cpu --no-dev || \
-          mise exec -- uv sync --locked --active --extra cpu --no-dev
-
+          mise exec -- uv sync --offline --locked --active --extra cpu --no-dev || \
+            mise exec -- uv sync --locked --active --extra cpu --no-dev
           cp -a ann "$ml_dir/"
           cp -a immich_ml "$ml_dir/"
           echo "::endgroup::"
