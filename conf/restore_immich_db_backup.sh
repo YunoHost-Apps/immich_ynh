@@ -39,6 +39,7 @@ then
 	app="__APP__"
 	db_cluster="__DB_CLUSTER__"
 	db_name="__APP__"
+	YNH_DEBIAN_VERSION=$(lsb_release --codename --short)
 
 	ynh_print_info "[+...................] Stopping immich..."
 	ynh_systemctl --service="$app-server" --action="stop"
@@ -47,7 +48,7 @@ then
 	myynh_drop_psql_db 1>/dev/null
 
 	ynh_print_info "[##+.................] Creating an empty immich db..."
-	if [[ $(lsb_release --codename --short) = "bookworm" ]]
+	if [[ $YNH_DEBIAN_VERSION = "bookworm" ]]
 	then
 		myynh_provision_postgresql 1>/dev/null
 	fi

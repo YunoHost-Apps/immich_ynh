@@ -57,6 +57,7 @@ mynh_install_geodata() {
 	date --iso-8601=seconds | tr -d "\n" > "$app_dir/geodata/geodata-date.txt"
 
 	# Cleanup
+	cd -
 	ynh_safe_rm "$tempdir"
 }
 
@@ -106,7 +107,7 @@ myynh_provision_postgresql() {
 
 	# Add postgresql packages from postgresql repo
 	ynh_print_info "Installing postgresql $psql_version..."
-	ynh_hide_warnings ynh_apt_install_dependencies_from_extra_repository \
+	ynh_apt_install_dependencies_from_extra_repository \
 		--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
 		--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
 		--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
@@ -189,7 +190,7 @@ myynh_update_psql_db() {
 
 		# The doc says it should be called only once, but the code says multiple calls are supported.
 		# Also, they're already installed so that should be quasi instantaneous.
-		ynh_hide_warnings ynh_apt_install_dependencies "postgresql-17-vchord"
+		ynh_apt_install_dependencies "postgresql-17-vchord"
 
 		# Mark packages as dependencies, to allow automatic removal
 		apt-mark auto "postgresql-17-vchord"
