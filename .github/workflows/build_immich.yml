@@ -325,6 +325,7 @@ jobs:
           # WEB
           ######################################################################
           echo "::group::🌐 Building immich web + sdk"
+          cd "$source_dir"
           pnpm --filter @immich/sdk --filter immich-web --frozen-lockfile --force install
           unset SHARP_FORCE_GLOBAL_LIBVIPS
           export SHARP_IGNORE_GLOBAL_LIBVIPS=true
