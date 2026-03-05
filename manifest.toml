@@ -89,6 +89,7 @@ ram.runtime = "2G"
 		"uuid-runtime",
 		"curl",
 		"unzip",
+		"libgl1",
 		"libglib2.0-0",
 		"libexpat1",
 		"libexif12",
