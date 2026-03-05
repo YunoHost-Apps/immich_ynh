@@ -86,11 +86,9 @@ ram.runtime = "2G"
 	packages = [
 		"postgresql",
 		"redis-server",
-		"uuid-runtime",
-		
+		"uuid-runtime",		
 		"curl",
 		"unzip",
-
 		"libglib2.0-0",
 		"libexpat1",
 		"libexif12",
