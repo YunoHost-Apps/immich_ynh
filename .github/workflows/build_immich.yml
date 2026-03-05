@@ -224,8 +224,8 @@ jobs:
             exit 1
           fi
           chmod 755 /usr/local/bin/mise
-          
-          
+
+
           mise_version=$(mise version --json | jq -r .version)
           echo "mise_version=$mise_version" >> $GITHUB_OUTPUT
 
@@ -380,13 +380,14 @@ jobs:
           # PLUGINS
           ######################################################################
           echo "::group::🔌 Building immich plugins"
-          cd "$source_dir/plugins"
-          mise trust --ignore ../mise.toml
-          mise trust ./mise.toml
+          cd "$source_dir"
+          mise trust --ignore ./mise.toml
+          mise trust ./plugins/mise.toml
+          cd plugins
           mise install
           mise run build
-          cp -r dist "$plugin_dir/"
-          cp manifest.json "$plugin_dir/"
+          cp -r ./dist "$plugin_dir/dist"
+          cp ./manifest.json "$plugin_dir/"
           echo "::endgroup::"
 
 
@@ -576,7 +577,7 @@ jobs:
           node="${{ needs.prepare.outputs.node_version }}"
           pnpm="${{ needs.prepare.outputs.pnpm_version }}"
           python="${{ needs.prepare.outputs.python_version }}"
-          
+
           first_meta=$(ls meta/meta-*.json 2>/dev/null | head -n1 || true)
           if [ -n "$first_meta" ]; then
             mise=$(jq -r '.mise_version' "$first_meta")
