@@ -3,10 +3,14 @@ name: Build immich with libvips (multi-arch)
 on:
   workflow_dispatch:
     inputs:
-      debian_versions:
+      debian:
         description: 'Debian versions to build (comma-separated: bookworm, trixie)'
         required: true
         default: 'bookworm,trixie'
+      arch:
+        description: 'CPU architecture to build (comma-separated: amd64, arm64)'
+        required: true
+        default: 'amd64'
 
   schedule:
     - cron: '0 2 * * *'
@@ -27,7 +31,8 @@ jobs:
       libheif_version: ${{ steps.get-versions.outputs.libheif_version }}
       vips_version:    ${{ steps.get-versions.outputs.vips_version }}
       should_build:    ${{ steps.check-version.outputs.should_build }}
-      matrix:          ${{ steps.set-matrix.outputs.matrix }}
+      matrix_debian:   ${{ steps.set-matrix.outputs.matrix_debian }}
+      matrix_arch:     ${{ steps.set-matrix.outputs.matrix_arch }}
 
       install_dir:     /var/www/immich
       source_dir:      /var/www/immich/source
@@ -84,13 +89,18 @@ jobs:
         if: steps.check-version.outputs.should_build == 'true'
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            versions="${{ github.event.inputs.debian_versions }}"
+            debian="${{ github.event.inputs.debian }}"
+            arch="${{ github.event.inputs.arch }}"
           else
-            versions="bookworm,trixie"
+            debian="bookworm,trixie"
+            arch="amd64"
           fi
 
-          MATRIX=$(echo "$versions" | jq -R -s -c 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          MATRIX_DEBIAN=$(echo "$debian" | jq -R -s -c 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
+          echo "matrix_debian=$MATRIX_DEBIAN" >> $GITHUB_OUTPUT
+
+          MATRIX_ARCH=$(echo "$arch" | jq -R -s -c 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
+          echo "matrix_arch=$MATRIX_ARCH" >> $GITHUB_OUTPUT
 
 
 
@@ -105,8 +115,8 @@ jobs:
 
     strategy:
       matrix:
-        debian: ${{ fromJson(needs.prepare.outputs.matrix) }}
-        arch:   [amd64, arm64]
+        debian: ${{ fromJson(needs.prepare.outputs.matrix_debian) }}
+        arch:   ${{ fromJson(needs.prepare.outputs.matrix_arch) }}
 
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
 
