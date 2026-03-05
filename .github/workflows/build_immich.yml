@@ -461,7 +461,7 @@ jobs:
               --arg sha "$sha" \
               '
                 . as $root
-                | $root[$distro] //= {}
+                | if ($root[$distro] | type) == "object" then . else .[$distro] = {} end
                 | $root[$distro][($arch + "_file")]   = $file
                 | $root[$distro][($arch + "_url")]    = $url
                 | $root[$distro][($arch + "_sha256")] = $sha
