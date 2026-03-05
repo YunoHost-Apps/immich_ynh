@@ -13,8 +13,7 @@ do
 	then
 		ynh_print_info "[####################] Bye!"
 		exit
-	elif [[ -z $backup_file ]]
-	then
+	elif [[ -z $backup_file ]]; then
 		ynh_print_info "[....................] Invalid choice, try again"
 	else
 		break
@@ -48,7 +47,7 @@ then
 	myynh_drop_psql_db 1>/dev/null
 
 	ynh_print_info "[##+.................] Creating an empty immich db..."
-	if [[ $YNH_DEBIAN_VERSION = "bookworm" ]]
+	if [ "$YNH_DEBIAN_VERSION" = "bookworm" ]
 	then
 		myynh_provision_postgresql 1>/dev/null
 	fi
