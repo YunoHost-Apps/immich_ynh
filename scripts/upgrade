@@ -76,6 +76,7 @@ ynh_script_progression "Updating a PostgreSQL database..."
 
 if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 then
+	myynh_install_postgresql
 	myynh_provision_postgresql
 fi
 
