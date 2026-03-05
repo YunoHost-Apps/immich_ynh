@@ -43,21 +43,13 @@ ram.runtime = "2G"
 [resources]
 	[resources.sources]
 
-	[resources.sources.immich_prebuilt_versions_bookworm]
-	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm.json"
-	sha256 = "5e2c793d0b507487941ea9200d14ceaeab692105258094ef9dd8ad37ff5c8288"
-
 	[resources.sources.immich_prebuilt_bookworm]
-	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm.tar.gz"
-	sha256 = "d55b44c3f9251caa5657ece82f0eef87a8ff7c9476ca47295cf127c8aecbd4da"
-
-	[resources.sources.immich_prebuilt_versions_trixie]
-	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-trixie.json"
-	sha256 = "5e2c793d0b507487941ea9200d14ceaeab692105258094ef9dd8ad37ff5c8288"
+	amd64.url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm-amd64.tar.gz"
+	amd64.sha256 = "5e5d818b528244036749b4db3987f2d74760225a1ce08175ace2ad21a80be51f"
 
 	[resources.sources.immich_prebuilt_trixie]
-	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-trixie.tar.gz"
-	sha256 = "59589908c26edde8ac7551d735d22b5edce5100cda8e1fd036649574574b5d9b"
+	amd64.url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-trixie-amd64.tar.gz"
+	amd64.sha256 = "ddb8c93054d9836f1fd0b8cd6f0cafd6dca8dd5cdec94150be04a66598bc3dee"
 
     [resources.sources.vchord]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
@@ -153,13 +145,6 @@ ram.runtime = "2G"
 	key = "https://repo.jellyfin.org/jellyfin_team.gpg.key"
 	packages = [
 		"jellyfin-ffmpeg7"
-	]
-
-	[resources.apt.extras.mise]
-	repo = "deb https://mise.jdx.dev/deb stable main"
-	key = "https://mise.jdx.dev/gpg-key.pub"
-	packages = [
-		"mise"
 	]
 
 	[resources.database]
