@@ -98,19 +98,23 @@ myynh_execute_psql_as_root() {
 		"$tool" "$cluster" $options "$database" "$sql"
 }
 
-# For bookworm
+# For bookworm > Add postgresql packages from postgresql repo
+myynh_install_postgresql() {
+	ynh_print_info "Installing postgresql $psql_version..."
+	ynh_apt_install_dependencies_from_extra_repository \
+		--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
+		--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
+		--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
+}
+
+# For bookworm > Provisionning the database on right postgresql cluster
 myynh_provision_postgresql() {
 	# Definie local var
 	local db_pwd
 	local default_port
 	local config_file
 
-	# Add postgresql packages from postgresql repo
-	ynh_print_info "Installing postgresql $psql_version..."
-	ynh_apt_install_dependencies_from_extra_repository \
-		--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
-		--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
-		--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
+	ynh_print_info "Provisionning database on postgresql $psql_version..."
 
 	# Create the cluster if not existing
 	if ! pg_lsclusters | grep -q "$db_cluster"
