@@ -140,6 +140,11 @@ jobs:
 
     steps:
 
+      - name: Install git for checkout
+        run: |
+          apt-get update
+          apt-get install -y git ca-certificates
+
       - uses: actions/checkout@v6
 
       - name: Setup Node
@@ -463,28 +468,53 @@ jobs:
         run: |
           echo "::group::📝 Creating manifest metadata JSON"
 
-          immich="${{ needs.prepare.outputs.immich_version }}"
           distro="${{ matrix.debian }}"
           arch="${{ matrix.arch }}"
+          immich="${{ needs.prepare.outputs.immich_version }}"
+          node="${{ needs.prepare.outputs.node_version }}"
+          pnpm="${{ needs.prepare.outputs.pnpm_version }}"
+          python="${{ needs.prepare.outputs.python_version }}"
+          mise="${{ steps.install-mise.outputs.mise_version }}"
+          exec_time="${{ steps.build-immich.outputs.exec_time }}"
+          peak_ram="${{ steps.build-immich.outputs.peak_ram }}"
+          disk_used="${{ steps.build-immich.outputs.disk_used }}"
           repo="${{ github.repository }}"
           tag="immich-v${immich}"
-
-          tarfile="immich-v${immich}-${distro}-${arch}.tar.gz"
-          tarurl="https://github.com/${repo}/releases/download/${tag}/${tarfile}"
-          tarsha=$(sha256sum "/tmp/${tarfile}" | awk '{print $1}')
+          file="immich-v${immich}-${distro}-${arch}.tar.gz"
+          url="https://github.com/${repo}/releases/download/${tag}/${file}"
+          sha=$(sha256sum "/tmp/${file}" | awk '{print $1}')
 
           jq -n \
             --arg distro "$distro" \
             --arg arch "$arch" \
-            --arg tarfile "$tarfile" \
-            --arg tarurl "$tarurl" \
-            --arg tarsha "$tarsha" \
-            '{
-              distro: $distro,
-              arch:   $arch,
-              tar: { file: $tarfile, url: $tarurl, sha256: $tarsha }
-            }' \
-            > "/tmp/meta-${distro}-${arch}.json"
+            --arg file "$file" \
+            --arg url "$url" \
+            --arg sha256 "$sha" \
+            --arg immich "$immich" \
+            --arg node "$node" \
+            --arg pnpm "$pnpm" \
+            --arg python "$python" \
+            --arg mise "$mise" \
+            --arg exec_time "$exec_time" \
+            --arg peak_ram "$peak_ram" \
+            --arg disk_used "$disk_used" \
+            '
+            {
+              distro:          $distro,
+              arch:            $arch,
+              file:            $file,
+              url:             $url,
+              sha256:          $sha256,
+              immich_version:  $immich,
+              node_version:    $node,
+              pnpm_version:    $pnpm,
+              python_version:  $python,
+              mise_version:    $mise,
+              exec_time:       $exec_time,
+              peak_ram:        $peak_ram,
+              disk_used:       $disk_used
+            }
+            ' > "/tmp/meta-${distro}-${arch}.json"
 
           echo "::endgroup::"
 
@@ -504,8 +534,8 @@ jobs:
       - name: Upload meta JSON
         uses: actions/upload-artifact@v4
         with:
-          name: meta
-          path: /tmp/meta-*.json
+          name: "meta-${{ matrix.debian }}-${{ matrix.arch }}"
+          path: "/tmp/meta-${{ matrix.debian }}-${{ matrix.arch }}.json"
           retention-days: 1
 
 
@@ -519,17 +549,24 @@ jobs:
     needs: [prepare, build]
     runs-on: ubuntu-latest
     if: needs.prepare.outputs.should_build == 'true'
+    outputs:
+      mise_version: ${{ steps.collect.outputs.mise }}
+      exec_time:    ${{ steps.collect.outputs.exec_time }}
+      peak_ram:     ${{ steps.collect.outputs.peak_ram }}
+      disk_used:    ${{ steps.collect.outputs.disk_used }}
+
 
     steps:
 
       - name: 📥 Download meta JSON files
         uses: actions/download-artifact@v4
         with:
-          name: meta
+          pattern: "meta-*"
           path: meta
           merge-multiple: true
 
-      - name: 📦 Build final manifest.json
+      - name: 📦 Collect to build final manifest.json
+        id: collect
         shell: bash
         run: |
           set -euo pipefail
@@ -539,7 +576,24 @@ jobs:
           node="${{ needs.prepare.outputs.node_version }}"
           pnpm="${{ needs.prepare.outputs.pnpm_version }}"
           python="${{ needs.prepare.outputs.python_version }}"
-          mise="${{ needs.build.outputs.mise_version }}"
+          
+          first_meta=$(ls meta/meta-*.json 2>/dev/null | head -n1 || true)
+          if [ -n "$first_meta" ]; then
+            mise=$(jq -r '.mise_version' "$first_meta")
+            exec_time=$(jq -r '.exec_time' "$first_meta")
+            peak_ram=$(jq -r '.peak_ram' "$first_meta")
+            disk_used=$(jq -r '.disk_used' "$first_meta")
+          else
+            mise="unknown"
+            exec_time="unknown"
+            peak_ram="unknown"
+            disk_used="unknown"
+          fi
+
+          echo "mise=$mise"           >> "$GITHUB_OUTPUT"
+          echo "exec_time=$exec_time" >> "$GITHUB_OUTPUT"
+          echo "peak_ram=$peak_ram"   >> "$GITHUB_OUTPUT"
+          echo "disk_used=$disk_used" >> "$GITHUB_OUTPUT"
 
           outfile="/tmp/immich-v${immich}-manifest.json"
 
@@ -550,12 +604,18 @@ jobs:
             --arg pnpm "$pnpm" \
             --arg python "$python" \
             --arg mise "$mise" \
+            --arg exec_time "$exec_time" \
+            --arg peak_ram "$peak_ram" \
+            --arg disk_used "$disk_used" \
             '{
               immich_version: $immich,
               node_version:   $node,
               pnpm_version:   $pnpm,
               python_version: $python,
-              mise_version:   $mise
+              mise_version:   $mise,
+              exec_time:      $exec_time,
+              peak_ram:       $peak_ram,
+              disk_used:      $disk_used
             }' > "$outfile"
 
           # Inject per-distro / per-arch metadata
@@ -564,10 +624,9 @@ jobs:
 
             distro=$(jq -r '.distro' "$meta")
             arch=$(jq -r '.arch' "$meta")
-
-            file=$(jq -r '.tar.file' "$meta")
-            url=$(jq -r '.tar.url'  "$meta")
-            sha=$(jq -r '.tar.sha256' "$meta")
+            file=$(jq -r '.file' "$meta")
+            url=$(jq -r '.url'  "$meta")
+            sha=$(jq -r '.sha256' "$meta")
 
             jq \
               --arg distro "$distro" \
@@ -648,14 +707,15 @@ jobs:
             - Node.js: `${{ needs.prepare.outputs.node_version }}`
             - pnpm: `${{ needs.prepare.outputs.pnpm_version }}`
             - Python: `${{ needs.prepare.outputs.python_version }}`
+            - mise: `${{ needs.manifest.outputs.mise_version }}`
 
             ---
 
-            ## 📊 Build Statistics (from *Build immich*)
+            ## 📊 Build Statistics
 
-            - ⏱️ Execution time: `${{ needs.build.outputs.exec_time }}`
-            - 🧠 Peak RAM usage: `${{ needs.build.outputs.peak_ram }}`
-            - 💾 Disk space used: `${{ needs.build.outputs.disk_used }}`
+            - ⏱️ Execution time: `${{ needs.manifest.outputs.exec_time }}`
+            - 🧠 Peak RAM usage: `${{ needs.manifest.outputs.peak_ram }}`
+            - 💾 Disk space used: `${{ needs.manifest.outputs.disk_used }}`
 
             ---
 
