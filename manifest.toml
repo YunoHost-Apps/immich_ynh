@@ -102,7 +102,8 @@ ram.runtime = "2G"
 		"liblcms2-2",
 		"libdav1d6",
 		"libaom3",
-		"libde265-0"
+		"libde265-0",
+		"libimagequant0"
 	]
 	packages_from_raw_bash = """
 	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
