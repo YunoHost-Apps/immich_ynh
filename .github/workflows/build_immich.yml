@@ -8,7 +8,9 @@ on:
         required: true
         default: 'bookworm,trixie'
       arch:
-        description: 'CPU architecture to build (comma-separated: amd64, arm64)'
+        description: |
+          CPU architecture to build (comma-separated: amd64, arm64)
+          Note: arm64 currently cannot build due to missing Flutter linux/arm64 binary
         required: true
         default: 'amd64'
 
@@ -531,7 +533,7 @@ jobs:
               --arg sha "$sha" \
               '
                 . as $root
-                | $root[$distro] //= {}
+                | if ($root[$distro] | type) == "object" then . else .[$distro] = {} end
                 | $root[$distro][($arch + "_file")]   = $file
                 | $root[$distro][($arch + "_url")]    = $url
                 | $root[$distro][($arch + "_sha256")] = $sha
