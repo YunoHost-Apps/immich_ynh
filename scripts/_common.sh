@@ -117,14 +117,12 @@ myynh_provision_postgresql() {
 	# Create the cluster if not existing
 	if ! pg_lsclusters | grep -q "$db_cluster"
 	then
-		ynh_print_info "Creating the cluster..."
 		pg_createcluster ${db_cluster/\// } --start
 	fi
 
 	# Create the database in the cluster if not existing
 	if [[ -z $(myynh_execute_psql_as_root --sql="\list $app" --options="--tuples-only --no-align" --database="postgres") ]]
 	then
-		ynh_print_info "Provisionning the database..."
 		db_pwd=$(ynh_app_setting_get --key=db_pwd)
 		myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
 		myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
