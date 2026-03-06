@@ -111,8 +111,6 @@ myynh_install_postgresql() {
 myynh_provision_postgresql() {
 	# Definie local var
 	local db_pwd
-	local default_port
-	local config_file
 
 	ynh_print_info "Provisionning database on postgresql $psql_version..."
 
@@ -132,9 +130,16 @@ myynh_provision_postgresql() {
 		myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
 		myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
 	fi
+}
 
-	# Set default cluster back to debian and remove autoprovisionned database and user created on wrong cluster
+# Set default cluster back to debian and remove autoprovisionned database and user created on wrong cluster
+myynh_set_default_back_to_debian() {
+	# Definie local var
+	local default_port
+	local config_file
+
 	ynh_print_info "Setting default postgresql cluster back to debian default..."
+
 	default_port=5432
 	config_file="/etc/postgresql-common/user_clusters"
 
@@ -160,11 +165,41 @@ myynh_provision_postgresql() {
 		fi
 }
 
+# Add VectorChord package
+mynh_add_vectorchord() {
+	# Definie local var
+	local tempdir
+
+	ynh_print_info "Adding VectorChord postgresql extension..."
+
+	# Create the temporary directory
+	tempdir="$(mktemp -d)"
+
+	# Download the deb files
+	ynh_setup_source --dest_dir="$tempdir" --source_id="vchord"
+
+	# Install the packages. Allow downgrades because apt decided bullseye > bookworm
+	_ynh_apt_install --allow-downgrades "$tempdir/postgresql-17-vchord.deb"
+
+	# The doc says it should be called only once, but the code says multiple calls are supported.
+	# Also, they're already installed so that should be quasi instantaneous.
+	ynh_apt_install_dependencies "postgresql-17-vchord"
+
+	# Mark packages as dependencies, to allow automatic removal
+	apt-mark auto "postgresql-17-vchord"
+
+	# Include the extension
+	myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
+		ynh_systemctl --service="postgresql" --action="restart"
+
+	# Cleanup
+	ynh_safe_rm "$tempdir"
+}
+
 # Update the database
 myynh_update_psql_db() {
 	# Definie local var
 	local current_db_cluster
-	local tempdir
 	#local db_port -> should be global
 
 	# On upgrade, check if the db is not yet on psql_version cluster and if no migrate it (aka dumb and restore the db to 17 + delete the db on 16)
@@ -180,28 +215,6 @@ myynh_update_psql_db() {
 		# Drop db on old cluster
 		myynh_drop_psql_db --cluster="$current_db_cluster"
 	fi
-
-	# Add VectorChord package
-	ynh_print_info "Adding VectorChord postgresql extension..."
-		# Create the temporary directory
-		tempdir="$(mktemp -d)"
-
-		# Download the deb files
-		ynh_setup_source --dest_dir="$tempdir" --source_id="vchord"
-
-		# Install the packages. Allow downgrades because apt decided bullseye > bookworm
-		_ynh_apt_install --allow-downgrades "$tempdir/postgresql-17-vchord.deb"
-
-		# The doc says it should be called only once, but the code says multiple calls are supported.
-		# Also, they're already installed so that should be quasi instantaneous.
-		ynh_apt_install_dependencies "postgresql-17-vchord"
-
-		# Mark packages as dependencies, to allow automatic removal
-		apt-mark auto "postgresql-17-vchord"
-
-		# Include the extension
-		myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
-		ynh_systemctl --service="postgresql" --action="restart"
 
 	# Fix collation version mismatch
 	ynh_print_info "Updating databse..."
@@ -228,9 +241,6 @@ myynh_update_psql_db() {
 
 	# Save the cluster in the settings
 	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
-
-	# Cleanup
-	ynh_safe_rm "$tempdir"
 }
 
 # Remove the database

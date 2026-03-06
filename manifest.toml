@@ -45,13 +45,13 @@ ram.runtime = "2G"
 
 	[resources.sources.immich_prebuilt_bookworm]
 	amd64.url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm-amd64.tar.gz"
-	amd64.sha256 = "5e5d818b528244036749b4db3987f2d74760225a1ce08175ace2ad21a80be51f"
+	amd64.sha256 = "5171f2f42dfec47f1dd2c92288518ef2f8a59ce6b515010445035b3ceeddc667"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
 	amd64.url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/immich-v2.5.6/immich-v2.5.6-trixie-amd64.tar.gz"
-	amd64.sha256 = "ddb8c93054d9836f1fd0b8cd6f0cafd6dca8dd5cdec94150be04a66598bc3dee"
+	amd64.sha256 = "78d9114a4816f53b8332729c6f32185cd725a410ad5289e4ab0da37dce1dab23"
 
 	prefetch = false
 
@@ -103,7 +103,9 @@ ram.runtime = "2G"
 		"libaom3",
 		"libde265-0",
 		"libimagequant0",
-		"libwebpdemux2"
+		"libwebpdemux2",
+		"libcgif0",
+		"libexif12"
 	]
 	packages_from_raw_bash = """
 	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
