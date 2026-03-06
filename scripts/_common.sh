@@ -180,7 +180,7 @@ mynh_add_vectorchord() {
 	_ynh_apt_install --allow-downgrades "$tempdir/postgresql-17-vchord.deb"
 
 	# Add the package to dependencies
-	YNH_INSTALL_APP_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-17-vchord"
+	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-17-vchord"
 
 	# Include the extension
 	myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
