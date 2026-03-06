@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.5.6~ynh5"
+version = "2.5.6~ynh6"
 
 maintainers = ["ewilly"]
 
@@ -22,14 +22,14 @@ code = "https://github.com/immich-app/immich"
 [integration]
 yunohost = ">= 12.1.39"
 helpers_version = "2.1"
-architectures = ["arm64", "amd64"]
+architectures = ["amd64"]
 multi_instance = false
 
 ldap = false
 sso = false
 
-disk = "2G"
-ram.build = "5G"
+disk = "3G"
+ram.build = "2G"
 ram.runtime = "2G"
 
 [install]
@@ -43,35 +43,27 @@ ram.runtime = "2G"
 [resources]
 	[resources.sources]
 
-	[resources.sources.main]
-	url = "https://github.com/immich-app/immich/archive/refs/tags/v2.5.6.tar.gz"
-	sha256 = "01072d3125873ca1455ce0153f453017402308734fea9da45eb7ccd387d757ed"
+	[resources.sources.immich_prebuilt_bookworm]
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm-amd64.tar.gz"
+	amd64.sha256 = "2ac46f0f2acc0648d0a66ba71b0ebefa2af4289e827c11dabd7c1c90812b110b"
 
-	autoupdate.strategy = "latest_github_release"
+	prefetch = false
 
-	[resources.sources.vips_prebuilt_bookworm]
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/vips-8.17.3-heif-1.20.2/vips-8.17.3-heif-1.20.2-bookworm.tar.gz"
-	sha256 = "607546cd0f862260a881500d0c9d2a6656e6e0e238760377022f3c339c1a3c47"
+	[resources.sources.immich_prebuilt_trixie]
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-trixie-amd64.tar.gz"
+	amd64.sha256 = "955f843aae065fec4a9535f392859e40ce58a6a74214ebb6d87c4ffded35b64f"
 
-	[resources.sources.vips_prebuilt_trixie]
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	# Version from  https://github.com/immich-app/base-images/blob/main/server/sources/libheif.json
-	url = "https://github.com/YunoHost-Apps/immich_ynh/releases/download/vips-8.17.3-heif-1.20.2/vips-8.17.3-heif-1.20.2-trixie.tar.gz"
-	sha256 = "2f6a73997012426822cc1923638d9706762e9d023beaeab4adb64f916b45acbb"
+	prefetch = false
 
     [resources.sources.vchord]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
 	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_amd64.deb"
 	amd64.sha256 = "d27910baaf86de52af19e25a9d6198dfecf1dbe50864075b0a9386cdc7de2c9b"
-	arm64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_arm64.deb"
-	arm64.sha256 = "8ddf63b52526cc3cecb3336a379b290e865a9919b9379c55b412ade26ffd2c47"
 
 	format = "whatever"
 	extract = false
 	rename = "postgresql-17-vchord.deb"
-	prefetch = false
+	prefetch = true
 
 	[resources.system_user]
 
@@ -92,61 +84,34 @@ ram.runtime = "2G"
 
 	[resources.apt]
 	packages = [
-		"curl",
 		"postgresql",
 		"redis-server",
-		"python3",
-		"python3-dev",
-		"libssl-dev",
-		"libffi-dev",
 		"uuid-runtime",
-		"autoconf",
-		"build-essential",
+		"curl",
 		"unzip",
-		"jq",
-		"perl",
-		"libnet-ssleay-perl",
-		"libio-socket-ssl-perl",
-		"libcapture-tiny-perl",
-		"libfile-which-perl",
-		"libfile-chdir-perl",
-		"libpkgconfig-perl",
-		"libffi-checklib-perl",
-		"libtest-warnings-perl",
-		"libtest-fatal-perl",
-		"libtest-needs-perl",
-		"libtest2-suite-perl",
-		"libsort-versions-perl",
-		"libpath-tiny-perl",
-		"libtry-tiny-perl",
-		"libterm-table-perl",
-		"libany-uri-escape-perl",
-		"libmojolicious-perl",
-		"libfile-slurper-perl",
-		"liblcms2-2",
-		"wget",
-		"yq",
-		"ccache",
 		"libgl1",
-		"pkg-config",
-		"libdav1d-dev",
-		"libwebp-dev",
-		"libaom-dev",
-		"libde265-dev",
-		"libexif-dev",
-		"libexpat1-dev",
-		"libglib2.0-dev",
-		"libjpeg-dev",
-		"libpng-dev",
-		"libtiff-dev",
-		"libgif-dev",
-		"libcgif-dev",
-		"libimagequant-dev",
-		"libraw-dev"
+		"libglib2.0-0",
+		"libexpat1",
+		"libexif12",
+		"libgif7",
+		"libjpeg62-turbo",
+		"libpng16-16",
+		"libwebp7",
+		"libtiff6",
+		"libcgif0",
+		"liblcms2-2",
+		"libaom3",
+		"libde265-0",
+		"libimagequant0",
+		"libwebpdemux2",
+		"libcgif0",
+		"libexif12"
 	]
 	packages_from_raw_bash = """
 	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
-		echo "postgresql-17-pgvector";
+		echo "libdav1d7, postgresql-17-pgvector";
+	elif [[ $YNH_DEBIAN_VERSION == "bookwrom" ]]; then
+		echo "libdav1d6";
 	fi
 	"""
 
@@ -157,15 +122,8 @@ ram.runtime = "2G"
 		"jellyfin-ffmpeg7"
 	]
 
-	[resources.apt.extras.mise]
-	repo = "deb https://mise.jdx.dev/deb stable main"
-	key = "https://mise.jdx.dev/gpg-key.pub"
-	packages = [
-		"mise"
-	]
-
-	[resources.nodejs]
-	version = "24"
-
 	[resources.database]
 	type = "postgresql"
+
+	[resources.nodejs]
+	version = "24.12.0"

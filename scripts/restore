@@ -38,9 +38,12 @@ db_cluster=$(ynh_app_setting_get --key=db_cluster)
 
 if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 then
+	myynh_install_postgresql
 	myynh_provision_postgresql
+	myynh_set_default_back_to_debian
 fi
 
+mynh_add_vectorchord
 myynh_update_psql_db
 
 #=================================================
@@ -101,7 +104,7 @@ myynh_set_permissions
 ynh_script_progression "Reloading NGINX web server and $app's service..."
 
 ynh_systemctl --service="$app-machine-learning" --action="start" --wait_until="Application startup complete" --log_path="/var/log/$app/$app-machine-learning.log"
-ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log" --timeout=900
+ynh_systemctl --service="$app-server" --action="start" --wait_until="Immich Server is listening" --log_path="/var/log/$app/$app-server.log"
 
 ynh_systemctl --service="nginx" --action="reload"
 

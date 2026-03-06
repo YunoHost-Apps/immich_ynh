@@ -6,17 +6,17 @@ YNH_HELPERS_VERSION="2.1" source /usr/share/yunohost/helpers
 YNH_STDINFO=1
 backup_files=( *.sql.gz )
 
-PS3="Select backup file to restore, or 0 to exit:"
+PS3="Select backup file to restore, or 0 to exit: "
 select backup_file in "${backup_files[@]}"
 do
 	if [[ $REPLY == "0" ]]
 	then
-			ynh_print_info "[####################] Bye!"
-			exit
+		ynh_print_info "[####################] Bye!"
+		exit
 	elif [[ -z $backup_file ]]; then
-				ynh_print_info "[....................] Invalid choice, try again"
+		ynh_print_info "[....................] Invalid choice, try again"
 	else
-			break
+		break
 	fi
 done
 
@@ -38,15 +38,17 @@ then
 	app="__APP__"
 	db_cluster="__DB_CLUSTER__"
 	db_name="__APP__"
+	YNH_DEBIAN_VERSION=$(lsb_release --codename --short)
+	YNH_ARCH=$(dpkg --print-architecture)
 
 	ynh_print_info "[+...................] Stopping immich..."
 	ynh_systemctl --service="$app-server" --action="stop"
 
 	ynh_print_info "[#+..................] Droping current immich db..."
-	myynh_drop_psql_db 1>/dev/null
+	myynh_drop_psql_db 1>/dev/null  || true
 
 	ynh_print_info "[##+.................] Creating an empty immich db..."
-	myynh_create_psql_db 1>/dev/null
+	myynh_provision_postgresql 1>/dev/null
 	myynh_update_psql_db 1>/dev/null
 
 	ynh_print_info "[###++++++++++++++++.] Restoring immich db backup... (Depending on your database size, this may take a long while)"
