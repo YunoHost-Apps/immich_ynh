@@ -55,14 +55,14 @@ ram.runtime = "2G"
 	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-trixie-amd64.tar.gz"
 	amd64.sha256 = "5d95adf64eba0bce7fe0fbe1db1165b6393427565bd36300fe52c0ae40ab2404"
 	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-trixie-arm64.tar.gz"
-	arm64.sha256 = "80153c5d7e6b7a22cdb81817cd45399b6032ef4abc0ece8dfadf36cab3b59607"
+	arm64.sha256 = "92036d9f37db10fff519c8cc0ba50db84f72ff3a90900b440a10d0e4d80fb61c"
 
 	prefetch = false
 
     [resources.sources.vchord]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
 	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_amd64.deb"
-	amd64.sha256 = "92036d9f37db10fff519c8cc0ba50db84f72ff3a90900b440a10d0e4d80fb61c"
+	amd64.sha256 = "d27910baaf86de52af19e25a9d6198dfecf1dbe50864075b0a9386cdc7de2c9b"
 
 	format = "whatever"
 	extract = false
