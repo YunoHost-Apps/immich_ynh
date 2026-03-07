@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.5.6~ynh7"
+version = "2.5.6~ynh8"
 
 maintainers = ["ewilly"]
 
@@ -22,7 +22,7 @@ code = "https://github.com/immich-app/immich"
 [integration]
 yunohost = ">= 12.1.39"
 helpers_version = "2.1"
-architectures = ["amd64"]
+architectures = ["amd64", "arm64"]
 multi_instance = false
 
 ldap = false
@@ -44,14 +44,18 @@ ram.runtime = "2G"
 	[resources.sources]
 
 	[resources.sources.immich_prebuilt_bookworm]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm-amd64.tar.gz"
-	amd64.sha256 = "2ac46f0f2acc0648d0a66ba71b0ebefa2af4289e827c11dabd7c1c90812b110b"
+	amd64_url = "https://github.com/ewilly/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm-amd64.tar.gz"
+	amd64_sha256 = "4d01240e8c6bc21c2d31092111d767145c3ef337ada710929f66217ceacbb797"
+	arm64_url = "https://github.com/ewilly/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-bookworm-arm64.tar.gz"
+	arm64_sha256 = "464811a6187d0673ab2c14e96d8a1f59277f63bac99d3fb8361ffba6ffce2fa2"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-trixie-amd64.tar.gz"
-	amd64.sha256 = "955f843aae065fec4a9535f392859e40ce58a6a74214ebb6d87c4ffded35b64f"
+	amd64_url = "https://github.com/ewilly/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-trixie-amd64.tar.gz"
+	amd64_sha256 = "dcf22e53ec9daa531cf5fe0efd8b76d54cbc05168e5954c2592a77273403ac06"
+	arm64_url = "https://github.com/ewilly/immich-build/releases/download/immich-v2.5.6/immich-v2.5.6-trixie-arm64.tar.gz"
+	arm64_sha256 = "80153c5d7e6b7a22cdb81817cd45399b6032ef4abc0ece8dfadf36cab3b59607"
 
 	prefetch = false
 
