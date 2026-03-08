@@ -63,6 +63,8 @@ ram.runtime = "2G"
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
 	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_amd64.deb"
 	amd64.sha256 = "d27910baaf86de52af19e25a9d6198dfecf1dbe50864075b0a9386cdc7de2c9b"
+	arm64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_arm64.deb"
+	arm64.sha256 = "8ddf63b52526cc3cecb3336a379b290e865a9919b9379c55b412ade26ffd2c47"
 
 	format = "whatever"
 	extract = false
