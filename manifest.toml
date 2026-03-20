@@ -44,30 +44,22 @@ ram.runtime = "2G"
 	[resources.sources]
 
 	[resources.sources.immich_prebuilt_bookworm]
-[resources.sources.immich_prebuilt_bookworm.amd64]
-resources.sources.immich_prebuilt_bookworm.amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.0/immich-v2.6.0-bookworm-amd64.tar.gz"
-resources.sources.immich_prebuilt_bookworm.amd64.sha256 = "4b47be7ee014e81fa5b676141d5200ce367d0f98df7923584881a3d84f542599"
-
-[resources.sources.immich_prebuilt_bookworm.arm64]
-resources.sources.immich_prebuilt_bookworm.arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.0/immich-v2.6.0-bookworm-arm64.tar.gz"
-resources.sources.immich_prebuilt_bookworm.arm64.sha256 = "a33fc52e474fd7d2dc11a4e0888d58b55a9388198ab836fd8353d15be320c844"
-
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.0/immich-v2.6.0-bookworm-amd64.tar.gz"
+	amd64.sha256 = "4b47be7ee014e81fa5b676141d5200ce367d0f98df7923584881a3d84f542599"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.0/immich-v2.6.0-bookworm-arm64.tar.gz"
+	arm64.sha256 = "a33fc52e474fd7d2dc11a4e0888d58b55a9388198ab836fd8353d15be320c844"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
-[resources.sources.immich_prebuilt_trixie.amd64]
-resources.sources.immich_prebuilt_trixie.amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.0/immich-v2.6.0-trixie-amd64.tar.gz"
-resources.sources.immich_prebuilt_trixie.amd64.sha256 = "f07a71712a61200365b0a5cf802626a3d4b8480f5d8bf041a2fca4538c605681"
-
-[resources.sources.immich_prebuilt_trixie.arm64]
-resources.sources.immich_prebuilt_trixie.arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.0/immich-v2.6.0-trixie-arm64.tar.gz"
-resources.sources.immich_prebuilt_trixie.arm64.sha256 = "ebf0c4a3e17f286fd22893a6b7b826abb93d4573803ec5a988f12fe7d782633c"
-
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.0/immich-v2.6.0-trixie-amd64.tar.gz"
+	amd64.sha256 = "f07a71712a61200365b0a5cf802626a3d4b8480f5d8bf041a2fca4538c605681"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.0/immich-v2.6.0-trixie-arm64.tar.gz"
+	arm64.sha256 = "ebf0c4a3e17f286fd22893a6b7b826abb93d4573803ec5a988f12fe7d782633c"
 
 	prefetch = false
 
-    [resources.sources.vchord]
+	[resources.sources.vchord]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
 	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_amd64.deb"
 	amd64.sha256 = "d27910baaf86de52af19e25a9d6198dfecf1dbe50864075b0a9386cdc7de2c9b"
@@ -141,3 +133,4 @@ resources.sources.immich_prebuilt_trixie.arm64.sha256 = "ebf0c4a3e17f286fd22893a
 
 	[resources.nodejs]
 	version = "24.12.0"
+
