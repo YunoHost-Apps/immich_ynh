@@ -23,6 +23,4 @@ exec gunicorn immich_ml.main:app \
 	--timeout "$MACHINE_LEARNING_WORKER_TIMEOUT" \
 	--log-config-json immich_ml/log_conf.json \
 	--keep-alive "$MACHINE_LEARNING_HTTP_KEEPALIVE_TIMEOUT_S" \
-	--graceful-timeout 10 \
-	--log-level debug \
-	--preload
+	--graceful-timeout 10
