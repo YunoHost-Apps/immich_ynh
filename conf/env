@@ -6,7 +6,7 @@ IMMICH_WEB_ROOT=__INSTALL_DIR__/immich/app/www
 IMMICH_VERSION=release
 IMMICH_LOG_LEVEL=log
 
-## Ports
+## Server
 IMMICH_HOST=127.0.0.1
 IMMICH_PORT=__PORT__
 IMMICH_MACHINE_LEARNING_URL=http://127.0.0.1:__PORT_MACHINELEARNING__
@@ -25,4 +25,10 @@ REDIS_HOSTNAME=127.0.0.1
 IMMICH_THIRD_PARTY_SOURCE_URL=https://github.com/YunoHost-Apps/immich_ynh/
 IMMICH_THIRD_PARTY_BUG_FEATURE_URL=https://github.com/YunoHost-Apps/immich_ynh/issues
 
+## Vips
 LD_LIBRARY_PATH=__INSTALL_DIR__/vips/lib
+
+## Machine Learning
+MACHINE_LEARNING_PORT=__PORT_MACHINELEARNING__
+MACHINE_LEARNING_CACHE_FOLDER=__INSTALL_DIR__/immich/.cache_ml
+TRANSFORMERS_CACHE=__INSTALL_DIR__/immich/.cache_ml
