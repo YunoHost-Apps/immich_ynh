@@ -13,7 +13,7 @@ Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/immich/app/machine-learning
 EnvironmentFile=__INSTALL_DIR__/immich/env
 
-ExecStart=venv/bin/gunicorn immich_ml.main:app \
+ExecStart=__INSTALL_DIR__/immich/app/machine-learning/venv/bin/gunicorn immich_ml.main:app \
 	--worker-class immich_ml.config.CustomUvicornWorker \
 	--config immich_ml/gunicorn_conf.py \
 	--bind 127.0.0.1:__PORT_MACHINELEARNING__ \
