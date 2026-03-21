@@ -10,9 +10,20 @@ Type=simple
 Restart=on-failure
 User=__APP__
 Group=__APP__
-WorkingDirectory=__INSTALL_DIR__/immich/app
+WorkingDirectory=__INSTALL_DIR__/immich/app/machine-learning
 EnvironmentFile=__INSTALL_DIR__/immich/env
-ExecStart=__INSTALL_DIR__/immich/app/machine-learning/ml_start.sh
+
+ExecStart=__INSTALL_DIR__/immich/app/machine-learning/venv/bin/gunicorn \
+	--worker-class immich_ml.config.CustomUvicornWorker \
+	--config __INSTALL_DIR__/immich/app/machine-learning/immich_ml/gunicorn_conf.py \
+	--bind 127.0.0.1:__PORT_MACHINELEARNING__ \
+	--workers 1 \
+	--timeout 300 \
+	--log-config-json __INSTALL_DIR__/immich/app/machine-learning/immich_ml/log_conf.json \
+	--keep-alive 2 \
+	--graceful-timeout 10 \
+	immich_ml.main:app
+
 SyslogIdentifier=immich-machine-learning
 StandardOutput=append:/var/log/__APP__/__APP__-machine-learning.log
 StandardError=append:/var/log/__APP__/__APP__-machine-learning.log
