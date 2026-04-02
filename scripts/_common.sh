@@ -233,13 +233,18 @@ myynh_update_psql_db() {
 	then
 		current_vchord_version=$(myynh_execute_psql_as_root \
 			--sql="SELECT installed_version FROM pg_available_extensions WHERE name = 'vchord';" \
-			--database="$db" \
-			2>/dev/null | tr -d '')
+			--options="--tuples-only --no-align" --database="$db")
+		echo "$current_vchord_version"
 		new_vchord_version=$(myynh_execute_psql_as_root \
-			--sql="SELECT default_version FROM pg_available_extensions WHERE name = 'vchord';" \
-			--database="$db" \
-			2>/dev/null | tr -d '')
-		if [ "$current_vchord_version" != "$new_vchord_version" ]
+			--sql="SELECT installed_version FROM pg_available_extensions WHERE name = 'vchord';" \
+			--options="--tuples-only --no-align" --database="$db")
+		echo "$new_vchord_version"
+		vchord_needs_update=$(myynh_execute_psql_as_root \
+			--sql="SELECT installed_version != default_version FROM pg_available_extensions WHERE name = 'vchord';"
+			--options="--tuples-only --no-align" --database="$db")
+		echo "$vchord_needs_update"
+
+		if [ "$vchord_needs_update" = "t" ]
 		then
 			myynh_execute_psql_as_root --sql="ALTER EXTENSION vchord UPDATE;" --database="$db"
 			myynh_execute_psql_as_root --sql="REINDEX INDEX face_index;" --database="$db"
