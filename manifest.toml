@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.6.3~ynh1"
+version = "2.6.3~ynh2"
 
 maintainers = ["ewilly"]
 
@@ -61,10 +61,11 @@ ram.runtime = "2G"
 
 	[resources.sources.vchord]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
-	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_amd64.deb"
-	amd64.sha256 = "d27910baaf86de52af19e25a9d6198dfecf1dbe50864075b0a9386cdc7de2c9b"
-	arm64.url = "https://github.com/tensorchord/VectorChord/releases/download/0.5.3/postgresql-17-vchord_0.5.3-1_arm64.deb"
-	arm64.sha256 = "8ddf63b52526cc3cecb3336a379b290e865a9919b9379c55b412ade26ffd2c47"
+	# and https://github.com/mmomjian/immich/blob/c9e251c78cb606d22ae74f3ec24cae7090756747/server/src/constants.ts#L17
+	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/1.1.1/postgresql-17-vchord_1.1.1-1_amd64.deb"
+	amd64.sha256 = "a48132c8d616c0d52a9811b32f12f88a8f6cc8542d7cc0180c8d0986bfbd03c5"
+	arm64.url = "https://github.com/tensorchord/VectorChord/releases/download/1.1.1/postgresql-17-vchord_1.1.1-1_arm64.deb"
+	arm64.sha256 = "50ae776bb2376f2b21aea646984cef51e96cc8ae49626cceccb043432c3ba1aa"
 
 	format = "whatever"
 	extract = false

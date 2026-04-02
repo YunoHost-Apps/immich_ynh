@@ -184,7 +184,9 @@ mynh_add_vectorchord() {
 
 	# Include the extension
 	myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
-		ynh_systemctl --service="postgresql" --action="restart"
+
+	# Restart postgresql
+	ynh_systemctl --service="postgresql" --action="restart"
 
 	# Cleanup
 	ynh_safe_rm "$tempdir"
@@ -225,6 +227,14 @@ myynh_update_psql_db() {
 			myynh_execute_psql_as_root --sql="ALTER DATABASE $db REFRESH COLLATION VERSION;" --database="$db"
 		fi
 	done
+
+	# On upgrade, update vectorchord
+	if [[ -n ${YNH_APP_UPGRADE_TYPE:-} ]]
+	then
+		myynh_execute_psql_as_root --sql="ALTER EXTENSION vchord UPDATE;" --database="$db"
+		myynh_execute_psql_as_root --sql="REINDEX INDEX face_index;" --database="$db"
+		myynh_execute_psql_as_root --sql="REINDEX INDEX clip_index;" --database="$db"
+	fi
 
 	# Give superuser permissions to immich user in immich db
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
