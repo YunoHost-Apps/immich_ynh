@@ -228,30 +228,6 @@ myynh_update_psql_db() {
 		fi
 	done
 
-	# On new vectorchord version, update extension and index
-	if [[ -n ${YNH_APP_UPGRADE_TYPE:-} ]]
-	then
-		current_vchord_version=$(myynh_execute_psql_as_root \
-			--sql="SELECT installed_version FROM pg_available_extensions WHERE name = 'vchord';" \
-			--options="--tuples-only --no-align" --database="$db")
-		echo "$current_vchord_version"
-		new_vchord_version=$(myynh_execute_psql_as_root \
-			--sql="SELECT installed_version FROM pg_available_extensions WHERE name = 'vchord';" \
-			--options="--tuples-only --no-align" --database="$db")
-		echo "$new_vchord_version"
-		vchord_needs_update=$(myynh_execute_psql_as_root \
-			--sql="SELECT installed_version != default_version FROM pg_available_extensions WHERE name = 'vchord';" \
-			--options="--tuples-only --no-align" --database="$db")
-		echo "$vchord_needs_update"
-
-		if [ "$vchord_needs_update" = "t" ]
-		then
-			myynh_execute_psql_as_root --sql="ALTER EXTENSION vchord UPDATE;" --database="$db"
-			myynh_execute_psql_as_root --sql="REINDEX INDEX face_index;" --database="$db"
-			myynh_execute_psql_as_root --sql="REINDEX INDEX clip_index;" --database="$db"
-		fi
-	fi
-
 	# Give superuser permissions to immich user in immich db
 	myynh_execute_psql_as_root --sql="ALTER USER $app WITH SUPERUSER;" --database="$app"
 
@@ -261,6 +237,21 @@ myynh_update_psql_db() {
 
 	# Save the cluster in the settings
 	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
+
+	# On new vectorchord version, update extension and index
+	if [[ -n ${YNH_APP_UPGRADE_TYPE:-} ]]
+	then
+		vchord_needs_update=$(myynh_execute_psql_as_root \
+			--sql="SELECT installed_version != default_version FROM pg_available_extensions WHERE name = 'vchord';" \
+			--options="--tuples-only --no-align" --database="$db")
+		if [ "$vchord_needs_update" = "t" ]
+		then
+			ynh_print_info "Updating vchord extension..."
+			myynh_execute_psql_as_root --sql="ALTER EXTENSION vchord UPDATE;" --database="$db"
+			ynh_hide_warnings myynh_execute_psql_as_root --sql="REINDEX INDEX face_index;" --database="$db"
+			ynh_hide_warnings myynh_execute_psql_as_root --sql="REINDEX INDEX clip_index;" --database="$db"
+		fi
+	fi
 }
 
 # Remove the database
