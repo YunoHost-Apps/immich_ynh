@@ -246,7 +246,7 @@ myynh_update_psql_db() {
 			--options="--tuples-only --no-align" --database="$db")
 		if [ "$vchord_needs_update" = "t" ]
 		then
-			ynh_print_info "Updating vchord extension..."
+			ynh_print_info "Updating VectorChord postgresql extension and rebuilding indexes..."
 			myynh_execute_psql_as_root --sql="ALTER EXTENSION vchord UPDATE;" --database="$db"
 			ynh_hide_warnings myynh_execute_psql_as_root --sql="REINDEX INDEX face_index;" --database="$db"
 			ynh_hide_warnings myynh_execute_psql_as_root --sql="REINDEX INDEX clip_index;" --database="$db"
