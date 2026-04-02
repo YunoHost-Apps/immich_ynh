@@ -213,7 +213,7 @@ myynh_update_psql_db() {
 	fi
 
 	# Fix collation version mismatch
-	ynh_print_info "Updating databse..."
+	ynh_print_info "Updating database..."
 	databases=$(myynh_execute_psql_as_root \
 		--sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" \
 		--options="--tuples-only --no-align" --database="postgres")
@@ -228,12 +228,23 @@ myynh_update_psql_db() {
 		fi
 	done
 
-	# On upgrade, update vectorchord
+	# On new vectorchord version, update extension and index
 	if [[ -n ${YNH_APP_UPGRADE_TYPE:-} ]]
 	then
-		myynh_execute_psql_as_root --sql="ALTER EXTENSION vchord UPDATE;" --database="$db"
-		myynh_execute_psql_as_root --sql="REINDEX INDEX face_index;" --database="$db"
-		myynh_execute_psql_as_root --sql="REINDEX INDEX clip_index;" --database="$db"
+		current_vchord_version=$(myynh_execute_psql_as_root \
+			--sql="SELECT installed_version FROM pg_available_extensions WHERE name = 'vchord';" \
+			--database="$db" \
+			2>/dev/null | tr -d '')
+		new_vchord_version=$(myynh_execute_psql_as_root \
+			--sql="SELECT default_version FROM pg_available_extensions WHERE name = 'vchord';" \
+			--database="$db" \
+			2>/dev/null | tr -d '')
+		if [ "$current_vchord_version" != "$new_vchord_version" ]
+		then
+			myynh_execute_psql_as_root --sql="ALTER EXTENSION vchord UPDATE;" --database="$db"
+			myynh_execute_psql_as_root --sql="REINDEX INDEX face_index;" --database="$db"
+			myynh_execute_psql_as_root --sql="REINDEX INDEX clip_index;" --database="$db"
+		fi
 	fi
 
 	# Give superuser permissions to immich user in immich db
