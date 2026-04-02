@@ -240,7 +240,7 @@ myynh_update_psql_db() {
 			--options="--tuples-only --no-align" --database="$db")
 		echo "$new_vchord_version"
 		vchord_needs_update=$(myynh_execute_psql_as_root \
-			--sql="SELECT installed_version != default_version FROM pg_available_extensions WHERE name = 'vchord';"
+			--sql="SELECT installed_version != default_version FROM pg_available_extensions WHERE name = 'vchord';" \
 			--options="--tuples-only --no-align" --database="$db")
 		echo "$vchord_needs_update"
 
