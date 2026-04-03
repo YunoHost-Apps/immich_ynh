@@ -5,6 +5,7 @@ Requires=redis-server.service
 Requires=postgresql.service
 Requires=__APP__-machine-learning.service
 After=network.target
+After=__APP__-learning.service
 
 [Service]
 Type=simple
