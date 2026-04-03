@@ -184,7 +184,9 @@ mynh_add_vectorchord() {
 
 	# Include the extension
 	myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
-		ynh_systemctl --service="postgresql" --action="restart"
+
+	# Restart postgresql
+	ynh_systemctl --service="postgresql" --action="restart"
 
 	# Cleanup
 	ynh_safe_rm "$tempdir"
@@ -211,7 +213,7 @@ myynh_update_psql_db() {
 	fi
 
 	# Fix collation version mismatch
-	ynh_print_info "Updating databse..."
+	ynh_print_info "Updating database..."
 	databases=$(myynh_execute_psql_as_root \
 		--sql="SELECT datname FROM pg_database WHERE datistemplate = false OR datname = 'template1';" \
 		--options="--tuples-only --no-align" --database="postgres")
@@ -235,6 +237,21 @@ myynh_update_psql_db() {
 
 	# Save the cluster in the settings
 	ynh_app_setting_set --key=db_cluster --value="$db_cluster"
+
+	# On new vectorchord version, update extension and index
+	if [[ -n ${YNH_APP_UPGRADE_TYPE:-} ]]
+	then
+		vchord_needs_update=$(myynh_execute_psql_as_root \
+			--sql="SELECT installed_version != default_version FROM pg_available_extensions WHERE name = 'vchord';" \
+			--options="--tuples-only --no-align" --database="$db")
+		if [ "$vchord_needs_update" = "t" ]
+		then
+			ynh_print_info "Updating VectorChord postgresql extension and rebuilding indexes..."
+			myynh_execute_psql_as_root --sql="ALTER EXTENSION vchord UPDATE;" --database="$db"
+			ynh_hide_warnings myynh_execute_psql_as_root --sql="REINDEX INDEX face_index;" --database="$db"
+			ynh_hide_warnings myynh_execute_psql_as_root --sql="REINDEX INDEX clip_index;" --database="$db"
+		fi
+	fi
 }
 
 # Remove the database
