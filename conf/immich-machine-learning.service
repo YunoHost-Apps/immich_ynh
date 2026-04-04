@@ -2,22 +2,14 @@
 Description=Immich machine-learning
 Documentation=https://github.com/immich-app/immich
 After=network.target
-StartLimitIntervalSec=2min
-StartLimitBurst=10
 
 [Service]
 Type=simple
-Restart=always
-RestartSec=3
-KillMode=control-group
-RestartPreventExitStatus=SIGTERM SIGINT
-TimeoutStartSec=5min
+Restart=on-failure
 User=__APP__
 Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/immich/app/machine-learning
 EnvironmentFile=__INSTALL_DIR__/immich/env
-
-ExecStartPre=/bin/sleep 5
 
 ExecStart=__INSTALL_DIR__/immich/app/machine-learning/venv/bin/gunicorn \
 	--preload \
