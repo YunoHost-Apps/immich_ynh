@@ -5,7 +5,7 @@ Requires=redis-server.service
 Requires=postgresql.service
 Requires=__APP__-machine-learning.service
 After=network.target
-After=__APP__-learning.service
+After=__APP__-machine-learning.service
 
 [Service]
 Type=simple
@@ -19,7 +19,6 @@ ExecStart=__NODEJS_DIR__/node __INSTALL_DIR__/immich/app/dist/main
 SyslogIdentifier=immich-server
 StandardOutput=append:/var/log/__APP__/__APP__-server.log
 StandardError=append:/var/log/__APP__/__APP__-server.log
-Restart=on-failure
 UMask=0077
 
 # Sandboxing options to harden security

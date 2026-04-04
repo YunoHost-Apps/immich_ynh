@@ -2,8 +2,6 @@
 Description=Immich machine-learning
 Documentation=https://github.com/immich-app/immich
 After=network.target
-PartOf=__APP__-server.service
-Before=__APP__-server.service
 StartLimitIntervalSec=2min
 StartLimitBurst=10
 
