@@ -15,10 +15,13 @@ Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/immich/app
 Environment="PATH=/usr/lib/jellyfin-ffmpeg/:__PATH_WITH_NODEJS__"
 EnvironmentFile=__INSTALL_DIR__/immich/env
+
 ExecStart=__NODEJS_DIR__/node __INSTALL_DIR__/immich/app/dist/main
+
 SyslogIdentifier=immich-server
 StandardOutput=append:/var/log/__APP__/__APP__-server.log
 StandardError=append:/var/log/__APP__/__APP__-server.log
+ReadWritePaths=/var/log/__APP__
 UMask=0077
 
 # Sandboxing options to harden security
