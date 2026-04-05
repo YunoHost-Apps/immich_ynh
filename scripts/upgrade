@@ -19,6 +19,7 @@ myynh_check_hardware
 ynh_script_progression "Stopping $app's systemd service..."
 
 ynh_systemctl --service="$app-server" --action="stop"
+ynh_systemctl --service="$app-machine-learning" --action="stop"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
