@@ -2,8 +2,6 @@
 Description=Immich machine-learning
 Documentation=https://github.com/immich-app/immich
 After=network.target
-PartOf=__APP__-server.service
-Before=__APP__-server.service
 
 [Service]
 Type=simple
@@ -14,6 +12,7 @@ WorkingDirectory=__INSTALL_DIR__/immich/app/machine-learning
 EnvironmentFile=__INSTALL_DIR__/immich/env
 
 ExecStart=__INSTALL_DIR__/immich/app/machine-learning/venv/bin/gunicorn \
+	--preload \
 	--worker-class immich_ml.config.CustomUvicornWorker \
 	--config __INSTALL_DIR__/immich/app/machine-learning/immich_ml/gunicorn_conf.py \
 	--bind 127.0.0.1:__PORT_MACHINELEARNING__ \
@@ -27,7 +26,7 @@ ExecStart=__INSTALL_DIR__/immich/app/machine-learning/venv/bin/gunicorn \
 SyslogIdentifier=immich-machine-learning
 StandardOutput=append:/var/log/__APP__/__APP__-machine-learning.log
 StandardError=append:/var/log/__APP__/__APP__-machine-learning.log
-Restart=on-failure
+ReadWritePaths=/var/log/__APP__
 UMask=0077
 
 # Sandboxing options to harden security
@@ -46,7 +45,7 @@ ProtectControlGroups=yes
 ProtectKernelModules=yes
 ProtectKernelTunables=yes
 LockPersonality=yes
-SystemCallFilter=~@clock @debug @module @mount @obsolete @reboot @setuid @swap
+SystemCallFilter=~@debug @module @mount @obsolete @reboot @setuid @swap
 
 # Denying access to capabilities that should not be relevant for webapps
 # Doc: https://man7.org/linux/man-pages/man7/capabilities.7.html

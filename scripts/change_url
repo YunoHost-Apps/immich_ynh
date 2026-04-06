@@ -12,8 +12,8 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression "Stopping $app's systemd service..."
 
-ynh_systemctl --service="$app-machine-learning" --action="stop" --log_path="/var/log/$app/$app-machine-learning.log"
-ynh_systemctl --service="$app-server" --action="stop" --log_path="/var/log/$app/$app-server.log"
+ynh_systemctl --service="$app-server" --action="stop"
+ynh_systemctl --service="$app-machine-learning" --action="stop"
 
 #=================================================
 # MODIFY URL IN NGINX CONF
