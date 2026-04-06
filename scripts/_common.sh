@@ -101,7 +101,7 @@ myynh_execute_psql_as_root() {
 # For bookworm > Add postgresql packages from postgresql repo
 myynh_install_postgresql() {
 	ynh_print_info "Installing postgresql $psql_version..."
-	ynh_apt_install_dependencies_from_extra_repository \
+	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies_from_extra_repository \
 		--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
 		--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
 		--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
