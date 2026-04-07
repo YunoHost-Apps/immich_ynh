@@ -4,7 +4,7 @@ Documentation=https://github.com/immich-app/immich
 After=network.target
 
 [Service]
-Type=simple
+Type=notify
 Restart=on-failure
 User=__APP__
 Group=__APP__
@@ -22,6 +22,11 @@ ExecStart=__INSTALL_DIR__/immich/app/machine-learning/venv/bin/gunicorn \
 	--keep-alive 2 \
 	--graceful-timeout 10 \
 	immich_ml.main:app
+
+KillMode=mixed
+PIDFile=/run/gunicorn/__APP__-ml-pid
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
 
 SyslogIdentifier=immich-machine-learning
 StandardOutput=append:/var/log/__APP__/__APP__-machine-learning.log
