@@ -17,10 +17,10 @@ ExecStart=__INSTALL_DIR__/immich/app/machine-learning/venv/bin/gunicorn \
 	--config __INSTALL_DIR__/immich/app/machine-learning/immich_ml/gunicorn_conf.py \
 	--bind 127.0.0.1:__PORT_MACHINELEARNING__ \
 	--workers 1 \
-	--timeout 300 \
+	--timeout 30 \
 	--log-config-json __INSTALL_DIR__/immich/app/machine-learning/immich_ml/log_conf.json \
 	--keep-alive 2 \
-	--graceful-timeout 10 \
+	--graceful-timeout 30 \
 	immich_ml.main:app
 
 KillMode=mixed
@@ -28,10 +28,8 @@ PIDFile=/run/gunicorn/__APP__-ml-pid
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 
-SyslogIdentifier=immich-machine-learning
 StandardOutput=append:/var/log/__APP__/__APP__-machine-learning.log
 StandardError=append:/var/log/__APP__/__APP__-machine-learning.log
-ReadWritePaths=/var/log/__APP__
 UMask=0077
 
 # Sandboxing options to harden security
