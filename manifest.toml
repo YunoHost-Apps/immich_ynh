@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.6.3~ynh2"
+version = "2.7.2~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -44,18 +44,18 @@ ram.runtime = "2G"
 	[resources.sources]
 
 	[resources.sources.immich_prebuilt_bookworm]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.3/immich-v2.6.3-bookworm-amd64.tar.gz"
-	amd64.sha256 = "466446ef53ff9bbab4f269ae2805769a22742fca4e087fa9b41719929264b867"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.3/immich-v2.6.3-bookworm-arm64.tar.gz"
-	arm64.sha256 = "9a333e52db2d9999867d0308c85738257100acb5070ab16be772cc8db0168478"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.7.2/immich-v2.7.2-bookworm-amd64.tar.gz"
+	amd64.sha256 = "f66093af345e39f37098db11fc434a9e933a8a5a9b57e558d30791379af058f5"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.7.2/immich-v2.7.2-bookworm-arm64.tar.gz"
+	arm64.sha256 = "002efa0179ad94932960e633fb7f453d3f83ee21eb7db088c3b2e42243c03b9f"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.3/immich-v2.6.3-trixie-amd64.tar.gz"
-	amd64.sha256 = "7afe461b920394ad6befc52d37f0876d930d0a192cdb640e35fd2f7a461305f8"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.6.3/immich-v2.6.3-trixie-arm64.tar.gz"
-	arm64.sha256 = "7c86553c91864c14b19ff2d00e5ed6a2dfbe9116bc34c6a32459eee8dbadedb8"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.7.2/immich-v2.7.2-trixie-amd64.tar.gz"
+	amd64.sha256 = "d87feabbfa524e289e3ebe403a9cf0a9b50148d5948cc5e5da0e8264c6ec52e7"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.7.2/immich-v2.7.2-trixie-arm64.tar.gz"
+	arm64.sha256 = "a24a05c85f39e4464b521e978e21a7dec73d3194763d5a1a1b486aa7a9809e18"
 
 	prefetch = false
 
@@ -134,4 +134,3 @@ ram.runtime = "2G"
 
 	[resources.nodejs]
 	version = "24.14.1"
-
