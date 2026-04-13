@@ -21,7 +21,7 @@ ExecStart=__INSTALL_DIR__/immich/app/machine-learning/venv/bin/python -m uvicorn
 	--workers 1 \
 	--timeout-keep-alive 2 \
 	--log-config __INSTALL_DIR__/immich/app/machine-learning/immich_ml/log_conf.json \
-	--log-level info \
+	--log-level debug \
 	immich_ml.main:app
 
 
