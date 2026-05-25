@@ -71,12 +71,13 @@ mynh_install_geodata() {
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
 	local legacy_args=tsocd
-	local -A args_array=([t]=tool= [s]=sql= [o]=options= [c]=cluster= [d]=database=)
+	local -A args_array=([t]=tool= [s]=sql= [o]=options= [c]=cluster= [d]=database= [f]=file=)
 	local tool
 	local sql
 	local options
 	local cluster
 	local database
+	local file
 	# Manage arguments with getopts
 	ynh_handle_getopts_args "$@"
 	tool="${tool:-psql}"
@@ -84,6 +85,7 @@ myynh_execute_psql_as_root() {
 	options="${options:-}"
 	cluster="${cluster:-$db_cluster}"
 	database="${database:-}"
+	file="${file:-}"
 	if [ -n "$sql" ]
 	then
 		sql="--command=$sql"
@@ -94,8 +96,8 @@ myynh_execute_psql_as_root() {
 		database="--dbname=$database"
 	fi
 
-	LC_ALL=C sudo --user=postgres PGUSER=postgres PGPASSWORD="$(cat "$PSQL_ROOT_PWD_FILE")" \
-		"$tool" "$cluster" $options "$database" "$sql"
+	LC_ALL=C sudo --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
+		"$tool" "$cluster" $options "$database" "$sql" "$file"
 }
 
 # For bookworm > Add postgresql packages from postgresql repo
@@ -285,7 +287,7 @@ myynh_dump_psql_db() {
 	ynh_handle_getopts_args "$@"
 	cluster="${cluster:-$db_cluster}"
 
-	myynh_execute_psql_as_root --tool="pg_dump" --cluster="$cluster" --database="$app" > db.sql
+	myynh_execute_psql_as_root --tool="pg_dump" --cluster="$cluster" --database="$app" --file="> db.sql"
 }
 
 # Restore the database
