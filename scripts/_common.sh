@@ -97,7 +97,7 @@ myynh_execute_psql_as_root() {
 	fi
 
 	LC_ALL=C sudo --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		"$tool" "$cluster" $options "$database" "$sql" "$file"
+		"$tool" "$cluster" $options "$database" "$file" "$sql"
 }
 
 # For bookworm > Add postgresql packages from postgresql repo
@@ -288,6 +288,7 @@ myynh_dump_psql_db() {
 	cluster="${cluster:-$db_cluster}"
 
 	myynh_execute_psql_as_root --tool="pg_dump" --cluster="$cluster" --database="$app" --file="> db.sql"
+	#sudo --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" pg_dump --cluster="$cluster" --dbname="$app" > db.sql
 }
 
 # Restore the database
