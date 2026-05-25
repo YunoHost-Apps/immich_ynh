@@ -62,8 +62,7 @@ mynh_install_geodata() {
 }
 
 # Execute a psql command as root user
-# usage: myynh_execute_psql_as_root [--tool=tool] --sql=sql [--options=options] [--cluster=cluster] [--database=database]
-# | arg: -t, --tool=        - the psql tool to run (default: psql)
+# usage: myynh_execute_psql_as_root --sql=sql [--options=options] [--cluster=cluster] [--database=database]
 # | arg: -s, --sql=         - the SQL command to execute
 # | arg: -o, --options=     - the options to add to psql
 # | arg: -c, --cluster=     - the cluster to connect to (default: current cluster)
@@ -71,21 +70,17 @@ mynh_install_geodata() {
 myynh_execute_psql_as_root() {
 	# Declare an array to define the options of this helper.
 	local legacy_args=tsocd
-	local -A args_array=([t]=tool= [s]=sql= [o]=options= [c]=cluster= [d]=database= [f]=file=)
-	local tool
+	local -A args_array=([s]=sql= [o]=options= [c]=cluster= [d]=database=)
 	local sql
 	local options
 	local cluster
 	local database
-	local file
 	# Manage arguments with getopts
 	ynh_handle_getopts_args "$@"
-	tool="${tool:-psql}"
 	sql="${sql:-}"
 	options="${options:-}"
 	cluster="${cluster:-$db_cluster}"
 	database="${database:-}"
-	file="${file:-}"
 	if [ -n "$sql" ]
 	then
 		sql="--command=$sql"
@@ -97,7 +92,7 @@ myynh_execute_psql_as_root() {
 	fi
 
 	LC_ALL=C sudo --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" \
-		"$tool" "$cluster" $options "$database" "$file" "$sql"
+		psql "$cluster" $options "$database" "$sql"
 }
 
 # For bookworm > Add postgresql packages from postgresql repo
@@ -287,8 +282,7 @@ myynh_dump_psql_db() {
 	ynh_handle_getopts_args "$@"
 	cluster="${cluster:-$db_cluster}"
 
-	myynh_execute_psql_as_root --tool="pg_dump" --cluster="$cluster" --database="$app" --file="> db.sql"
-	#sudo --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" pg_dump --cluster="$cluster" --dbname="$app" > db.sql
+	sudo --user=postgres PGUSER=postgres PGPASSWORD="$(cat $PSQL_ROOT_PWD_FILE)" pg_dump --cluster="$cluster" --dbname="$app" > db.sql
 }
 
 # Restore the database
