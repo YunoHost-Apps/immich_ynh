@@ -37,6 +37,7 @@ ram.runtime = "2G"
 	type = "domain"
 
 	[install.init_main_permission]
+	help.en = "You must activate 'Visitors' if you want to connect the Immich mobile app to your Immich server. This can be changed later via the webadmin."
 	type = "group"
 	default = "visitors"
 
