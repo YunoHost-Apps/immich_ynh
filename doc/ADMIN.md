@@ -19,3 +19,7 @@ Or
   3. Restore a backup by launching that script: `bash restore_immich_db_backup.sh`
 
 [^1]: you may still be able to login using `root` from the local network - or from a direct console on the server.
+
+### Mobile app
+
+You must activate the `Visitors` permission for `Immich` (immich.main) if you want to connect the Immich mobile app to your Immich server.
