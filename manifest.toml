@@ -119,7 +119,7 @@ ram.runtime = "2G"
 	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
 		echo "libdav1d7, libraw23t64, postgresql-17-pgvector";
 	elif [[ $YNH_DEBIAN_VERSION == "bookwrom" ]]; then
-		echo "libdav1d6";
+		echo "libdav1d6, libraw20";
 	fi
 	"""
 
