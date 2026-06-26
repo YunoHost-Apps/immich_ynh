@@ -111,14 +111,12 @@ ram.runtime = "2G"
 		"libaom3",
 		"libde265-0",
 		"libimagequant0",
-		"libwebpdemux2",
-		"libcgif0",
-		"libexif12"
+		"libwebpdemux2"
 	]
 	packages_from_raw_bash = """
 	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
 		echo "libdav1d7, libraw23t64, postgresql-17-pgvector";
-	elif [[ $YNH_DEBIAN_VERSION == "bookwrom" ]]; then
+	elif [[ $YNH_DEBIAN_VERSION == "bookworm" ]]; then
 		echo "libdav1d6, libraw20";
 	fi
 	"""
