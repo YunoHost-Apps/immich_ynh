@@ -117,7 +117,7 @@ ram.runtime = "2G"
 	]
 	packages_from_raw_bash = """
 	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
-		echo "libdav1d7, postgresql-17-pgvector";
+		echo "libdav1d7, libraw23t64, postgresql-17-pgvector";
 	elif [[ $YNH_DEBIAN_VERSION == "bookwrom" ]]; then
 		echo "libdav1d6";
 	fi
