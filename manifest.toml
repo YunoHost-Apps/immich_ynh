@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.999.0~ynh1"
+version = "2.999.3~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -45,18 +45,18 @@ ram.runtime = "2G"
 	[resources.sources]
 
 	[resources.sources.immich_prebuilt_bookworm]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0-rc.2/immich-v3.0.0-rc.2-bookworm-amd64.tar.gz"
-	amd64.sha256 = "1fb4b03d50cb8a4b1a03d3e8d298739efe940c94820fbb25bb653a1047d3f9e9"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0-rc.2/immich-v3.0.0-rc.2-bookworm-arm64.tar.gz"
-	arm64.sha256 = "423de84e00abb81f5e21216c32be20a6ace7b884568c2fbab4ebf7657357b3ba"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0-rc.3/immich-v3.0.0-rc.3-bookworm-amd64.tar.gz"
+	amd64.sha256 = "7cc7bcbc39d164fbbbf3fec094c569b6cf23efebbc93240664555794690a335b"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0-rc.3/immich-v3.0.0-rc.3-bookworm-arm64.tar.gz"
+	arm64.sha256 = "8916e334571a8ee41894587b2943adbae8068a12c3c47f0ba8a2e644857f2959"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0-rc.2/immich-v3.0.0-rc.2-trixie-amd64.tar.gz"
-	amd64.sha256 = "9f5572f78846f87ffd2762fe647e6c702089879a438419115070b5a4bc63bb73"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0-rc.2/immich-v3.0.0-rc.2-trixie-arm64.tar.gz"
-	arm64.sha256 = "d508fdf524818b5087602bd0bc4320d7f01aa02610facb68959db07595616324"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0-rc.3/immich-v3.0.0-rc.3-trixie-amd64.tar.gz"
+	amd64.sha256 = "e48a34c135a6d7b95e34e19fe57998bba1996a980ceb5b037d18ef96d9593b2d"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0-rc.3/immich-v3.0.0-rc.3-trixie-arm64.tar.gz"
+	arm64.sha256 = "acef830bdda60d95e446c0465360f96186502ae23b7d93d15cc3c058f0fcda95"
 
 	prefetch = false
 
