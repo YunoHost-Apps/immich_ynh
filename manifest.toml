@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "3.0.0~ynh1"
+version = "3.0.1~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -45,18 +45,18 @@ ram.runtime = "2G"
 	[resources.sources]
 
 	[resources.sources.immich_prebuilt_bookworm]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0/immich-v3.0.0-bookworm-amd64.tar.gz"
-	amd64.sha256 = "a18cc12f99da9ad345ca10e79d4b5597b40ef03ed99769ee7e92287265d3ca7e"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0/immich-v3.0.0-bookworm-arm64.tar.gz"
-	arm64.sha256 = "dae7793b8444051274cba6256b5730ac25d6561e2977bebb736c67a9e086f866"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.1/immich-v3.0.1-bookworm-amd64.tar.gz"
+	amd64.sha256 = "9e45201fa824b66c3e1d0570340b8680e3f0dab90c490c4c5358a4ba547b4030"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.1/immich-v3.0.1-bookworm-arm64.tar.gz"
+	arm64.sha256 = "5734e26778bd5c175f5e4c620bc106a91cc37c5a76225db85e54abe52ee44859"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0/immich-v3.0.0-trixie-amd64.tar.gz"
-	amd64.sha256 = "e074508d068e711c7f2288e84063ec9578309fe5511d8557a3702da542941088"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.0/immich-v3.0.0-trixie-arm64.tar.gz"
-	arm64.sha256 = "6742631b49a22b8a6f11f26a61904dd114106f5db33e867f36e014f621f93e0a"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.1/immich-v3.0.1-trixie-amd64.tar.gz"
+	amd64.sha256 = "be38771887710bd98a44e87683fe8a0918b8a88019431d24af8ac23fdb5bbbda"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.1/immich-v3.0.1-trixie-arm64.tar.gz"
+	arm64.sha256 = "7294675d74ff21f85720cd2fc326792d4c66ddea816fd1b0370a6997e8e031c5"
 
 	prefetch = false
 
