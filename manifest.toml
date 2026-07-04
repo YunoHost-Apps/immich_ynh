@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "2.7.5~ynh2"
+version = "3.0.1~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -45,18 +45,18 @@ ram.runtime = "2G"
 	[resources.sources]
 
 	[resources.sources.immich_prebuilt_bookworm]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.7.5/immich-v2.7.5-bookworm-amd64.tar.gz"
-	amd64.sha256 = "35b6ec43f7de6de1a48eef95b3b97ded0ec2a4c103f6bfd44b0042417298b37b"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.7.5/immich-v2.7.5-bookworm-arm64.tar.gz"
-	arm64.sha256 = "2467a77bde88398c184a24eacd62665eed8a3df62646d0dde856d6943c783b03"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.1/immich-v3.0.1-bookworm-amd64.tar.gz"
+	amd64.sha256 = "9e45201fa824b66c3e1d0570340b8680e3f0dab90c490c4c5358a4ba547b4030"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.1/immich-v3.0.1-bookworm-arm64.tar.gz"
+	arm64.sha256 = "5734e26778bd5c175f5e4c620bc106a91cc37c5a76225db85e54abe52ee44859"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.7.5/immich-v2.7.5-trixie-amd64.tar.gz"
-	amd64.sha256 = "57f0e0149c02e04a609ddad67f0387f052fab83fff5cafff63a39207edc5f9bd"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v2.7.5/immich-v2.7.5-trixie-arm64.tar.gz"
-	arm64.sha256 = "b96ca91f72a97bac6835fe5ba975fba3e3eb0608ff75564f707e1d03dd66e447"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.1/immich-v3.0.1-trixie-amd64.tar.gz"
+	amd64.sha256 = "be38771887710bd98a44e87683fe8a0918b8a88019431d24af8ac23fdb5bbbda"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.1/immich-v3.0.1-trixie-arm64.tar.gz"
+	arm64.sha256 = "7294675d74ff21f85720cd2fc326792d4c66ddea816fd1b0370a6997e8e031c5"
 
 	prefetch = false
 
@@ -111,15 +111,13 @@ ram.runtime = "2G"
 		"libaom3",
 		"libde265-0",
 		"libimagequant0",
-		"libwebpdemux2",
-		"libcgif0",
-		"libexif12"
+		"libwebpdemux2"
 	]
 	packages_from_raw_bash = """
 	if [[ $YNH_DEBIAN_VERSION == "trixie" ]]; then
-		echo "libdav1d7, postgresql-17-pgvector";
-	elif [[ $YNH_DEBIAN_VERSION == "bookwrom" ]]; then
-		echo "libdav1d6";
+		echo "libdav1d7, libraw23t64, postgresql-17-pgvector";
+	elif [[ $YNH_DEBIAN_VERSION == "bookworm" ]]; then
+		echo "libdav1d6, libraw20";
 	fi
 	"""
 
