@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "3.0.2~ynh1"
+version = "3.0.3~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -45,24 +45,24 @@ ram.runtime = "2G"
 	[resources.sources]
 
 	[resources.sources.immich_prebuilt_bookworm]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.2/immich-v3.0.2-bookworm-amd64.tar.gz"
-	amd64.sha256 = "fd0f2a98bd63b7c39a00fd4b0578a78b13fe3343f5cc55ec6eeb7774836e127a"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.2/immich-v3.0.2-bookworm-arm64.tar.gz"
-	arm64.sha256 = "e77b7cf441c64bf1ce5e50b07e5910c96a0d919a56cc8586ca35ed60def1960d"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.3/immich-v3.0.3-bookworm-amd64.tar.gz"
+	amd64.sha256 = "fdc969756485b7e38c605c8b5891c4937633cfa1da705a3b52927c2a4a34f5eb"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.3/immich-v3.0.3-bookworm-arm64.tar.gz"
+	arm64.sha256 = "75094cfab5ddd0ff0ef65b5c0bbf2439126d943f21921cf79c56a86a0ca32200"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.2/immich-v3.0.2-trixie-amd64.tar.gz"
-	amd64.sha256 = "461ebf85bd83b1b64f906573aba54e3bd5f8c261bea85ab23900405b9643fc1f"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.2/immich-v3.0.2-trixie-arm64.tar.gz"
-	arm64.sha256 = "cc4efb6c8f0a2d39de142f2f2c6ba62c05567c9a89f0c7749b764dd3c7795e37"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.3/immich-v3.0.3-trixie-amd64.tar.gz"
+	amd64.sha256 = "ceea138bff32a5c483efde9eb40397d249865b7f8cb4e939440b7d9606ca1434"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.0.3/immich-v3.0.3-trixie-arm64.tar.gz"
+	arm64.sha256 = "ea53a6d6a3626bb10f0ab4615ecd7bde9a84c60d5ff3621633a25c2389803717"
 
 	prefetch = false
 
 	[resources.sources.vchord]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
-	# and https://github.com/mmomjian/immich/blob/c9e251c78cb606d22ae74f3ec24cae7090756747/server/src/constants.ts#L17
+	# and https://github.com/mmomjian/immich/blob/main/server/src/constants.ts#L24
 	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/1.1.1/postgresql-17-vchord_1.1.1-1_amd64.deb"
 	amd64.sha256 = "a48132c8d616c0d52a9811b32f12f88a8f6cc8542d7cc0180c8d0986bfbd03c5"
 	arm64.url = "https://github.com/tensorchord/VectorChord/releases/download/1.1.1/postgresql-17-vchord_1.1.1-1_arm64.deb"
