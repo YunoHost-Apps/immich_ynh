@@ -9,18 +9,19 @@ Restart=always
 RestartSec=10s
 User=__APP__
 Group=__APP__
-WorkingDirectory=__INSTALL_DIR__/immich/app/machine-learning
-EnvironmentFile=__INSTALL_DIR__/immich/env
+SupplementaryGroups=render video
+WorkingDirectory=__INSTALL_DIR__/__APP__/app/machine-learning
+EnvironmentFile=__INSTALL_DIR__/__APP__/env
 
 # Clean up residual control socket before startup
-ExecStartPre=/bin/rm -f __INSTALL_DIR__/immich/app/machine-learning/gunicorn.ctl
+ExecStartPre=/bin/rm -f __INSTALL_DIR__/__APP__/app/machine-learning/gunicorn.ctl
 
-ExecStart=__INSTALL_DIR__/immich/app/machine-learning/venv/bin/python -m uvicorn \
+ExecStart=__INSTALL_DIR__/__APP__/app/machine-learning/venv/bin/python -m uvicorn \
 	--host 127.0.0.1 \
 	--port __PORT_MACHINELEARNING__ \
 	--workers 1 \
 	--timeout-keep-alive 2 \
-	--log-config __INSTALL_DIR__/immich/app/machine-learning/immich_ml/log_conf.json \
+	--log-config __INSTALL_DIR__/__APP__/app/machine-learning/immich_ml/log_conf.json \
 	--log-level info \
 	immich_ml.main:app
 
@@ -33,22 +34,47 @@ StandardOutput=append:/var/log/__APP__/__APP__-machine-learning.log
 StandardError=append:/var/log/__APP__/__APP__-machine-learning.log
 UMask=0077
 
+# Allow hardware acceleration, based on :
+# Server > https://github.com/immich-app/immich/blob/main/docker/hwaccel.transcoding.yml
+# ML     > https://github.com/immich-app/immich/blob/main/docker/hwaccel.ml.yml
+PrivateDevices=no
+DevicePolicy=closed
+## NVIDIA (NVENC, CUDA)
+DeviceAllow=char-nvidia* rw
+## Intel/AMD (VAAPI, QuickSync)
+DeviceAllow=char-drm rw
+## AMD ROCm
+DeviceAllow=char-kfd rw
+## Rockchip SoC
+DeviceAllow=char-dma_heap rw
+DeviceAllow=char-rga rw
+DeviceAllow=char-mpp rw
+## ARM Mali
+DeviceAllow=char-mali rw
+DeviceAllow=char-ump rw
+
 # Sandboxing options to harden security
+# Details for these options: https://www.freedesktop.org/software/systemd/man/systemd.exec.html
 NoNewPrivileges=yes
 PrivateTmp=yes
-PrivateDevices=yes
-RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+# PrivateDevices=yes -> See Allow hardware acceleration
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
 RestrictNamespaces=yes
 RestrictRealtime=yes
-DevicePolicy=closed
+# DevicePolicy=closed -> See Allow hardware acceleration
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
 ProtectSystem=full
 ProtectControlGroups=yes
 ProtectKernelModules=yes
 ProtectKernelTunables=yes
 LockPersonality=yes
-SystemCallFilter=~@clock @debug @module @mount @obsolete @reboot @setuid @swap
+SystemCallArchitectures=native
+SystemCallFilter=~@clock @debug @module @mount @obsolete @reboot @setuid @swap @cpu-emulation @privileged
 
 # Denying access to capabilities that should not be relevant for webapps
+# Doc: https://man7.org/linux/man-pages/man7/capabilities.7.html
 CapabilityBoundingSet=~CAP_RAWIO CAP_MKNOD
 CapabilityBoundingSet=~CAP_AUDIT_CONTROL CAP_AUDIT_READ CAP_AUDIT_WRITE
 CapabilityBoundingSet=~CAP_SYS_BOOT CAP_SYS_TIME CAP_SYS_MODULE CAP_SYS_PACCT
@@ -60,4 +86,4 @@ CapabilityBoundingSet=~CAP_NET_ADMIN CAP_NET_BROADCAST CAP_NET_RAW
 CapabilityBoundingSet=~CAP_SYS_ADMIN CAP_SYS_PTRACE CAP_SYSLOG
 
 [Install]
-WantedBy=immich-server.service
+WantedBy=__APP__-server.service
