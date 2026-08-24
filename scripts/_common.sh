@@ -102,34 +102,12 @@ myynh_execute_psql_as_root() {
 
 # For bookworm > Add postgresql packages from postgresql repo
 myynh_install_postgresql() {
-	ynh_print_info "Installing postgresql $psql_version..."
+	ynh_print_info "Adding pgvector postgresql extension..."
 	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies_from_extra_repository \
 		--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
 		--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
-		--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
-}
-
-# For bookworm > Provisionning the database on right postgresql cluster
-myynh_provision_postgresql() {
-	# Definie local var
-	local db_pwd
-
-	ynh_print_info "Provisionning database on postgresql $psql_version..."
-
-	# Create the cluster if not existing
-	if ! pg_lsclusters | grep -q "$db_cluster"
-	then
-		pg_createcluster ${db_cluster/\// } --start
-	fi
-
-	# Create the database in the cluster if not existing
-	if [[ -z $(myynh_execute_psql_as_root --sql="\list $app" --options="--tuples-only --no-align" --database="postgres") ]]
-	then
-		db_pwd=$(ynh_app_setting_get --key=db_pwd)
-		myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
-		myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
-		myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
-	fi
+		--package="postgresql-$psql_version-pgvector"
+		#--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
 }
 
 # Add VectorChord package
