@@ -70,7 +70,7 @@ ram.runtime = "2G"
 
 	format = "whatever"
 	extract = false
-	rename = "postgresql-vchord.deb"
+	rename = "postgresql-15-vchord.deb"
 	prefetch = true
 
 	[resources.sources.vchord_trixie]
@@ -83,7 +83,7 @@ ram.runtime = "2G"
 
 	format = "whatever"
 	extract = false
-	rename = "postgresql-vchord.deb"
+	rename = "postgresql-17-vchord.deb"
 	prefetch = true
 
 	[resources.system_user]

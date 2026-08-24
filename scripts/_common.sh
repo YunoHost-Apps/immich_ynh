@@ -146,10 +146,10 @@ mynh_add_vectorchord() {
 	ynh_setup_source --dest_dir="$tempdir" --source_id="vchord_$YNH_DEBIAN_VERSION"
 
 	# Install the packages
-	_ynh_apt_install --allow-downgrades "$tempdir/postgresql-vchord.deb"
+	_ynh_apt_install --allow-downgrades "$tempdir/postgresql-$psql_version-vchord.deb"
 
 	# Add the package to dependencies
-	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-vchord"
+	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-$psql_version-vchord"
 
 	# Include the extension
 	myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
