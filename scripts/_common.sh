@@ -5,7 +5,12 @@
 #=================================================
 
 # Postgresql version
-psql_version=17
+if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+then
+	psql_version=15
+else
+	psql_version=17
+fi
 db_cluster="$psql_version/main"
 
 # Fail2ban
@@ -127,39 +132,6 @@ myynh_provision_postgresql() {
 	fi
 }
 
-# Set default cluster back to debian and remove autoprovisionned database and user created on wrong cluster
-myynh_set_default_back_to_debian() {
-	# Definie local var
-	local default_port
-	local config_file
-
-	ynh_print_info "Setting default postgresql cluster back to debian default..."
-
-	default_port=5432
-	config_file="/etc/postgresql-common/user_clusters"
-
-		# Retrieve informations about default psql cluster
-		default_db_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
-		default_psql_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f2)
-		default_psql_database=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f5)
-
-		# Remove non commented lines
-		sed -i'.bak' -e '/^#/!d' "$config_file"
-
-		# Add new line USER  GROUP   VERSION CLUSTER DATABASE
-		echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
-
-		# Remove the autoprovisionned database and user created on wrong cluster
-		if ynh_psql_database_exists "$app"
-		then
-			ynh_psql_drop_db "$app"
-		fi
-		if ynh_psql_user_exists "$app"
-		then
-			ynh_psql_drop_user "$app"
-		fi
-}
-
 # Add VectorChord package
 mynh_add_vectorchord() {
 	# Definie local var
@@ -171,13 +143,13 @@ mynh_add_vectorchord() {
 	tempdir="$(mktemp -d)"
 
 	# Download the deb files
-	ynh_setup_source --dest_dir="$tempdir" --source_id="vchord"
+	ynh_setup_source --dest_dir="$tempdir" --source_id="vchord_$YNH_DEBIAN_VERSION"
 
 	# Install the packages
-	_ynh_apt_install --allow-downgrades "$tempdir/postgresql-17-vchord.deb"
+	_ynh_apt_install --allow-downgrades "$tempdir/postgresql-vchord.deb"
 
 	# Add the package to dependencies
-	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-17-vchord"
+	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-vchord"
 
 	# Include the extension
 	myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"

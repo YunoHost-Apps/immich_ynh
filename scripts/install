@@ -34,8 +34,6 @@ ynh_script_progression "Creating a PostgreSQL database (if needed)..."
 if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 then
 	myynh_install_postgresql
-	myynh_provision_postgresql
-	myynh_set_default_back_to_debian
 fi
 
 mynh_add_vectorchord
