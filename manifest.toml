@@ -60,7 +60,20 @@ ram.runtime = "2G"
 
 	prefetch = false
 
-	[resources.sources.vchord]
+	[resources.sources.vchord_bookworm]
+	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
+	# and https://github.com/mmomjian/immich/blob/main/server/src/constants.ts#L24
+	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/1.1.1/postgresql-15-vchord_1.1.1-1_amd64.deb"
+	amd64.sha256 = "484a481c1af83a4b5b4e72e8f61a5c36aa331b39913a728d0f527503dde445ca"
+	arm64.url = "https://github.com/tensorchord/VectorChord/releases/download/1.1.1/postgresql-15-vchord_1.1.1-1_arm64.deb"
+	arm64.sha256 = "f4aed22be2be4d33f2873c8df73745fdd519926a6ed08d51ebb48a45022dba9f"
+
+	format = "whatever"
+	extract = false
+	rename = "postgresql-15-vchord.deb"
+	prefetch = true
+
+	[resources.sources.vchord_trixie]
 	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
 	# and https://github.com/mmomjian/immich/blob/main/server/src/constants.ts#L24
 	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/1.1.1/postgresql-17-vchord_1.1.1-1_amd64.deb"

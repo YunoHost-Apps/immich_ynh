@@ -5,7 +5,12 @@
 #=================================================
 
 # Postgresql version
-psql_version=17
+if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
+then
+	psql_version=15
+else
+	psql_version=17
+fi
 db_cluster="$psql_version/main"
 
 # Fail2ban
@@ -97,67 +102,12 @@ myynh_execute_psql_as_root() {
 
 # For bookworm > Add postgresql packages from postgresql repo
 myynh_install_postgresql() {
-	ynh_print_info "Installing postgresql $psql_version..."
+	ynh_print_info "Adding pgvector postgresql extension..."
 	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies_from_extra_repository \
 		--repo="deb https://apt.postgresql.org/pub/repos/apt $YNH_DEBIAN_VERSION-pgdg main $psql_version" \
 		--key="https://www.postgresql.org/media/keys/ACCC4CF8.asc" \
-		--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
-}
-
-# For bookworm > Provisionning the database on right postgresql cluster
-myynh_provision_postgresql() {
-	# Definie local var
-	local db_pwd
-
-	ynh_print_info "Provisionning database on postgresql $psql_version..."
-
-	# Create the cluster if not existing
-	if ! pg_lsclusters | grep -q "$db_cluster"
-	then
-		pg_createcluster ${db_cluster/\// } --start
-	fi
-
-	# Create the database in the cluster if not existing
-	if [[ -z $(myynh_execute_psql_as_root --sql="\list $app" --options="--tuples-only --no-align" --database="postgres") ]]
-	then
-		db_pwd=$(ynh_app_setting_get --key=db_pwd)
-		myynh_execute_psql_as_root --sql="CREATE DATABASE $app;"
-		myynh_execute_psql_as_root --sql="CREATE USER $app WITH ENCRYPTED PASSWORD '$db_pwd';" --database="$app"
-		myynh_execute_psql_as_root --sql="GRANT ALL PRIVILEGES ON DATABASE $app TO $app;" --database="$app"
-	fi
-}
-
-# Set default cluster back to debian and remove autoprovisionned database and user created on wrong cluster
-myynh_set_default_back_to_debian() {
-	# Definie local var
-	local default_port
-	local config_file
-
-	ynh_print_info "Setting default postgresql cluster back to debian default..."
-
-	default_port=5432
-	config_file="/etc/postgresql-common/user_clusters"
-
-		# Retrieve informations about default psql cluster
-		default_db_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f1)
-		default_psql_cluster=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f2)
-		default_psql_database=$(pg_lsclusters --no-header | grep "$default_port" | cut -d' ' -f5)
-
-		# Remove non commented lines
-		sed -i'.bak' -e '/^#/!d' "$config_file"
-
-		# Add new line USER  GROUP   VERSION CLUSTER DATABASE
-		echo -e "* * $default_db_cluster $default_psql_cluster $default_psql_database" >> "$config_file"
-
-		# Remove the autoprovisionned database and user created on wrong cluster
-		if ynh_psql_database_exists "$app"
-		then
-			ynh_psql_drop_db "$app"
-		fi
-		if ynh_psql_user_exists "$app"
-		then
-			ynh_psql_drop_user "$app"
-		fi
+		--package="postgresql-$psql_version-pgvector"
+		#--package="libpq5 libpq-dev postgresql-$psql_version postgresql-$psql_version-pgvector postgresql-client-$psql_version"
 }
 
 # Add VectorChord package
@@ -171,13 +121,13 @@ mynh_add_vectorchord() {
 	tempdir="$(mktemp -d)"
 
 	# Download the deb files
-	ynh_setup_source --dest_dir="$tempdir" --source_id="vchord"
+	ynh_setup_source --dest_dir="$tempdir" --source_id="vchord_$YNH_DEBIAN_VERSION"
 
 	# Install the packages
-	_ynh_apt_install --allow-downgrades "$tempdir/postgresql-17-vchord.deb"
+	_ynh_apt_install --allow-downgrades "$tempdir/postgresql-$psql_version-vchord.deb"
 
 	# Add the package to dependencies
-	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-17-vchord"
+	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-$psql_version-vchord"
 
 	# Include the extension
 	myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"

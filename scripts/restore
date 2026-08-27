@@ -39,8 +39,6 @@ db_cluster=$(ynh_app_setting_get --key=db_cluster)
 if [[ $YNH_DEBIAN_VERSION == "bookworm" ]]
 then
 	myynh_install_postgresql
-	myynh_provision_postgresql
-	myynh_set_default_back_to_debian
 fi
 
 mynh_add_vectorchord
