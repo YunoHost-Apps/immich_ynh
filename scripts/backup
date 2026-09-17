@@ -50,9 +50,15 @@ ynh_backup "/var/log/$app/"
 #=================================================
 ynh_print_info "Backing up a PostgreSQL database..."
 
-db_cluster=$(ynh_app_setting_get --key=db_cluster)
+if [[ $YNH_DEBIAN_VERSION == "trixie" ]] \
+&& pg_lsclusters | grep -wq "$db_cluster_renamed"
+then
+    db_cluster="$db_cluster_renamed"
+else
+    db_cluster=$(ynh_app_setting_get --key=db_cluster)
+fi
 
-myynh_dump_psql_db
+myynh_dump_psql_db --cluster="$db_cluster"
 
 #=================================================
 # END OF SCRIPT
