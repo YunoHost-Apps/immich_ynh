@@ -178,6 +178,9 @@ myynh_migrate_cluster_if_needed() {
 		# Create the immich db on the cluster 17/main
 		myynh_provision_postgresql
 
+		# Add VectorChord before restoring
+		mynh_add_vectorchord
+
 		# Restore the immich db dump to the cluster 17/main
 		myynh_restore_psql_db
 
