@@ -79,6 +79,9 @@ then
 	myynh_install_postgresql
 	myynh_provision_postgresql
 	myynh_set_default_back_to_debian
+elif [[ $YNH_DEBIAN_VERSION == "trixie" ]]
+then
+	myynh_migrate_cluster_if_needed
 fi
 
 mynh_add_vectorchord
