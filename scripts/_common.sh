@@ -7,6 +7,7 @@
 # Postgresql version
 psql_version=17
 db_cluster="$psql_version/main"
+db_cluster_renamed="17/renamed" # For Bookworm -> Trixie postgresql migration
 
 # Fail2ban
 failregex="$app-server.*Failed login attempt for user.+from ip address\s?<ADDR>"
@@ -112,7 +113,7 @@ myynh_provision_postgresql() {
 	ynh_print_info "Provisionning database on postgresql $psql_version..."
 
 	# Create the cluster if not existing
-	if ! pg_lsclusters | grep -q "$db_cluster"
+	if ! pg_lsclusters | grep -wq "$db_cluster"
 	then
 		pg_createcluster ${db_cluster/\// } --start
 	fi
@@ -158,6 +159,34 @@ myynh_set_default_back_to_debian() {
 		then
 			ynh_psql_drop_user "$app"
 		fi
+}
+
+# With Bookworm -> Trixie postgresql migration, the 17/main cluster is moved to 17/renamed
+# To make the app reworking, we need to:
+# 1. check if the cluster 17/renamed exists
+# 2. dump the immich db from the cluster 17/renamed
+# 3. restore the immich db dump to the cluster 17/main
+# 4. drop the cluster 17/renamed
+# (settings and env values are updated after with myynh_update_psql_db)
+myynh_migrate_cluster_if_needed() {
+	# Check if the cluster 17/renamed exists
+	if pg_lsclusters | grep -wq "$db_cluster_renamed"
+		then
+		# Dump the immich db from the cluster 17/renamed
+		myynh_dump_psql_db --cluster="$db_cluster_renamed"
+
+		# Create the immich db on the cluster 17/main
+		myynh_provision_postgresql
+
+		# Add VectorChord before restoring
+		mynh_add_vectorchord
+
+		# Restore the immich db dump to the cluster 17/main
+		myynh_restore_psql_db
+
+		# Drop the cluster 17/renamed
+		pg_dropcluster ${db_cluster_renamed/\// } --stop
+	fi
 }
 
 # Add VectorChord package
