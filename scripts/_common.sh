@@ -208,6 +208,9 @@ mynh_add_vectorchord() {
 	# Add the package to dependencies
 	YNH_APT_INSTALL_DEPENDENCIES_REPLACE="false" ynh_apt_install_dependencies "postgresql-17-vchord"
 
+	# Mark the packahe as auto
+	apt-mark auto "postgresql-17-vchord"
+
 	# Include the extension
 	myynh_execute_psql_as_root --sql="ALTER SYSTEM SET shared_preload_libraries = 'vchord'"
 
