@@ -46,17 +46,17 @@ ram.runtime = "2G"
 
 	[resources.sources.immich_prebuilt_bookworm]
 	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.3.0/immich-v3.3.0-bookworm-amd64.tar.gz"
-	amd64.sha256 = "c1e79539862374d23f69e06f0a190adaaa14cbc9b26def8ba1df01034b768dd4"
+	amd64.sha256 = "e239477fd767f3da21a9938f9281ba0d1e621e0ffbfced27aa544e43bd9428a1"
 	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.3.0/immich-v3.3.0-bookworm-arm64.tar.gz"
-	arm64.sha256 = "9add83624246463656f9173d8d62c61dcdedac690f5b3c0d9b0094268ccd8b99"
+	arm64.sha256 = "392f86253a51a046bc232e0aa9f64a052550d3b15966b50b6c723b736312fb1e"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
 	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.3.0/immich-v3.3.0-trixie-amd64.tar.gz"
-	amd64.sha256 = "c07b5fdc68d933c707c058fe910473bab9c52450e6926447321bc451331316b1"
+	amd64.sha256 = "2d7127a97905919d6564648a8302f7463b0e6a2601a61b2d38172876a3a8b107"
 	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.3.0/immich-v3.3.0-trixie-arm64.tar.gz"
-	arm64.sha256 = "91951fe1747f7531bbb995aa96a3012a317fb923a93b8405dceb73104672a5b8"
+	arm64.sha256 = "dfecd960f102b7e2715dd9c1ef68db574a6b4855f8e8c36997142be8a2260515"
 
 	prefetch = false
 
