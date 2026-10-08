@@ -7,7 +7,7 @@ name = "Immich"
 description.en = "Photo and video backup solution directly from your mobile phone"
 description.fr = "Sauvegarde de photos et de vidéos directement depuis votre mobile"
 
-version = "3.2.4~ynh1"
+version = "3.3.0~ynh1"
 
 maintainers = ["ewilly"]
 
@@ -45,18 +45,18 @@ ram.runtime = "2G"
 	[resources.sources]
 
 	[resources.sources.immich_prebuilt_bookworm]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.2.4/immich-v3.2.4-bookworm-amd64.tar.gz"
-	amd64.sha256 = "4b2df44dcd30e2c1a479f13a7032e60157665eb9c27465705fa8755035445a19"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.2.4/immich-v3.2.4-bookworm-arm64.tar.gz"
-	arm64.sha256 = "eaa448360ad4dccb0a0725d890a5154deec98f78596591733ed4f4789fc0b556"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.3.0/immich-v3.3.0-bookworm-amd64.tar.gz"
+	amd64.sha256 = "e239477fd767f3da21a9938f9281ba0d1e621e0ffbfced27aa544e43bd9428a1"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.3.0/immich-v3.3.0-bookworm-arm64.tar.gz"
+	arm64.sha256 = "392f86253a51a046bc232e0aa9f64a052550d3b15966b50b6c723b736312fb1e"
 
 	prefetch = false
 
 	[resources.sources.immich_prebuilt_trixie]
-	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.2.4/immich-v3.2.4-trixie-amd64.tar.gz"
-	amd64.sha256 = "1f5de04d69064dc0616a48d6059971c13d2008e0e2cfd972af8436aec6f2ed20"
-	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.2.4/immich-v3.2.4-trixie-arm64.tar.gz"
-	arm64.sha256 = "e1f8ac1f2aac7110c7b55ab2376664828e53f55536dd3a15a107fe4c44687f6c"
+	amd64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.3.0/immich-v3.3.0-trixie-amd64.tar.gz"
+	amd64.sha256 = "2d7127a97905919d6564648a8302f7463b0e6a2601a61b2d38172876a3a8b107"
+	arm64.url = "https://github.com/YunoHost-Apps/immich-build/releases/download/immich-v3.3.0/immich-v3.3.0-trixie-arm64.tar.gz"
+	arm64.sha256 = "dfecd960f102b7e2715dd9c1ef68db574a6b4855f8e8c36997142be8a2260515"
 
 	prefetch = false
 
@@ -122,6 +122,7 @@ ram.runtime = "2G"
 	"""
 
 	[resources.apt.extras.jellyfin-ffmpeg]
+	# Version https://github.com/immich-app/immich/blob/main/mise.toml#L30
 	repo = "deb https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"
 	key = "https://repo.jellyfin.org/jellyfin_team.gpg.key"
 	packages = [
@@ -132,4 +133,4 @@ ram.runtime = "2G"
 	type = "postgresql"
 
 	[resources.nodejs]
-	version = "24.15.0"
+	version = "24.21.0"
