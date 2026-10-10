@@ -41,17 +41,21 @@ mynh_install_geodata() {
 	cd "$tempdir"
 
 	# Download files
-	curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
 	curl -LO "https://download.geonames.org/export/dump/admin1CodesASCII.txt" 2>&1
 	curl -LO "https://download.geonames.org/export/dump/admin2Codes.txt" 2>&1
+	curl -LO "https://download.geonames.org/export/dump/cities500.zip" 2>&1
+	curl -LO "https://download.geonames.org/export/dump/countryInfo.txt" 2>&1
 	curl -LO "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_countries.geojson" 2>&1
+
+	# Prepare files
 	unzip "cities500.zip"
 
 	# Copy built files
 	mkdir -p "$app_dir/geodata/"
-	cp -a "cities500.txt" "$app_dir/geodata/"
 	cp -a "admin1CodesASCII.txt" "$app_dir/geodata/"
 	cp -a "admin2Codes.txt" "$app_dir/geodata/"
+	cp -a "cities500.txt" "$app_dir/geodata/"
+	cp -a "countryInfo.txt" "$app_dir/geodata/"
 	cp -a "ne_10m_admin_0_countries.geojson" "$app_dir/geodata/"
 
 	# Update geodata-date
