@@ -1,0 +1,134 @@
+name: Auto-update from immich-build
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force the update even if immich_ynh current version is already up-to-date"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  BUILD_REPO: YunoHost-Apps/immich-build
+  BASE_BRANCH: testing
+
+jobs:
+  autoupdate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout testing
+        uses: actions/checkout@v7
+        with:
+          ref: testing
+          fetch-depth: 0
+
+      - name: Get the manifest.json from last release of immich-build
+        id: upstream
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          tag=$(gh release list --repo "$BUILD_REPO" --limit 30 \
+                  --json tagName,isDraft,isPrerelease \
+                  --jq '[.[] | select(.isDraft==false and .isPrerelease==false)][0].tagName')
+          if [ -z "$tag" ]
+          then
+            echo "Can't find release on $BUILD_REPO"
+            exit 1
+          fi
+          echo "Tag amont : $tag"
+
+          version="${tag#immich-v}"
+          gh release download "$tag" --repo "$BUILD_REPO" \
+            --pattern "immich-v${version}-manifest.json" \
+            --output upstream-manifest.json --clobber
+
+          echo "tag=$tag"         >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Compare versions and edit the manifest.toml
+        id: edit
+        run: |
+          python3 .github/workflows/autoupdate_from_build.py \
+            --upstream-manifest upstream-manifest.json \
+            --manifest manifest.toml \
+            --new-version "${{ steps.upstream.outputs.version }}" \
+            ${{ inputs.force && '--force' || '' }}
+
+      - name: Commit on branch autoupdate-{version}
+        if: steps.edit.outputs.updated == 'true'
+        env:
+          VERSION: ${{ steps.upstream.outputs.version }}
+        run: |
+          set -euo pipefail
+          rm -f upstream-manifest.json
+          branch="autoupdate-${VERSION}"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1
+          then
+            git fetch origin "$branch"
+            git checkout -B "$branch" "origin/$branch"
+          else
+            git checkout -b "$branch"
+          fi
+
+          git add manifest.toml
+          if git diff --cached --quiet
+          then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git commit -m "Upgrade to v${VERSION} (sources from immich-build)"
+          git push --set-upstream origin "$branch"
+
+      - name: Create the Pull Request
+        id: create_pr
+        if: steps.edit.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.upstream.outputs.version }}
+          OLD_VERSION: ${{ steps.edit.outputs.old_version }}
+          TAG: ${{ steps.upstream.outputs.tag }}
+        run: |
+          set -euo pipefail
+          branch="autoupdate-${VERSION}"
+          if [ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]
+          then
+            echo "PR already exiting for $branch."
+            exit 0
+          fi
+
+          PR_URL=$(gh pr create \
+            --base "$BASE_BRANCH" \
+            --head "$branch" \
+            --title "Upgrade to v${VERSION}" \
+            --body "Automatic update from immich-build ${OLD_VERSION} to ${VERSION}.
+
+          Source: https://github.com/${BUILD_REPO}/releases/tag/${TAG}
+
+          - \`version\` → \`${VERSION}~ynh1\`
+          - \`resources.nodejs.version\`
+          - urls & sha256 \`immich_prebuilt_bookworm\` / \`immich_prebuilt_trixie\` (amd64 + arm64)
+
+          Before merging, please have a look at:
+          - \`[resources.sources.vchord]\`: https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml and https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml#L9
+          - \`[resources.apt.extras.jellyfin-ffmpeg]\`: https://github.com/immich-app/immich/blob/main/mise.toml#L31
+          ")
+
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+
+      - name: Add a comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment "${{ steps.create_pr.outputs.pr_url }}" --body "!testme"
