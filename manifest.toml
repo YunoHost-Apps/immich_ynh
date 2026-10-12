@@ -61,8 +61,8 @@ ram.runtime = "2G"
 	prefetch = false
 
 	[resources.sources.vchord]
-	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml
-	# and https://github.com/mmomjian/immich/blob/main/server/src/constants.ts#L24
+	# Version https://github.com/immich-app/base-images/blob/main/postgres/versions.yaml#L9
+	# and https://github.com/immich-app/immich/blob/main/server/src/constants.ts#L24
 	amd64.url = "https://github.com/tensorchord/VectorChord/releases/download/1.1.1/postgresql-17-vchord_1.1.1-1_amd64.deb"
 	amd64.sha256 = "a48132c8d616c0d52a9811b32f12f88a8f6cc8542d7cc0180c8d0986bfbd03c5"
 	arm64.url = "https://github.com/tensorchord/VectorChord/releases/download/1.1.1/postgresql-17-vchord_1.1.1-1_arm64.deb"
@@ -122,7 +122,7 @@ ram.runtime = "2G"
 	"""
 
 	[resources.apt.extras.jellyfin-ffmpeg]
-	# Version https://github.com/immich-app/immich/blob/main/mise.toml#L30
+	# Version https://github.com/immich-app/immich/blob/main/mise.toml#L31
 	repo = "deb https://repo.jellyfin.org/debian __YNH_DEBIAN_VERSION__ main"
 	key = "https://repo.jellyfin.org/jellyfin_team.gpg.key"
 	packages = [
