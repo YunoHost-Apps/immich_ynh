@@ -71,8 +71,8 @@ jobs:
           rm -f upstream-manifest.json
           branch="autoupdate-${VERSION}"
 
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "yunohost-bot"
+          git config user.email "yunohost-bot@users.noreply.github.com"
 
           if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1
           then
